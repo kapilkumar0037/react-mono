@@ -1,5 +1,5 @@
 import NxWelcome from './nx-welcome';
-
+import { ReactMonoUiControls } from '@react-mono/ui-controls';
 import { Route, Routes, Link } from 'react-router-dom';
 
 export function App() {
@@ -38,6 +38,14 @@ export function App() {
           element={
             <div>
               <Link to="/">Click here to go back to root page.</Link>
+            </div>
+          }
+        />
+         <Route
+          path="/page-3"
+          element={
+            <div>
+              <ReactMonoUiControls />
             </div>
           }
         />
