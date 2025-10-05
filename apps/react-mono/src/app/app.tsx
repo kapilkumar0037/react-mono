@@ -1,12 +1,15 @@
-import NxWelcome from './nx-welcome';
+
 import { ReactMonoUiControls } from '@react-mono/ui-controls';
 import { Route, Routes, Link } from 'react-router-dom';
 
 export function App() {
   return (
-    <div>
-      <NxWelcome title="@react-mono/react-mono" />
-
+    <div >
+     
+      <div data-theme="dark">
+        <div className='bg-background'>Testing</div>
+        <ReactMonoUiControls />
+      </div>
       {/* START: routes */}
       {/* These routes and navigation have been generated for you */}
       {/* Feel free to move and update them to fit your needs */}
@@ -38,14 +41,6 @@ export function App() {
           element={
             <div>
               <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
-         <Route
-          path="/page-3"
-          element={
-            <div>
-              <ReactMonoUiControls />
             </div>
           }
         />

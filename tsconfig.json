@@ -11,6 +11,12 @@
     },
     {
       "path": "./packages/ui-controls"
+    },
+    {
+      "path": "./packages/tailwind"
+    },
+    {
+      "path": "./packages/styles"
     }
   ]
 }

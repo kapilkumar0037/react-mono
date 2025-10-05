@@ -3,6 +3,9 @@
   "include": [],
   "references": [
     {
+      "path": "../../packages/styles"
+    },
+    {
       "path": "../../packages/ui-controls"
     },
     {
