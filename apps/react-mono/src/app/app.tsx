@@ -7,7 +7,7 @@ export function App() {
     <div >
      
       <div data-theme="dark">
-        <div className='bg-background'>Testing</div>
+        <div className='bg-background text-text'>Testing</div>
         <ReactMonoUiControls />
       </div>
       {/* START: routes */}
