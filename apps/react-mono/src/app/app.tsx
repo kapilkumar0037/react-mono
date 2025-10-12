@@ -1,14 +1,21 @@
-
-import { ReactMonoUiControls } from '@react-mono/ui-controls';
+import { Button, ReactMonoUiControls } from '@react-mono/ui-controls';
 import { Route, Routes, Link } from 'react-router-dom';
 
 export function App() {
   return (
-    <div >
-     
-      <div data-theme="dark">
-        <div className='bg-background text-text'>Testing</div>
+    <div>
+      <div data-theme="default">
+        <div className="bg-background text-text">Testing</div>
         <ReactMonoUiControls />
+        <Button variant="primary" size="md">
+          Primary Button
+        </Button>
+        <Button variant="secondary" size="md">
+          Secondary Button
+        </Button>
+        <Button variant="ghost" size="md">
+          Ghost Button
+        </Button>
       </div>
       {/* START: routes */}
       {/* These routes and navigation have been generated for you */}
