@@ -1,7 +1,14 @@
-import { Button, ReactMonoUiControls } from '@react-mono/ui-controls';
+import { Button, Checkbox, ReactMonoUiControls } from '@react-mono/ui-controls';
+import { useState } from 'react';
 import { Route, Routes, Link } from 'react-router-dom';
 
 export function App() {
+  const [isAllChecked, setIsAllChecked] = useState(false);
+
+  const handleParentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Parent checkbox changed:', event.target.checked);
+    setIsAllChecked(event.target.checked);
+  };
   return (
     <div>
       <div data-theme="default">
@@ -16,7 +23,14 @@ export function App() {
         <Button variant="ghost" size="md">
           Ghost Button
         </Button>
+
+        <div>
+          <Checkbox checked={isAllChecked} onChange={handleParentChange}>
+            Checkbox{' '}
+          </Checkbox>
+        </div>
       </div>
+
       {/* START: routes */}
       {/* These routes and navigation have been generated for you */}
       {/* Feel free to move and update them to fit your needs */}
