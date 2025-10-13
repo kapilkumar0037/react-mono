@@ -11,7 +11,7 @@ export function App() {
   };
   return (
     <div>
-      <div data-theme="default">
+      <div data-theme="dark">
         <div className="bg-background text-text">Testing</div>
         <ReactMonoUiControls />
         <Button variant="primary" size="md">

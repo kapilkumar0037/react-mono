@@ -16,16 +16,18 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           type="checkbox"
           className={`
             w-4 h-4 
-            border border-gray-300 rounded 
-            bg-white
-            text-primary 
-            focus:ring-2 focus:ring-primary/20
+            border border-primary/20 rounded 
+            bg-background
+            checked:bg-primary checked:border-primary
+            hover:border-primary/50
+            focus:ring-2 focus:ring-primary/20 focus:ring-offset-1
             disabled:opacity-50 disabled:cursor-not-allowed
+            transition-colors
             ${className}
           `.trim()}
         />
         {children && (
-          <span className="text-sm text-gray-700 select-none">
+          <span className="text-sm text-text select-none">
             {children}
           </span>
         )}
