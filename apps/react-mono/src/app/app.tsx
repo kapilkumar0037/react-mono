@@ -1,4 +1,4 @@
-import { Button, Checkbox, ReactMonoUiControls } from '@react-mono/ui-controls';
+import { Button, Checkbox, Dropdown, ReactMonoUiControls } from '@react-mono/ui-controls';
 import { useState } from 'react';
 import { Route, Routes, Link } from 'react-router-dom';
 
@@ -11,7 +11,7 @@ export function App() {
   };
   return (
     <div>
-      <div data-theme="dark">
+      <div data-theme="default">
         <div className="bg-background text-text">Testing</div>
         <ReactMonoUiControls />
         <Button variant="primary" size="md">
@@ -26,8 +26,18 @@ export function App() {
 
         <div>
           <Checkbox checked={isAllChecked} onChange={handleParentChange}>
-            Checkbox{' '}
+            Checkbox
           </Checkbox>
+        </div>
+        <div className="mt-4">
+          <Dropdown defaultValue="">
+            <option value="" disabled>
+              Select a fruit
+            </option>
+            <option value="apple">Apple</option>
+            <option value="banana">Banana</option>
+            <option value="orange">Orange</option>
+          </Dropdown>
         </div>
       </div>
 

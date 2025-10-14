@@ -2,4 +2,6 @@ export { default as Button } from './lib/Button/Button';
 export { default as Checkbox } from './lib/checkbox/Checkbox';
 export type { CheckboxProps } from './lib/checkbox/Checkbox';
 
+export { default as Dropdown } from './lib/dropdown/Dropdown';
+
 export * from './lib/ui-controls';
