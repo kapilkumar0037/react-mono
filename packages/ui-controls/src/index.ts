@@ -6,4 +6,5 @@ export { default as Dropdown } from './lib/dropdown/Dropdown';
 
 export { default as Radio } from './lib/radio/Radio';
 
-export * from './lib/ui-controls';
+export { default as Textarea } from './lib/textarea/Textarea';
+

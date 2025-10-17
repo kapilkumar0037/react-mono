@@ -1,4 +1,4 @@
-import { Button, Checkbox, Dropdown, Radio, ReactMonoUiControls } from '@react-mono/ui-controls';
+import { Button, Checkbox, Dropdown, Radio, Textarea } from '@react-mono/ui-controls';
 import { useState } from 'react';
 import { Route, Routes, Link } from 'react-router-dom';
 
@@ -13,7 +13,6 @@ export function App() {
     <div>
       <div data-theme="default">
         <div className="bg-background text-text">Testing</div>
-        <ReactMonoUiControls />
         <Button variant="primary" size="md">
           Primary Button
         </Button>
@@ -44,6 +43,11 @@ export function App() {
           <Radio name="color" value="red">Red</Radio>
           <Radio name="color" value="green">Green</Radio>
           <Radio name="color" value="blue">Blue</Radio>
+        </div>
+        <div className="mt-4">
+          <Textarea rows={4} placeholder="Type your message here...">
+            Message
+          </Textarea>
         </div>
       </div>
 
