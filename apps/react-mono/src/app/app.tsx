@@ -1,4 +1,4 @@
-import { Button, Checkbox, Dropdown, Radio, Textarea } from '@react-mono/ui-controls';
+import { Button, Checkbox, Datetime, Dropdown, Radio, Textarea } from '@react-mono/ui-controls';
 import { useState } from 'react';
 import { Route, Routes, Link } from 'react-router-dom';
 
@@ -48,6 +48,11 @@ export function App() {
           <Textarea rows={4} placeholder="Type your message here...">
             Message
           </Textarea>
+        </div>
+        <div className="mt-4">
+          <Datetime value="2025-10-22T15:30" onChange={(value) => console.log('New datetime:', value)}>
+            Select Date and Time
+          </Datetime>
         </div>
       </div>
 
