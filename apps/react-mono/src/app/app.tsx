@@ -1,4 +1,4 @@
-import { Button, Checkbox, Datetime, Dropdown, Radio, Textarea } from '@react-mono/ui-controls';
+import { Button, Card, Checkbox, Datetime, Dropdown, Radio, Textarea } from '@react-mono/ui-controls';
 import { useState } from 'react';
 import { Route, Routes, Link } from 'react-router-dom';
 
@@ -53,6 +53,37 @@ export function App() {
           <Datetime value="2025-10-22T15:30" onChange={(value) => console.log('New datetime:', value)}>
             Select Date and Time
           </Datetime>
+        </div>
+
+        <div className="mt-8 space-y-6">
+          <Card variant="default">
+            <Card.Header>
+              <h3 className="text-lg font-semibold">Default Card</h3>
+            </Card.Header>
+            <Card.Content>
+              <p>This is a default card with a header. It uses the standard background and no border.</p>
+            </Card.Content>
+          </Card>
+
+          <Card variant="bordered">
+            <Card.Header>
+              <h3 className="text-lg font-semibold">Bordered Card</h3>
+            </Card.Header>
+            <Card.Content>
+              <p>This card has a border and shows how to use the bordered variant.</p>
+            </Card.Content>
+            <Card.Footer>
+              <Button variant="primary" size="sm">Action</Button>
+              <Button variant="ghost" size="sm">Cancel</Button>
+            </Card.Footer>
+          </Card>
+
+          <Card variant="elevated">
+            <Card.Content>
+              <h3 className="text-lg font-semibold mb-2">Elevated Card</h3>
+              <p>This is an elevated card that shows content without header or footer sections.</p>
+            </Card.Content>
+          </Card>
         </div>
       </div>
 
