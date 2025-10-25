@@ -12,3 +12,6 @@ export type { DatetimeProps } from './lib/datetime/Datetime';
 
 export { Card } from './lib/Card/Card';
 export type { CardProps } from './lib/Card/Card';
+
+export { Alert } from './lib/Alert/Alert';
+export type { AlertProps } from './lib/Alert/Alert';
