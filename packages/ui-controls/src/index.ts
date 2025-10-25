@@ -10,5 +10,5 @@ export { default as Textarea } from './lib/textarea/Textarea';
 export { default as Datetime } from './lib/datetime/Datetime';
 export type { DatetimeProps } from './lib/datetime/Datetime';
 
-export { default as Card } from './lib/components/Card';
-export type { CardProps, CardVariant } from './lib/components/Card';
+export { Card } from './lib/Card/Card';
+export type { CardProps } from './lib/Card/Card';
