@@ -1,167 +1,34 @@
-import { Alert, Button, Card, Checkbox, Datetime, Dropdown, Radio, Textarea } from '@react-mono/ui-controls';
-import { useState } from 'react';
-import { Route, Routes, Link } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import { Layout } from './components/layout/Layout';
+import { AlertsDemo } from './components/demos/AlertsDemo';
+import { BadgesDemo } from './components/demos/BadgesDemo';
+import { ButtonsDemo } from './components/demos/ButtonsDemo';
+import { CardsDemo } from './components/demos/CardsDemo';
+import { CheckboxesDemo } from './components/demos/CheckboxesDemo';
+import { DatetimeDemo } from './components/demos/DatetimeDemo';
+import { DropdownsDemo } from './components/demos/DropdownsDemo';
+import { RadioDemo } from './components/demos/RadioDemo';
+import { TextareasDemo } from './components/demos/TextareasDemo';
 
 export function App() {
-  const [isAllChecked, setIsAllChecked] = useState(false);
-
-  const handleParentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Parent checkbox changed:', event.target.checked);
-    setIsAllChecked(event.target.checked);
-  };
   return (
-    <div>
-      <div data-theme="default">
-        <div className="bg-background text-text">Testing</div>
-        <Button variant="primary" size="md">
-          Primary Button
-        </Button>
-        <Button variant="secondary" size="md">
-          Secondary Button
-        </Button>
-        <Button variant="ghost" size="md">
-          Ghost Button
-        </Button>
-
-        <div>
-          <Checkbox checked={isAllChecked} onChange={handleParentChange}>
-            Checkbox
-          </Checkbox>
-        </div>
-        <div className="mt-4">
-          <Dropdown defaultValue="">
-            <option value="" disabled>
-              Select a fruit
-            </option>
-            <option value="apple">Apple</option>
-            <option value="banana">Banana</option>
-            <option value="orange">Orange</option>
-          </Dropdown>
-        </div>
-        <div className="mt-4">
-          <div className="mb-2 font-semibold">Choose a color:</div>
-          <Radio name="color" value="red">Red</Radio>
-          <Radio name="color" value="green">Green</Radio>
-          <Radio name="color" value="blue">Blue</Radio>
-        </div>
-        <div className="mt-4">
-          <Textarea rows={4} placeholder="Type your message here...">
-            Message
-          </Textarea>
-        </div>
-        <div className="mt-4">
-          <Datetime value="2025-10-22T15:30" onChange={(value) => console.log('New datetime:', value)}>
-            Select Date and Time
-          </Datetime>
-        </div>
-
-        <div className="mt-8 space-y-6">
-          <Card variant="default">
-            <Card.Header>
-              <h3 className="text-lg font-semibold">Default Card</h3>
-            </Card.Header>
-            <Card.Content>
-              <p>This is a default card with a header. It uses the standard background and no border.</p>
-            </Card.Content>
-          </Card>
-
-          <Card variant="bordered">
-            <Card.Header>
-              <h3 className="text-lg font-semibold">Bordered Card</h3>
-            </Card.Header>
-            <Card.Content>
-              <p>This card has a border and shows how to use the bordered variant.</p>
-            </Card.Content>
-            <Card.Footer>
-              <Button variant="primary" size="sm">Action</Button>
-              <Button variant="ghost" size="sm">Cancel</Button>
-            </Card.Footer>
-          </Card>
-
-          <Card variant="elevated">
-            <Card.Content>
-              <h3 className="text-lg font-semibold mb-2">Elevated Card</h3>
-              <p>This is an elevated card that shows content without header or footer sections.</p>
-            </Card.Content>
-          </Card>
-        </div>
-
-        <div className="mt-8 space-y-4">
-          <Alert variant="info" title="Information">
-            This is an informational message with a title.
-          </Alert>
-
-          <Alert variant="success">
-            Your changes have been successfully saved!
-          </Alert>
-
-          <Alert 
-            variant="warning" 
-            title="Warning" 
-            dismissible 
-            onDismiss={() => console.log('Warning alert dismissed')}
-          >
-            Please backup your data before proceeding.
-          </Alert>
-
-          <Alert 
-            variant="error" 
-            title="Error" 
-            dismissible 
-            onDismiss={() => console.log('Error alert dismissed')}
-          >
-            Unable to connect to the server. Please try again later.
-          </Alert>
-
-          <Alert 
-            variant="info" 
-            icon={
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            }
-          >
-            This alert uses a custom icon.
-          </Alert>
-        </div>
-      </div>
-
-      {/* START: routes */}
-      {/* These routes and navigation have been generated for you */}
-      {/* Feel free to move and update them to fit your needs */}
-      <br />
-      <hr />
-      <br />
-      <div role="navigation">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/page-2">Page 2</Link>
-          </li>
-        </ul>
-      </div>
+    <div data-theme="default">
       <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Navigate to="/components/buttons" replace />} />
+          <Route path="components">
+            <Route path="buttons" element={<ButtonsDemo />} />
+            <Route path="checkboxes" element={<CheckboxesDemo />} />
+            <Route path="cards" element={<CardsDemo />} />
+            <Route path="alerts" element={<AlertsDemo />} />
+            <Route path="badges" element={<BadgesDemo />} />
+            <Route path="dropdowns" element={<DropdownsDemo />} />
+            <Route path="radio" element={<RadioDemo />} />
+            <Route path="textareas" element={<TextareasDemo />} />
+            <Route path="datetime" element={<DatetimeDemo />} />
+          </Route>
+        </Route>
       </Routes>
-      {/* END: routes */}
     </div>
   );
 }

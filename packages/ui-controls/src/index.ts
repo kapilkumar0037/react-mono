@@ -15,3 +15,6 @@ export type { CardProps } from './lib/Card/Card';
 
 export { Alert } from './lib/Alert/Alert';
 export type { AlertProps } from './lib/Alert/Alert';
+
+export { Badge } from './lib/Badge/Badge';
+export type { BadgeProps } from './lib/Badge/Badge';
