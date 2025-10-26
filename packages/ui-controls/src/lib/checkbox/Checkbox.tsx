@@ -27,7 +27,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           `.trim()}
         />
         {children && (
-          <span className="text-sm text-text select-none">
+          <span className="text-sm select-none">
             {children}
           </span>
         )}
