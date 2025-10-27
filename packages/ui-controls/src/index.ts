@@ -18,3 +18,6 @@ export type { AlertProps } from './lib/Alert/Alert';
 
 export { Badge } from './lib/Badge/Badge';
 export type { BadgeProps } from './lib/Badge/Badge';
+
+export { default as Breadcrumb } from './lib/Breadcrumb/Breadcrumb';
+export type { BreadcrumbProps, BreadcrumbItemProps } from './lib/Breadcrumb/Breadcrumb';

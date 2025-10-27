@@ -2,6 +2,7 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { AlertsDemo } from './components/demos/AlertsDemo';
 import { BadgesDemo } from './components/demos/BadgesDemo';
+import { BreadcrumbsDemo } from './components/demos/BreadcrumbsDemo';
 import { ButtonsDemo } from './components/demos/ButtonsDemo';
 import { CardsDemo } from './components/demos/CardsDemo';
 import { CheckboxesDemo } from './components/demos/CheckboxesDemo';
@@ -22,6 +23,7 @@ export function App() {
             <Route path="cards" element={<CardsDemo />} />
             <Route path="alerts" element={<AlertsDemo />} />
             <Route path="badges" element={<BadgesDemo />} />
+            <Route path="breadcrumbs" element={<BreadcrumbsDemo />} />
             <Route path="dropdowns" element={<DropdownsDemo />} />
             <Route path="radio" element={<RadioDemo />} />
             <Route path="textareas" element={<TextareasDemo />} />

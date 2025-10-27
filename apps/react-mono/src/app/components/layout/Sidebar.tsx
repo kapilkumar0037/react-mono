@@ -10,6 +10,7 @@ const components = [
   { name: 'Cards', path: '/components/cards' },
   { name: 'Alerts', path: '/components/alerts' },
   { name: 'Badges', path: '/components/badges' },
+  { name: 'Breadcrumbs', path: '/components/breadcrumbs' },
 ];
 
 export const Sidebar = () => {
