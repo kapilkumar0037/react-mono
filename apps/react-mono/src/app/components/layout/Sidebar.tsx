@@ -58,6 +58,12 @@ const componentGroups: ComponentGroup[] = [
           { name: 'Cards', path: '/components/cards' },
           { name: 'Badges', path: '/components/badges' },
         ]
+      },
+      {
+        name: 'Overlays',
+        items: [
+          { name: 'Modal', path: '/components/modal' },
+        ]
       }
     ]
   },

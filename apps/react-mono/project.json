@@ -3,6 +3,11 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/react-mono/src",
   "projectType": "application",
+  "implicitDependencies": [
+    "@react-mono/ui-controls",
+    "@react-mono/styles",
+    "@react-mono/tailwind"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/vite:build",
@@ -11,6 +16,12 @@
       "options": {
         "outputPath": "dist/apps/react-mono"
       },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "dependencies"
+        }
+      ],
       "configurations": {
         "development": {
           "mode": "development"

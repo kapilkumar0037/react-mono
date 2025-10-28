@@ -10,6 +10,7 @@ import { DatetimeDemo } from './components/demos/DatetimeDemo';
 import { DropdownsDemo } from './components/demos/DropdownsDemo';
 import { RadioDemo } from './components/demos/RadioDemo';
 import { TextareasDemo } from './components/demos/TextareasDemo';
+import { ModalDemo } from './components/demos/ModalDemo';
 
 export function App() {
   return (
@@ -28,6 +29,7 @@ export function App() {
             <Route path="radio" element={<RadioDemo />} />
             <Route path="textareas" element={<TextareasDemo />} />
             <Route path="datetime" element={<DatetimeDemo />} />
+            <Route path="modal" element={<ModalDemo />} />
           </Route>
         </Route>
       </Routes>

@@ -21,3 +21,6 @@ export type { BadgeProps } from './lib/Badge/Badge';
 
 export { default as Breadcrumb } from './lib/Breadcrumb/Breadcrumb';
 export type { BreadcrumbProps, BreadcrumbItemProps } from './lib/Breadcrumb/Breadcrumb';
+
+export { Modal } from './lib/Modal/Modal';
+export type { ModalProps } from './lib/Modal/Modal';
