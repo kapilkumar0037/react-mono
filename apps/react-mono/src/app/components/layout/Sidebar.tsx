@@ -94,6 +94,7 @@ const componentGroups: ComponentGroup[] = [
       {
         name: 'Page Navigation',
         items: [
+          { name: 'Navbar', path: '/components/navbar' },
           { name: 'Breadcrumbs', path: '/components/breadcrumbs' },
         ]
       }

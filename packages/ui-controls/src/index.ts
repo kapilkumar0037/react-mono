@@ -24,3 +24,16 @@ export type { BreadcrumbProps, BreadcrumbItemProps } from './lib/Breadcrumb/Brea
 
 export { Modal } from './lib/Modal/Modal';
 export type { ModalProps } from './lib/Modal/Modal';
+
+export {
+  Navbar,
+  NavbarBrand,
+  NavbarItem,
+  NavbarSection,
+} from './lib/Navbar/Navbar';
+export type {
+  NavbarProps,
+  NavbarBrandProps,
+  NavbarItemProps,
+  NavbarSectionProps,
+} from './lib/Navbar/Navbar';

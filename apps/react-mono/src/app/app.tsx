@@ -11,6 +11,7 @@ import { DropdownsDemo } from './components/demos/DropdownsDemo';
 import { RadioDemo } from './components/demos/RadioDemo';
 import { TextareasDemo } from './components/demos/TextareasDemo';
 import { ModalDemo } from './components/demos/ModalDemo';
+import { NavbarDemo } from './components/demos/NavbarDemo';
 
 export function App() {
   return (
@@ -30,6 +31,7 @@ export function App() {
             <Route path="textareas" element={<TextareasDemo />} />
             <Route path="datetime" element={<DatetimeDemo />} />
             <Route path="modal" element={<ModalDemo />} />
+            <Route path="navbar" element={<NavbarDemo />} />
           </Route>
         </Route>
       </Routes>
