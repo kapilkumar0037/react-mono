@@ -79,6 +79,7 @@ const componentGroups: ComponentGroup[] = [
         name: 'Notifications',
         items: [
           { name: 'Alerts', path: '/components/alerts' },
+          { name: 'Toast', path: '/components/toast' },
         ]
       }
     ]
