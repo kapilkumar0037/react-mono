@@ -43,3 +43,15 @@ export type { ToastProps, ToastVariant, ToastPosition } from './lib/Toast/Toast'
 export { ToastContainer } from './lib/Toast/ToastContainer';
 export type { ToastData } from './lib/Toast/ToastContainer';
 export { ToastProvider, useToast } from './lib/Toast/ToastProvider';
+
+export { ButtonGroup, ButtonGroupItem } from './lib/ButtonGroup/ButtonGroup';
+export type {
+  ButtonGroupProps,
+  ButtonGroupItemProps,
+  ButtonGroupSize,
+  ButtonGroupVariant,
+  ButtonGroupOrientation,
+} from './lib/ButtonGroup/ButtonGroup';
+
+export { Spinner } from './lib/Spinner/Spinner';
+export type { SpinnerProps, SpinnerSize, SpinnerVariant } from './lib/Spinner/Spinner';

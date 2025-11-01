@@ -13,6 +13,8 @@ import { TextareasDemo } from './components/demos/TextareasDemo';
 import { ModalDemo } from './components/demos/ModalDemo';
 import { NavbarDemo } from './components/demos/NavbarDemo';
 import { ToastDemo } from './components/demos/ToastDemo';
+import { ButtonGroupDemo } from './components/demos/ButtonGroupDemo';
+import { SpinnerDemo } from './components/demos/SpinnerDemo';
 
 export function App() {
   return (
@@ -34,6 +36,8 @@ export function App() {
             <Route path="modal" element={<ModalDemo />} />
             <Route path="navbar" element={<NavbarDemo />} />
             <Route path="toast" element={<ToastDemo />} />
+            <Route path="button-group" element={<ButtonGroupDemo />} />
+            <Route path="spinner" element={<SpinnerDemo />} />
           </Route>
         </Route>
       </Routes>

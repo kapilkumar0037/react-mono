@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'default' | 'outline';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps
@@ -30,9 +30,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       'inline-flex items-center justify-center gap-2 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variants: Record<ButtonVariant, string> = {
-      primary: 'bg-primary text-white',
-      secondary: 'bg-white text-primary border border-gray-200',
-      ghost: 'bg-transparent text-primary',
+      primary: 'bg-primary text-white hover:bg-primary-dark',
+      secondary: 'bg-white text-primary border border-gray-200 hover:bg-gray-50',
+      ghost: 'bg-transparent text-primary hover:bg-gray-50',
+      default: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50',
+      outline: 'bg-transparent text-gray-700 border border-gray-300 hover:bg-gray-50',
     };
 
     const sizes: Record<ButtonSize, string> = {
