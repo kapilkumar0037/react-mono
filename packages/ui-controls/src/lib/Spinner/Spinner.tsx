@@ -1,68 +1,102 @@
 import React from 'react';
 
-export type SpinnerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-export type SpinnerVariant = 'primary' | 'muted' | 'white' | 'black';
+export type SpinnerSize = '2xs' | 'xs' | 'sm' | 'md' | 'lg';
+export type SpinnerVariant = 'inherit' | 'primary' | 'muted' | 'white';
+export type SpinnerVisual = 'border' | 'classic';
 
 export interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: SpinnerSize;
   variant?: SpinnerVariant;
-  label?: string; // accessible label
+  visual?: SpinnerVisual;
+  label?: string;
   className?: string;
 }
 
-const sizeMap: Record<SpinnerSize, string> = {
-  xs: 'w-4 h-4',
-  sm: 'w-5 h-5',
-  md: 'w-6 h-6',
-  lg: 'w-8 h-8',
-  xl: 'w-10 h-10',
+const sizeMap: Record<SpinnerSize, { size: string, border: string }> = {
+  '2xs': { size: 'w-3 h-3', border: 'border-2' },
+  xs: { size: 'w-4 h-4', border: 'border-2' },
+  sm: { size: 'w-5 h-5', border: 'border-2' },
+  md: { size: 'w-6 h-6', border: 'border-[3px]' },
+  lg: { size: 'w-8 h-8', border: 'border-[3px]' },
 };
 
-const variantMap: Record<SpinnerVariant, string> = {
-  primary: 'text-primary',
-  muted: 'text-gray-400',
-  white: 'text-white',
-  black: 'text-black',
+const variantMap: Record<SpinnerVariant, { color: string, track: string }> = {
+  inherit: { color: 'border-current', track: 'border-current/20' },
+  primary: { color: 'border-primary', track: 'border-primary/20' },
+  muted: { color: 'border-gray-400', track: 'border-gray-200' },
+  white: { color: 'border-white', track: 'border-white/20' },
 };
 
 /**
  * Spinner
  * - Accessible: uses role="status" and optional label for screen readers
  * - Configurable sizes and color variants
+ * - Two styles: border (CSS-based) or classic (SVG-based)
  * - Uses Tailwind's `animate-spin`
  */
 export const Spinner: React.FC<SpinnerProps> = ({
-  size = 'md',
-  variant = 'primary',
+  size = 'xs',
+  variant = 'inherit',
+  visual = 'border',
   label = 'Loading',
   className = '',
   ...rest
 }) => {
-  const sizeCls = sizeMap[size] || sizeMap.md;
-  const variantCls = variantMap[variant] || variantMap.primary;
+  const { size: sizeCls, border: borderWidth } = sizeMap[size] || sizeMap.xs;
+  const { color: borderColor, track: trackColor } = variantMap[variant] || variantMap.inherit;
 
+  if (visual === 'border') {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        aria-label={label}
+        className={`inline-flex items-center ${className}`}
+        {...rest}
+      >
+        <div
+          className={`
+            ${sizeCls}
+            ${borderWidth}
+            ${borderColor}
+            ${trackColor}
+            animate-spin
+            rounded-full
+            border-solid
+            border-t-transparent
+            border-r-transparent
+          `}
+        />
+        <span className="sr-only">{label}</span>
+      </div>
+    );
+  }
+
+  // Classic SVG spinner
   return (
     <div
       role="status"
       aria-live="polite"
       aria-label={label}
-      className={`inline-flex items-center justify-center ${className}`}
+      className={`inline-flex items-center ${className}`}
       {...rest}
     >
       <svg
-        className={`${sizeCls} ${variantCls} animate-spin`} 
-        xmlns="http://www.w3.org/2000/svg" 
-        fill="none" 
+        className={`${sizeCls} animate-spin ${variant === 'inherit' ? 'text-current' : variantMap[variant].color.replace('border-', 'text-')}`}
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
         viewBox="0 0 24 24"
         aria-hidden="true"
       >
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        <path 
+          fill="currentColor" 
+          d="M12 4.75v1.5a5.75 5.75 0 1 0 5.75 5.75h1.5A7.25 7.25 0 1 1 12 4.75Z"
+        />
       </svg>
-      {/* Visible label for assistive tech only */}
       <span className="sr-only">{label}</span>
     </div>
   );
 };
+
 
 export default Spinner;
