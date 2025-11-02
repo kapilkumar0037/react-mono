@@ -55,3 +55,6 @@ export type {
 
 export { Spinner } from './lib/Spinner/Spinner';
 export type { SpinnerProps, SpinnerSize, SpinnerVariant } from './lib/Spinner/Spinner';
+
+export { Accordion, AccordionItem } from './lib/Accordion/Accordion';
+export type { AccordionProps, AccordionItemProps } from './lib/Accordion/Accordion';
