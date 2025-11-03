@@ -65,6 +65,7 @@ const componentGroups: ComponentGroup[] = [
             name: 'Overlays',
             items: [
               { name: 'Modal', path: '/components/modal' },
+              { name: 'Off Canvas', path: '/components/off-canvas' },
             ]
           },
           {

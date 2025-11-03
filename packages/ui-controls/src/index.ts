@@ -58,3 +58,6 @@ export type { SpinnerProps, SpinnerSize, SpinnerVariant } from './lib/Spinner/Sp
 
 export { Accordion, AccordionItem } from './lib/Accordion/Accordion';
 export type { AccordionProps, AccordionItemProps } from './lib/Accordion/Accordion';
+
+export { OffCanvas } from './lib/OffCanvas/OffCanvas';
+export type { OffCanvasProps, OffCanvasPlacement, OffCanvasSize } from './lib/OffCanvas/OffCanvas';

@@ -16,6 +16,7 @@ import { ToastDemo } from './components/demos/ToastDemo';
 import { ButtonGroupDemo } from './components/demos/ButtonGroupDemo';
 import { SpinnerDemo } from './components/demos/SpinnerDemo';
 import { AccordionDemo } from './components/demos/AccordionDemo';
+import { OffCanvasDemo } from './components/demos/OffCanvasDemo';
 
 export function App() {
   return (
@@ -40,6 +41,7 @@ export function App() {
             <Route path="button-group" element={<ButtonGroupDemo />} />
             <Route path="spinner" element={<SpinnerDemo />} />
             <Route path="accordion" element={<AccordionDemo />} />
+            <Route path="off-canvas" element={<OffCanvasDemo />} />
           </Route>
         </Route>
       </Routes>
