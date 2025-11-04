@@ -59,6 +59,7 @@ const componentGroups: ComponentGroup[] = [
               { name: 'Accordion', path: '/components/accordion' },
               { name: 'Cards', path: '/components/cards' },
               { name: 'Badges', path: '/components/badges' },
+              { name: 'Pagination', path: '/components/pagination' },
             ]
           },
           {

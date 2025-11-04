@@ -61,3 +61,6 @@ export type { AccordionProps, AccordionItemProps } from './lib/Accordion/Accordi
 
 export { OffCanvas } from './lib/OffCanvas/OffCanvas';
 export type { OffCanvasProps, OffCanvasPlacement, OffCanvasSize } from './lib/OffCanvas/OffCanvas';
+
+export { Pagination } from './lib/Pagination/Pagination';
+export type { PaginationProps } from './lib/Pagination/Pagination';
