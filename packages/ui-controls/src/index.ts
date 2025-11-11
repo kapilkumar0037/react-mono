@@ -64,3 +64,6 @@ export type { OffCanvasProps, OffCanvasPlacement, OffCanvasSize } from './lib/Of
 
 export { Pagination } from './lib/Pagination/Pagination';
 export type { PaginationProps } from './lib/Pagination/Pagination';
+
+export { Tooltip } from './lib/Tooltip/Tooltip';
+export type { TooltipProps, TooltipPlacement } from './lib/Tooltip/Tooltip';

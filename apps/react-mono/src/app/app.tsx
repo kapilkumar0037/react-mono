@@ -18,6 +18,7 @@ import { SpinnerDemo } from './components/demos/SpinnerDemo';
 import { AccordionDemo } from './components/demos/AccordionDemo';
 import { OffCanvasDemo } from './components/demos/OffCanvasDemo';
 import { PaginationDemo } from './components/demos/PaginationDemo';
+import { TooltipDemo } from './components/demos/TooltipDemo';
 
 export function App() {
   return (
@@ -44,6 +45,7 @@ export function App() {
             <Route path="accordion" element={<AccordionDemo />} />
             <Route path="off-canvas" element={<OffCanvasDemo />} />
             <Route path="pagination" element={<PaginationDemo />} />
+            <Route path="tooltip" element={<TooltipDemo />} />
           </Route>
         </Route>
       </Routes>
