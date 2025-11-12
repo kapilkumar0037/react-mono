@@ -61,6 +61,7 @@ const componentGroups: ComponentGroup[] = [
               { name: 'Badges', path: '/components/badges' },
               { name: 'Pagination', path: '/components/pagination' },
               { name: 'Tooltip', path: '/components/tooltip' },
+              { name: 'Popover', path: '/components/popover' },
             ]
           },
           {

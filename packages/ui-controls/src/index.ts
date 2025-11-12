@@ -67,3 +67,6 @@ export type { PaginationProps } from './lib/Pagination/Pagination';
 
 export { Tooltip } from './lib/Tooltip/Tooltip';
 export type { TooltipProps, TooltipPlacement } from './lib/Tooltip/Tooltip';
+
+export { Popover } from './lib/Popover/Popover';
+export type { PopoverProps, PopoverPlacement, PopoverTrigger } from './lib/Popover/Popover';
