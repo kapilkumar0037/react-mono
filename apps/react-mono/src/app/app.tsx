@@ -20,6 +20,7 @@ import { OffCanvasDemo } from './components/demos/OffCanvasDemo';
 import { PaginationDemo } from './components/demos/PaginationDemo';
 import { TooltipDemo } from './components/demos/TooltipDemo';
 import { PopoverDemo } from './components/demos/PopoverDemo';
+import { ScrollspyDemo } from './components/demos/ScrollspyDemo';
 
 export function App() {
   return (
@@ -48,6 +49,7 @@ export function App() {
             <Route path="pagination" element={<PaginationDemo />} />
             <Route path="tooltip" element={<TooltipDemo />} />
             <Route path="popover" element={<PopoverDemo />} />
+            <Route path="scrollspy" element={<ScrollspyDemo />} />
           </Route>
         </Route>
       </Routes>

@@ -70,3 +70,6 @@ export type { TooltipProps, TooltipPlacement } from './lib/Tooltip/Tooltip';
 
 export { Popover } from './lib/Popover/Popover';
 export type { PopoverProps, PopoverPlacement, PopoverTrigger } from './lib/Popover/Popover';
+
+export { Scrollspy } from './lib/Scrollspy/Scrollspy';
+export type { ScrollspyProps, ScrollspySection } from './lib/Scrollspy/Scrollspy';
