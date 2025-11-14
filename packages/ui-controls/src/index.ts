@@ -73,3 +73,6 @@ export type { PopoverProps, PopoverPlacement, PopoverTrigger } from './lib/Popov
 
 export { Scrollspy } from './lib/Scrollspy/Scrollspy';
 export type { ScrollspyProps, ScrollspySection } from './lib/Scrollspy/Scrollspy';
+
+export { ListGroup, ListGroupItem } from './lib/ListGroup/ListGroup';
+export type { ListGroupProps, ListGroupItemProps } from './lib/ListGroup/ListGroup';

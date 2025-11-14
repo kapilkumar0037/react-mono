@@ -21,6 +21,7 @@ import { PaginationDemo } from './components/demos/PaginationDemo';
 import { TooltipDemo } from './components/demos/TooltipDemo';
 import { PopoverDemo } from './components/demos/PopoverDemo';
 import { ScrollspyDemo } from './components/demos/ScrollspyDemo';
+import { ListGroupDemo } from './components/demos/ListGroupDemo';
 
 export function App() {
   return (
@@ -50,6 +51,7 @@ export function App() {
             <Route path="tooltip" element={<TooltipDemo />} />
             <Route path="popover" element={<PopoverDemo />} />
             <Route path="scrollspy" element={<ScrollspyDemo />} />
+            <Route path="list-group" element={<ListGroupDemo />} />
           </Route>
         </Route>
       </Routes>
