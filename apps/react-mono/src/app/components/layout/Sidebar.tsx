@@ -57,6 +57,7 @@ const componentGroups: ComponentGroup[] = [
             name: 'Content',
             items: [
               { name: 'Accordion', path: '/components/accordion' },
+              { name: 'Collapse', path: '/components/collapse' },
               { name: 'Cards', path: '/components/cards' },
               { name: 'Badges', path: '/components/badges' },
               { name: 'Pagination', path: '/components/pagination' },

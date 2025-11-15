@@ -22,6 +22,7 @@ import { TooltipDemo } from './components/demos/TooltipDemo';
 import { PopoverDemo } from './components/demos/PopoverDemo';
 import { ScrollspyDemo } from './components/demos/ScrollspyDemo';
 import { ListGroupDemo } from './components/demos/ListGroupDemo';
+import CollapseDemo from './components/demos/CollapseDemo';
 
 export function App() {
   return (
@@ -52,6 +53,7 @@ export function App() {
             <Route path="popover" element={<PopoverDemo />} />
             <Route path="scrollspy" element={<ScrollspyDemo />} />
             <Route path="list-group" element={<ListGroupDemo />} />
+            <Route path="collapse" element={<CollapseDemo />} />
           </Route>
         </Route>
       </Routes>
