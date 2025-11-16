@@ -1,3 +1,4 @@
+import InputGroupDemo from './components/demos/InputGroupDemo';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { AlertsDemo } from './components/demos/AlertsDemo';
@@ -54,6 +55,7 @@ export function App() {
             <Route path="scrollspy" element={<ScrollspyDemo />} />
             <Route path="list-group" element={<ListGroupDemo />} />
             <Route path="collapse" element={<CollapseDemo />} />
+            <Route path="input-group" element={<InputGroupDemo />} />
           </Route>
         </Route>
       </Routes>

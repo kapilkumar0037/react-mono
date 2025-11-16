@@ -1,3 +1,4 @@
+export * from './lib/InputGroup/InputGroup';
 export * from './lib/Collapse/Collapse';
 export { default as Button } from './lib/Button/Button';
 export { default as Checkbox } from './lib/checkbox/Checkbox';
