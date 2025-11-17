@@ -1,3 +1,4 @@
+export * from './lib/Carousel/Carousel';
 export * from './lib/InputGroup/InputGroup';
 export * from './lib/Collapse/Collapse';
 export { default as Button } from './lib/Button/Button';
