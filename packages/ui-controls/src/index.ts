@@ -1,3 +1,4 @@
+export * from './lib/Range/Range';
 export * from './lib/Carousel/Carousel';
 export * from './lib/InputGroup/InputGroup';
 export * from './lib/Collapse/Collapse';

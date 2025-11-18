@@ -1,3 +1,4 @@
+import RangeDemo from './components/demos/RangeDemo';
 import CarouselDemo from './components/demos/CarouselDemo';
 import InputGroupDemo from './components/demos/InputGroupDemo';
 import { Route, Routes, Navigate } from 'react-router-dom';
@@ -58,6 +59,7 @@ export function App() {
             <Route path="collapse" element={<CollapseDemo />} />
             <Route path="input-group" element={<InputGroupDemo />} />
             <Route path="carousel" element={<CarouselDemo />} />
+            <Route path="range" element={<RangeDemo />} />
           </Route>
         </Route>
       </Routes>

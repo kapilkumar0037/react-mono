@@ -60,6 +60,7 @@ const componentGroups: ComponentGroup[] = [
               { name: 'Carousel', path: '/components/carousel' },
               { name: 'Collapse', path: '/components/collapse' },
               { name: 'Input Group', path: '/components/input-group' },
+              { name: 'Range', path: '/components/range' },
               { name: 'Cards', path: '/components/cards' },
               { name: 'Badges', path: '/components/badges' },
               { name: 'Pagination', path: '/components/pagination' },
