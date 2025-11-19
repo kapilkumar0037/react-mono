@@ -1,3 +1,4 @@
+import NavsTabsDemo from './components/demos/NavsTabsDemo';
 import RangeDemo from './components/demos/RangeDemo';
 import CarouselDemo from './components/demos/CarouselDemo';
 import InputGroupDemo from './components/demos/InputGroupDemo';
@@ -60,6 +61,7 @@ export function App() {
             <Route path="input-group" element={<InputGroupDemo />} />
             <Route path="carousel" element={<CarouselDemo />} />
             <Route path="range" element={<RangeDemo />} />
+            <Route path="navs-tabs" element={<NavsTabsDemo />} />
           </Route>
         </Route>
       </Routes>
