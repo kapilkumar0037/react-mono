@@ -58,6 +58,7 @@ const componentGroups: ComponentGroup[] = [
             items: [
               { name: 'Accordion', path: '/components/accordion' },
               { name: 'Carousel', path: '/components/carousel' },
+              { name: 'Close Button', path: '/components/close-button' },
               { name: 'Collapse', path: '/components/collapse' },
               { name: 'Input Group', path: '/components/input-group' },
               { name: 'Navs & Tabs', path: '/components/navs-tabs' },
