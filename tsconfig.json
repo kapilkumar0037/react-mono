@@ -17,6 +17,12 @@
     },
     {
       "path": "./packages/styles"
+    },
+    {
+      "path": "./apps/admin-template-e2e"
+    },
+    {
+      "path": "./apps/admin-template"
     }
   ]
 }

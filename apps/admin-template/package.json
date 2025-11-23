@@ -1,0 +1,8 @@
+{
+  "name": "@react-mono/admin-template",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "name": "admin-template"
+  }
+}
