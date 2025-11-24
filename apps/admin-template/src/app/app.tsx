@@ -1,10 +1,15 @@
-import NxWelcome from './nx-welcome';
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Dashboard from './Dashboard';
 
 export function App() {
   return (
-    <div>
-      <NxWelcome title="admin-template" />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        {/* Future routes can be added here */}
+      </Routes>
+    </Router>
   );
 }
 
