@@ -82,3 +82,6 @@ export type { ScrollspyProps, ScrollspySection } from './lib/Scrollspy/Scrollspy
 
 export { ListGroup, ListGroupItem } from './lib/ListGroup/ListGroup';
 export type { ListGroupProps, ListGroupItemProps } from './lib/ListGroup/ListGroup';
+
+export { default as Sidebar } from './lib/Sidebar/Sidebar';
+export type { SidebarProps, SidebarItem } from './lib/Sidebar/Sidebar';
