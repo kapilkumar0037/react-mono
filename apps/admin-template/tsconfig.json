@@ -3,6 +3,9 @@
   "include": [],
   "references": [
     {
+      "path": "../../packages/ui-controls"
+    },
+    {
       "path": "./tsconfig.app.json"
     },
     {
