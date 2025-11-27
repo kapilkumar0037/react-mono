@@ -17,9 +17,9 @@ const Sidebar: React.FC<SidebarProps> = ({ items }) => {
     <aside className="h-full w-64 bg-gray-900 text-white flex flex-col shadow-lg">
       <div className="p-6 text-2xl font-bold tracking-wide border-b border-gray-800 mb-2">Admin Dashboard</div>
       <nav className="flex-1 overflow-y-auto">
-        <ListGroup>
+        <ListGroup as="div">
           {items.map((item) => (
-            <ListGroupItem key={item.to} className="px-4 py-2">
+            <ListGroupItem key={item.to} className="px-4 py-2" as="div">
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
