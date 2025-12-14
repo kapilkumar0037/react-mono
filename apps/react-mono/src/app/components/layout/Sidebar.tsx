@@ -162,14 +162,14 @@ export const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 min-h-screen p-4">
-      <div className="text-xl font-bold mb-6">Components</div>
+    <div className="w-64 border-r min-h-screen p-4 bg-blue-900">
+      <div className="text-xl font-bold mb-6 text-blue-100">Components</div>
       <nav className="space-y-2">
         {componentGroups.map((group) => (
-          <div key={group.name} className="border-b border-gray-100 last:border-0 pb-2">
+          <div key={group.name} className="border-b border-blue-800 last:border-0 pb-2">
             <button
               onClick={() => toggleGroup(group.name)}
-              className="w-full flex items-center justify-between px-4 py-2 text-left text-sm font-semibold text-gray-600 hover:bg-gray-50 rounded-md"
+              className="w-full flex items-center justify-between px-4 py-2 text-left text-sm font-semibold text-blue-200 rounded-md hover:bg-blue-800 transition-colors"
             >
               <div className="flex items-center gap-2">
                 {group.icon}
@@ -192,7 +192,7 @@ export const Sidebar = () => {
                   <div key={subGroup.name} className="mb-2">
                     <button
                       onClick={() => toggleSubGroup(subGroup.name)}
-                      className="w-full flex items-center justify-between px-4 py-2 text-left text-sm text-gray-500 hover:bg-gray-50 rounded-md"
+                      className="w-full flex items-center justify-between px-4 py-2 text-left text-sm text-blue-200 hover:bg-blue-800 rounded-md transition-colors"
                     >
                       <span>{subGroup.name}</span>
                       <svg
@@ -212,10 +212,10 @@ export const Sidebar = () => {
                           <Link
                             key={item.path}
                             to={item.path}
-                            className={`block px-4 py-2 rounded-md text-sm ${
+                            className={`block px-4 py-2 rounded-md text-sm transition-colors ${
                               location.pathname === item.path
-                                ? 'bg-primary text-white'
-                                : 'text-gray-600 hover:bg-gray-50'
+                                ? 'bg-blue-700 text-white'
+                                : 'text-blue-100 hover:bg-blue-800'
                             }`}
                           >
                             {item.name}

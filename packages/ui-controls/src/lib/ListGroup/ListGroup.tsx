@@ -20,7 +20,7 @@ export const ListGroup: React.FC<ListGroupProps> = ({
   className = '',
   as: Component = 'ul',
 }) => (
-  <Component className={`divide-y divide-gray-200 rounded border border-gray-200 bg-white ${className}`}>
+  <Component className={className}>
     {children}
   </Component>
 );
@@ -33,8 +33,9 @@ export const ListGroupItem: React.FC<ListGroupItemProps> = ({
   as: Component = 'li',
   onClick,
 }) => {
+  // Remove default backgrounds so parent can control it (e.g., sidebar)
   const base = 'block px-4 py-2 text-sm transition-colors';
-  const activeCls = active ? 'bg-primary/10 text-primary font-semibold' : 'text-gray-700 hover:bg-gray-50';
+  const activeCls = active ? 'font-semibold' : '';
   const disabledCls = disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : '';
   return (
     <Component
