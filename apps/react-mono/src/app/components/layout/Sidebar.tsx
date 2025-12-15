@@ -162,14 +162,15 @@ export const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 border-r min-h-screen p-4 bg-blue-900">
-      <div className="text-xl font-bold mb-6 text-blue-100">Components</div>
-      <nav className="space-y-2">
+    <div className="w-64 min-h-screen bg-blue-900 flex flex-col">
+      <div className="text-xl font-bold mb-6 text-blue-100 px-6 pt-6">Components</div>
+      <nav className="flex-1 flex flex-col gap-2 px-2 pb-6">
         {componentGroups.map((group) => (
-          <div key={group.name} className="border-b border-blue-800 last:border-0 pb-2">
+          <div key={group.name} className="pb-2">
             <button
               onClick={() => toggleGroup(group.name)}
-              className="w-full flex items-center justify-between px-4 py-2 text-left text-sm font-semibold text-blue-200 rounded-md hover:bg-blue-800 transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2 text-left text-sm font-semibold text-blue-200 rounded-none hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800 transition-colors border-none shadow-none bg-transparent"
+              style={{ boxShadow: 'none', border: 'none', background: 'transparent' }}
             >
               <div className="flex items-center gap-2">
                 {group.icon}
@@ -187,12 +188,13 @@ export const Sidebar = () => {
               </svg>
             </button>
             {expandedGroups[group.name] && (
-              <div className="mt-1 ml-4">
+              <div className="mt-1 ml-2">
                 {group.subGroups.map((subGroup) => (
                   <div key={subGroup.name} className="mb-2">
                     <button
                       onClick={() => toggleSubGroup(subGroup.name)}
-                      className="w-full flex items-center justify-between px-4 py-2 text-left text-sm text-blue-200 hover:bg-blue-800 rounded-md transition-colors"
+                      className="w-full flex items-center justify-between px-3 py-2 text-left text-sm text-blue-200 hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800 rounded-none transition-colors border-none shadow-none bg-transparent"
+                      style={{ boxShadow: 'none', border: 'none', background: 'transparent' }}
                     >
                       <span>{subGroup.name}</span>
                       <svg
@@ -207,16 +209,17 @@ export const Sidebar = () => {
                       </svg>
                     </button>
                     {expandedSubGroups[subGroup.name] && (
-                      <div className="ml-4 mt-1 space-y-1">
+                      <div className="ml-2 mt-1 flex flex-col gap-1">
                         {subGroup.items.map((item) => (
                           <Link
                             key={item.path}
                             to={item.path}
-                            className={`block px-4 py-2 rounded-md text-sm transition-colors ${
+                            className={`block px-3 py-2 rounded-none text-sm transition-colors border-none shadow-none ${
                               location.pathname === item.path
                                 ? 'bg-blue-700 text-white'
-                                : 'text-blue-100 hover:bg-blue-800'
+                                : 'text-blue-100 hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800'
                             }`}
+                            style={{ boxShadow: 'none', border: 'none' }}
                           >
                             {item.name}
                           </Link>
