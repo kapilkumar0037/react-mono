@@ -5,7 +5,7 @@ import AdminNavbar from './AdminNavbar';
 
 const Dashboard: React.FC = () => {
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200">
+    <div className="flex min-h-screen bg-blue-50">
       <AdminSidebar />
       <div className="flex-1 flex flex-col">
         <AdminNavbar />
