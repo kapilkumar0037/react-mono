@@ -122,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {brand && <div className="flex-shrink-0 flex items-center">{brand}</div>}
           </div>
 
-          <div className="hidden md:flex items-center justify-end flex-1 ml-6">
+          <div className="hidden md:flex items-center justify-end flex-1">
             {children}
           </div>
 

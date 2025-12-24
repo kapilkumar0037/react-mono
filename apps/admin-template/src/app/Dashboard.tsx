@@ -1,14 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 
 const Dashboard: React.FC = () => {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   return (
     <div className="flex min-h-screen bg-blue-50">
-      <AdminSidebar />
+      <AdminSidebar collapsed={sidebarCollapsed} />
       <div className="flex-1 flex flex-col">
-        <AdminNavbar />
+        <AdminNavbar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} />
         <main className="flex-1 p-8">
           <h1 className="text-xl font-semibold mb-4 text-blue-900 tracking-tight">Dashboard Overview</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

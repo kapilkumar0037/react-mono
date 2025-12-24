@@ -22,9 +22,10 @@ export interface SidebarGroup {
 export interface SidebarProps {
   items?: SidebarItem[];
   groups?: SidebarGroup[];
+  collapsed?: boolean;
 }
 
-const SidebarContent: React.FC<SidebarProps> = ({ items, groups }) => {
+const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = false }) => {
   const [open, setOpen] = useState(true);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [expandedSubGroups, setExpandedSubGroups] = useState<Record<string, boolean>>({});
@@ -81,10 +82,18 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups }) => {
         <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <aside
-        className={`h-screen w-64 bg-blue-900 text-blue-100 flex flex-col shadow-lg border-r border-blue-800 transition-transform duration-300 fixed md:static z-40 ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+        className={`h-screen bg-blue-900 text-blue-100 flex flex-col shadow-lg border-r border-blue-800 transition-all duration-300 fixed md:static z-40 ${
+          collapsed ? 'w-20' : 'w-64'
+        } ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+        style={{
+          width: collapsed ? '5rem' : '16rem'
+        }}
       >
-        <div className="flex items-center justify-start p-6 border-b border-blue-800 mb-4">
-          <span className="text-xl font-bold text-blue-100">AdminPro</span>
+        <div className={`flex items-center border-b border-blue-800 transition-all duration-300 h-14 ${
+          collapsed ? 'justify-center px-2' : 'justify-start px-6'
+        }`}>
+          {!collapsed && <span className="font-bold text-blue-100 text-xl">AdminPro</span>}
+          {collapsed && <span className="text-lg font-bold text-blue-100">A</span>}
         </div>
         <nav className="flex-1 overflow-y-auto px-4 pt-2">
           {groups ? (
@@ -94,16 +103,18 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups }) => {
                 <div key={group.name} className="pb-2">
                   <button
                     onClick={() => toggleGroup(group.name)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-left text-sm font-semibold text-blue-100 rounded-none hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800 transition-colors"
+                    className={`w-full flex items-center transition-all duration-300 text-left text-sm font-semibold text-blue-100 rounded-none hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800 ${
+                      collapsed ? 'justify-center px-2 py-2' : 'justify-between px-3 py-2'
+                    }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className={`flex items-center ${collapsed ? 'gap-0' : 'gap-2'}`}>
                       {group.icon}
-                      <span>{group.name}</span>
+                      <span className={collapsed ? 'hidden' : ''}>{group.name}</span>
                     </div>
                     <svg
                       className={`w-4 h-4 transform transition-transform ${
                         expandedGroups[group.name] ? 'rotate-180' : ''
-                      }`}
+                      } ${collapsed ? 'hidden' : ''}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -111,19 +122,21 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  {expandedGroups[group.name] && (
+                  {expandedGroups[group.name] && !collapsed && (
                     <div className="mt-1 ml-2">
                       {group.subGroups.map((subGroup) => (
                         <div key={subGroup.name} className="mb-2">
                           <button
                             onClick={() => toggleSubGroup(subGroup.name)}
-                            className="w-full flex items-center justify-between px-3 py-2 text-left text-sm text-blue-200 hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800 rounded-none transition-colors"
+                            className={`w-full flex items-center transition-all duration-300 text-left text-sm text-blue-200 hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800 rounded-none ${
+                              collapsed ? 'justify-center px-2 py-2' : 'justify-between px-3 py-2'
+                            }`}
                           >
-                            <span>{subGroup.name}</span>
+                            <span className={collapsed ? 'hidden' : ''}>{subGroup.name}</span>
                             <svg
                               className={`w-3 h-3 transform transition-transform ${
                                 expandedSubGroups[subGroup.name] ? 'rotate-180' : ''
-                              }`}
+                              } ${collapsed ? 'hidden' : ''}`}
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -131,7 +144,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups }) => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                             </svg>
                           </button>
-                          {expandedSubGroups[subGroup.name] && (
+                          {expandedSubGroups[subGroup.name] && !collapsed && (
                             <div className="ml-2 mt-1 flex flex-col gap-1">
                               {subGroup.items.map((item) => (
                                 <NavLink
@@ -165,7 +178,11 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups }) => {
                   <NavLink
                     to={item.to}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 w-full text-base font-medium rounded-none px-4 py-2 transition-all duration-200 border-l-4 ${
+                      `flex items-center gap-3 w-full text-base font-medium rounded-none transition-all duration-200 border-l-4 ${
+                        collapsed
+                          ? 'justify-center px-2 py-2'
+                          : 'px-4 py-2'
+                      } ${
                         isActive
                           ? 'bg-blue-700 text-white border-blue-300 shadow-sm'
                           : 'bg-blue-900 text-blue-100 border-transparent hover:bg-blue-800 hover:text-white hover:border-blue-400'
@@ -173,14 +190,16 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups }) => {
                     }
                   >
                     {item.icon && <span className="text-xl">{item.icon}</span>}
-                    {item.label}
+                    <span className={collapsed ? 'hidden' : ''}>{item.label}</span>
                   </NavLink>
                 </ListGroupItem>
               ))}
             </ListGroup>
           )}
         </nav>
-        <div className="p-4 border-t border-blue-800 text-xs text-blue-300 text-center rounded-b-lg mt-2 bg-blue-900">© 2025 AdminPro</div>
+        <div className={`border-t border-blue-800 text-xs text-blue-300 text-center rounded-b-lg mt-2 bg-blue-900 transition-all duration-300 ${
+          collapsed ? 'p-2 hidden md:block' : 'p-4'
+        }`}>© 2025 AdminPro</div>
       </aside>
       {/* Overlay for mobile when sidebar is open */}
       {open && (

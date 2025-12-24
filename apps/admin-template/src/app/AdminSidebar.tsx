@@ -84,8 +84,8 @@ const sidebarGroups: SidebarGroup[] = [
   }
 ];
 
-const AdminSidebar: React.FC = () => {
-  return <Sidebar groups={sidebarGroups} />;
+const AdminSidebar: React.FC<{ collapsed?: boolean }> = ({ collapsed = false }) => {
+  return <Sidebar groups={sidebarGroups} collapsed={collapsed} />;
 };
 
 export default AdminSidebar;
