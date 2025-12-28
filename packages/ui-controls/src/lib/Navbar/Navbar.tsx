@@ -125,7 +125,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="hidden md:flex items-center justify-end flex-1">
             {children}
           </div>
-
           {/* Mobile menu button */}
           <div className="flex items-center md:hidden">
             <button
