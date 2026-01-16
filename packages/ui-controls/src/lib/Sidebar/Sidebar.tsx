@@ -106,6 +106,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
                     className={`w-full flex items-center transition-all duration-300 text-left text-sm font-semibold text-blue-100 rounded-none hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800 ${
                       collapsed ? 'justify-center px-2 py-2' : 'justify-between px-3 py-2'
                     }`}
+                    title={collapsed ? group.name : ''}
                   >
                     <div className={`flex items-center ${collapsed ? 'gap-0' : 'gap-2'}`}>
                       {group.icon}
@@ -157,6 +158,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
                                         : 'text-blue-100 hover:bg-blue-800'
                                     }`
                                   }
+                                  title={collapsed ? item.label : ''}
                                 >
                                   {item.label}
                                 </NavLink>
@@ -188,6 +190,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
                           : 'bg-blue-900 text-blue-100 border-transparent hover:bg-blue-800 hover:text-white hover:border-blue-400'
                       }`
                     }
+                    title={collapsed ? item.label : ''}
                   >
                     {item.icon && <span className="text-xl">{item.icon}</span>}
                     <span className={collapsed ? 'hidden' : ''}>{item.label}</span>
