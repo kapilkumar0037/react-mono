@@ -1,10 +1,27 @@
 
 import React, { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 
 const Dashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Mock data for last 12 months
+  const salesData = [
+    { month: 'Jan', sales: 4000, revenue: 2400 },
+    { month: 'Feb', sales: 3000, revenue: 1398 },
+    { month: 'Mar', sales: 2000, revenue: 9800 },
+    { month: 'Apr', sales: 2780, revenue: 3908 },
+    { month: 'May', sales: 1890, revenue: 4800 },
+    { month: 'Jun', sales: 2390, revenue: 3800 },
+    { month: 'Jul', sales: 3490, revenue: 4300 },
+    { month: 'Aug', sales: 4200, revenue: 5100 },
+    { month: 'Sep', sales: 3800, revenue: 4500 },
+    { month: 'Oct', sales: 4100, revenue: 5200 },
+    { month: 'Nov', sales: 4900, revenue: 6100 },
+    { month: 'Dec', sales: 5200, revenue: 6800 },
+  ];
 
   return (
     <div className="flex min-h-screen bg-blue-50">
@@ -55,8 +72,21 @@ const Dashboard: React.FC = () => {
           {/* Placeholder for charts */}
           <div className="mt-8">
             <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500">
-              <div className="text-lg font-semibold mb-4 text-gray-900">Charts & Analytics</div>
-              <div className="h-32 flex items-center justify-center text-gray-400 text-sm bg-gray-50 rounded-lg">[Charts will be added here]</div>
+              <div className="text-lg font-semibold mb-4 text-gray-900">Sales & Revenue - Last 12 Months</div>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={salesData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.5rem' }}
+                    cursor={{ fill: '#f3f4f6' }}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: '1rem' }} />
+                  <Bar dataKey="sales" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="revenue" fill="#10b981" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </main>
