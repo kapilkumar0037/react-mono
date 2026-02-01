@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 
@@ -22,6 +22,42 @@ const Dashboard: React.FC = () => {
     { month: 'Nov', sales: 4900, revenue: 6100 },
     { month: 'Dec', sales: 5200, revenue: 6800 },
   ];
+
+  // Mock data for sales by category
+  const salesByCategory = [
+    { name: 'Electronics', value: 4000 },
+    { name: 'Clothing', value: 3000 },
+    { name: 'Home & Garden', value: 2800 },
+    { name: 'Sports', value: 2200 },
+    { name: 'Books', value: 1800 },
+  ];
+
+  // Colors for pie chart
+  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+  // Mock recent orders data
+  const recentOrders = [
+    { id: '#ORD001', customer: 'John Doe', amount: '$1,234.50', status: 'Completed', date: '2025-01-28' },
+    { id: '#ORD002', customer: 'Jane Smith', amount: '$2,345.00', status: 'Pending', date: '2025-01-27' },
+    { id: '#ORD003', customer: 'Mike Johnson', amount: '$890.25', status: 'Shipped', date: '2025-01-26' },
+    { id: '#ORD004', customer: 'Sarah Williams', amount: '$3,456.75', status: 'Completed', date: '2025-01-25' },
+    { id: '#ORD005', customer: 'Tom Brown', amount: '$567.90', status: 'Processing', date: '2025-01-24' },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Completed':
+        return 'bg-green-100 text-green-800';
+      case 'Pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Shipped':
+        return 'bg-blue-100 text-blue-800';
+      case 'Processing':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-blue-50">
@@ -119,6 +155,67 @@ const Dashboard: React.FC = () => {
                   <Bar dataKey="revenue" fill="#10b981" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Charts Row - Sales by Category and Recent Orders */}
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Pie Chart - Sales by Category */}
+            <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
+              <div className="text-lg font-semibold mb-4 text-gray-900">Sales by Category</div>
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={salesByCategory}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: $${value}k`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {salesByCategory.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `$${value}k`} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Recent Orders Table */}
+            <div className="lg:col-span-2 bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-500">
+              <div className="text-lg font-semibold mb-4 text-gray-900">Recent Orders</div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Order ID</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Customer</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order, index) => (
+                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-4 text-gray-900 font-medium">{order.id}</td>
+                        <td className="py-3 px-4 text-gray-700">{order.customer}</td>
+                        <td className="py-3 px-4 text-gray-900 font-semibold">{order.amount}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-gray-600">{order.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button className="mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm">View all orders →</button>
             </div>
           </div>
         </main>
