@@ -60,11 +60,11 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-blue-50">
+    <div className="flex h-screen bg-blue-50">
       <AdminSidebar collapsed={sidebarCollapsed} />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <AdminNavbar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} />
-        <main className="flex-1 p-8">
+        <main className="flex-1 overflow-y-auto p-8">
           <h1 className="text-xl font-semibold mb-4 text-blue-900 tracking-tight">Dashboard Overview</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Stat cards with icons and modern design */}
@@ -163,17 +163,18 @@ const Dashboard: React.FC = () => {
             {/* Pie Chart - Sales by Category */}
             <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
               <div className="text-lg font-semibold mb-4 text-gray-900">Sales by Category</div>
-              <ResponsiveContainer width="100%" height={280}>
+              <ResponsiveContainer width="100%" height={320}>
                 <PieChart>
                   <Pie
                     data={salesByCategory}
                     cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: $${value}k`}
-                    outerRadius={80}
+                    cy="45%"
+                    labelLine={true}
+                    label={({ value }) => `$${value}k`}
+                    outerRadius={90}
                     fill="#8884d8"
                     dataKey="value"
+                    labelStyle={{ fontSize: '11px', fontWeight: 'bold' }}
                   >
                     {salesByCategory.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -182,6 +183,14 @@ const Dashboard: React.FC = () => {
                   <Tooltip formatter={(value) => `$${value}k`} />
                 </PieChart>
               </ResponsiveContainer>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {salesByCategory.map((category, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                    <span className="text-gray-600">{category.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Recent Orders Table */}

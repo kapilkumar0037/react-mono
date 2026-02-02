@@ -82,7 +82,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
         <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <aside
-        className={`h-screen bg-blue-900 text-blue-100 flex flex-col shadow-lg border-r border-blue-800 transition-all duration-300 fixed md:static z-40 ${
+        className={`min-h-screen h-full bg-blue-900 text-blue-100 flex flex-col shadow-lg border-r border-blue-800 transition-all duration-300 fixed md:static z-40 ${
           collapsed ? 'w-20' : 'w-64'
         } ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
         style={{
@@ -200,7 +200,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
             </ListGroup>
           )}
         </nav>
-        <div className={`border-t border-blue-800 text-xs text-blue-300 text-center rounded-b-lg mt-2 bg-blue-900 transition-all duration-300 ${
+        <div className={`border-t border-blue-800 text-xs text-blue-300 text-center bg-blue-900 transition-all duration-300 mt-auto ${
           collapsed ? 'p-2 hidden md:block' : 'p-4'
         }`}>© 2025 AdminPro</div>
       </aside>
