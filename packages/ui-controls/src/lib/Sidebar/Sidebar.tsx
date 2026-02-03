@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ListGroup, ListGroupItem } from '../ListGroup/ListGroup';
 import { NavLink, useInRouterContext, BrowserRouter, useLocation } from 'react-router-dom';
+import './Sidebar.css';
 
 export interface SidebarItem {
   label: string;
@@ -71,6 +72,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
       [subGroupName]: !prev[subGroupName]
     }));
   };
+
   const sidebarContent = (
     <>
       <button
@@ -95,7 +97,13 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
           {!collapsed && <span className="font-bold text-blue-100 text-xl">AdminPro</span>}
           {collapsed && <span className="text-lg font-bold text-blue-100">A</span>}
         </div>
-        <nav className="flex-1 overflow-y-auto px-4 pt-2">
+        <nav 
+          className="flex-1 overflow-y-auto px-4 pt-2 sidebar-nav bg-blue-900"
+          style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#3b82f6 #1e3a8a'
+          }}
+        >
           {groups ? (
             // Hierarchical menu with groups and subgroups
             <div className="flex flex-col gap-2">
