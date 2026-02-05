@@ -6,7 +6,7 @@ import AdminNavbar from './AdminNavbar';
 
 const Dashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeChartTab, setActiveChartTab] = useState<'sales' | 'revenue'>('sales');
+  const [activeChartTab, setActiveChartTab] = useState<'sales' | 'revenue' | 'customers'>('sales');
 
   // Mock data for last 12 months
   const salesData = [
@@ -57,6 +57,47 @@ const Dashboard: React.FC = () => {
     { label: 'Conversion Rate', value: '3.2%', change: 'down', color: 'text-red-600' },
   ];
 
+  // Mock data for customer growth
+  const customerGrowthData = [
+    { month: 'Jan', customers: 400 },
+    { month: 'Feb', customers: 520 },
+    { month: 'Mar', customers: 680 },
+    { month: 'Apr', customers: 790 },
+    { month: 'May', customers: 950 },
+    { month: 'Jun', customers: 1100 },
+    { month: 'Jul', customers: 1320 },
+    { month: 'Aug', customers: 1580 },
+    { month: 'Sep', customers: 1750 },
+    { month: 'Oct', customers: 1920 },
+    { month: 'Nov', customers: 2100 },
+    { month: 'Dec', customers: 2340 },
+  ];
+
+  // Mock top products data
+  const topProducts = [
+    { id: 1, name: 'Wireless Headphones', sales: 1250, revenue: '$45,000' },
+    { id: 2, name: 'Smart Watch', sales: 980, revenue: '$38,500' },
+    { id: 3, name: 'USB-C Cable', sales: 2150, revenue: '$12,900' },
+    { id: 4, name: 'Portable Charger', sales: 890, revenue: '$16,410' },
+    { id: 5, name: 'Screen Protector', sales: 3200, revenue: '$9,600' },
+  ];
+
+  // Mock system health data
+  const systemHealth = [
+    { name: 'Server Uptime', status: 'healthy', value: '99.9%', icon: '✓' },
+    { name: 'Database', status: 'healthy', value: 'Online', icon: '✓' },
+    { name: 'API Response', status: 'healthy', value: '45ms', icon: '✓' },
+    { name: 'Storage', status: 'warning', value: '78%', icon: '⚠' },
+  ];
+
+  // Mock footer stats
+  const footerStats = [
+    { label: 'Total Revenue', value: '$892,450', icon: '💰' },
+    { label: 'Total Customers', value: '12,340', icon: '👥' },
+    { label: 'Avg Order Value', value: '$127.50', icon: '💵' },
+    { label: 'Retention Rate', value: '87.5%', icon: '📈' },
+  ];
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Completed':
@@ -82,6 +123,19 @@ const Dashboard: React.FC = () => {
         return 'bg-red-50 border-l-4 border-red-400';
       default:
         return 'bg-blue-50 border-l-4 border-blue-400';
+    }
+  };
+
+  const getSystemHealthColor = (status: string) => {
+    switch (status) {
+      case 'healthy':
+        return 'bg-green-50 border-l-4 border-green-400 text-green-700';
+      case 'warning':
+        return 'bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700';
+      case 'critical':
+        return 'bg-red-50 border-l-4 border-red-400 text-red-700';
+      default:
+        return 'bg-gray-50 border-l-4 border-gray-400 text-gray-700';
     }
   };
 
@@ -150,6 +204,12 @@ const Dashboard: React.FC = () => {
                 >
                   Revenue Trend
                 </button>
+                <button 
+                  onClick={() => setActiveChartTab('customers')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'customers' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                >
+                  Customer Growth
+                </button>
               </div>
               
               {activeChartTab === 'sales' && (
@@ -172,6 +232,18 @@ const Dashboard: React.FC = () => {
                     <YAxis stroke="#6b7280" tick={{ fontSize: 11 }} />
                     <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.5rem', fontSize: '12px' }} />
                     <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+              
+              {activeChartTab === 'customers' && (
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={customerGrowthData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 11 }} />
+                    <YAxis stroke="#6b7280" tick={{ fontSize: 11 }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.5rem', fontSize: '12px' }} />
+                    <Line type="monotone" dataKey="customers" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
                   </LineChart>
                 </ResponsiveContainer>
               )}
@@ -242,6 +314,61 @@ const Dashboard: React.FC = () => {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* Top Products - Compact Table */}
+          <div className="bg-white rounded-lg shadow p-4 border-t-4 border-green-500">
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-sm font-semibold text-gray-900">Top Products</p>
+              <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Product</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-700">Sales</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-700">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topProducts.map((product, index) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-2 px-2 text-gray-900 font-medium">{product.name}</td>
+                      <td className="py-2 px-2 text-right text-gray-700">{product.sales}</td>
+                      <td className="py-2 px-2 text-right text-gray-900 font-semibold">{product.revenue}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* System Health Indicators */}
+          <div className="bg-white rounded-lg shadow p-4 border-t-4 border-orange-500">
+            <p className="text-sm font-semibold text-gray-900 mb-3">System Health</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {systemHealth.map((health, index) => (
+                <div key={index} className="bg-gray-50 rounded p-3 text-center border-l-4" style={{ borderColor: getSystemHealthColor(health.status).replace('text-', '#') }}>
+                  <p className="text-xs font-semibold text-gray-600 mb-1">{health.name}</p>
+                  <p className={`text-lg font-bold mb-1 ${getSystemHealthColor(health.status)}`}>{health.value}</p>
+                  <span className={`text-xs font-medium px-2 py-1 rounded ${health.status === 'healthy' ? 'bg-green-100 text-green-700' : health.status === 'warning' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                    {health.status.charAt(0).toUpperCase() + health.status.slice(1)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer Stats Summary */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {footerStats.map((stat, index) => (
+              <div key={index} className="bg-white rounded-lg shadow p-4 text-center border-t-4 border-blue-500">
+                <p className="text-2xl mb-1">{stat.icon}</p>
+                <p className="text-xs font-semibold text-gray-600 mb-1">{stat.label}</p>
+                <p className="text-lg font-bold text-gray-900">{stat.value}</p>
+              </div>
+            ))}
           </div>
         </main>
       </div>
