@@ -283,7 +283,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Recent Orders - Compact Table */}
-          <div className="bg-white rounded-lg shadow p-4 border-t-4 border-purple-500">
+          <div className="bg-white rounded-lg shadow p-4 border-t-4 border-purple-500 mb-4">
             <div className="flex justify-between items-center mb-3">
               <p className="text-sm font-semibold text-gray-900">Recent Orders</p>
               <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
@@ -316,52 +316,57 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Top Products - Compact Table */}
-          <div className="bg-white rounded-lg shadow p-4 border-t-4 border-green-500">
-            <div className="flex justify-between items-center mb-3">
-              <p className="text-sm font-semibold text-gray-900">Top Products</p>
-              <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Product</th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-700">Sales</th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-700">Revenue</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topProducts.map((product, index) => (
-                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-2 px-2 text-gray-900 font-medium">{product.name}</td>
-                      <td className="py-2 px-2 text-right text-gray-700">{product.sales}</td>
-                      <td className="py-2 px-2 text-right text-gray-900 font-semibold">{product.revenue}</td>
+          {/* Top Products & System Health Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            {/* Top Products - Compact Table */}
+            <div className="bg-white rounded-lg shadow p-4 border-t-4 border-green-500">
+              <div className="flex justify-between items-center mb-3">
+                <p className="text-sm font-semibold text-gray-900">Top Products</p>
+                <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-2 px-2 font-semibold text-gray-700">Product</th>
+                      <th className="text-right py-2 px-2 font-semibold text-gray-700">Sales</th>
+                      <th className="text-right py-2 px-2 font-semibold text-gray-700">Revenue</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {topProducts.map((product, index) => (
+                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-2 px-2 text-gray-900 font-medium">{product.name}</td>
+                        <td className="py-2 px-2 text-right text-gray-700">{product.sales}</td>
+                        <td className="py-2 px-2 text-right text-gray-900 font-semibold">{product.revenue}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
 
-          {/* System Health Indicators */}
-          <div className="bg-white rounded-lg shadow p-4 border-t-4 border-orange-500">
-            <p className="text-sm font-semibold text-gray-900 mb-3">System Health</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {systemHealth.map((health, index) => (
-                <div key={index} className="bg-gray-50 rounded p-3 text-center border-l-4" style={{ borderColor: getSystemHealthColor(health.status).replace('text-', '#') }}>
-                  <p className="text-xs font-semibold text-gray-600 mb-1">{health.name}</p>
-                  <p className={`text-lg font-bold mb-1 ${getSystemHealthColor(health.status)}`}>{health.value}</p>
-                  <span className={`text-xs font-medium px-2 py-1 rounded ${health.status === 'healthy' ? 'bg-green-100 text-green-700' : health.status === 'warning' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
-                    {health.status.charAt(0).toUpperCase() + health.status.slice(1)}
-                  </span>
-                </div>
-              ))}
+            {/* System Health Indicators */}
+            <div className="bg-white rounded-lg shadow p-4 border-t-4 border-orange-500">
+              <p className="text-sm font-semibold text-gray-900 mb-3">System Health</p>
+              <div className="space-y-2">
+                {systemHealth.map((health, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border-l-4" style={{ borderColor: health.status === 'healthy' ? '#10b981' : '#f59e0b' }}>
+                    <span className="text-xs font-medium text-gray-700">{health.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-900">{health.value}</span>
+                      <span className={`text-xs font-medium px-2 py-1 rounded ${health.status === 'healthy' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {health.status === 'healthy' ? '✓ OK' : '⚠ Warning'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Footer Stats Summary */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {footerStats.map((stat, index) => (
               <div key={index} className="bg-white rounded-lg shadow p-4 text-center border-t-4 border-blue-500">
                 <p className="text-2xl mb-1">{stat.icon}</p>
