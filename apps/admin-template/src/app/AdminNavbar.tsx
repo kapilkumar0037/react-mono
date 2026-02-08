@@ -6,10 +6,17 @@ import {
 
 interface AdminNavbarProps {
   onToggleSidebar?: () => void;
+  onSearch?: (query: string) => void;
 }
 
-const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
+const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    onSearch?.(value);
+  };
 
   return (
     <Navbar className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 h-14 flex items-center border-b border-blue-800 shadow-sm">
@@ -23,6 +30,23 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
+        
+        {/* Search Bar */}
+        <div className="flex-1 max-w-xs hidden sm:block">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search orders, customers..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="w-full px-3 py-2 bg-blue-800 text-white text-sm placeholder-blue-300 rounded focus:outline-none focus:bg-blue-700 transition-colors"
+            />
+            <svg className="absolute right-3 top-2.5 w-4 h-4 text-blue-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+
         <div className="flex items-center gap-4">
         <div className="relative">
           <button

@@ -7,6 +7,8 @@ import AdminNavbar from './AdminNavbar';
 const Dashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeChartTab, setActiveChartTab] = useState<'sales' | 'revenue' | 'customers'>('sales');
+  const [selectedDateFilter, setSelectedDateFilter] = useState<'today' | 'week' | 'month' | 'year'>('month');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Mock data for last 12 months
   const salesData = [
@@ -98,6 +100,15 @@ const Dashboard: React.FC = () => {
     { label: 'Retention Rate', value: '87.5%', icon: '📈' },
   ];
 
+  // Mock top customers data
+  const topCustomers = [
+    { id: 1, name: 'Acme Corporation', revenue: '$45,230', orders: 12, lastOrder: '2025-01-28', status: 'Active' },
+    { id: 2, name: 'Tech Solutions Inc', revenue: '$38,900', orders: 9, lastOrder: '2025-01-25', status: 'Active' },
+    { id: 3, name: 'Global Trading Ltd', revenue: '$32,450', orders: 8, lastOrder: '2025-01-20', status: 'Active' },
+    { id: 4, name: 'Prime Retail Co', revenue: '$28,600', orders: 7, lastOrder: '2025-01-15', status: 'Inactive' },
+    { id: 5, name: 'NextGen Ventures', revenue: '$22,300', orders: 5, lastOrder: '2025-01-10', status: 'Active' },
+  ];
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Completed':
@@ -143,9 +154,39 @@ const Dashboard: React.FC = () => {
     <div className="flex h-screen bg-gray-50">
       <AdminSidebar collapsed={sidebarCollapsed} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminNavbar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} />
+        <AdminNavbar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} onSearch={setSearchQuery} />
         <main className="flex-1 overflow-y-auto p-4">
-          <h1 className="text-2xl font-bold mb-4 text-blue-900">Dashboard</h1>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold text-blue-900">Dashboard</h1>
+          </div>
+
+          {/* Quick Date Filters */}
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+            <button
+              onClick={() => setSelectedDateFilter('today')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'today' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+            >
+              Today
+            </button>
+            <button
+              onClick={() => setSelectedDateFilter('week')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'week' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+            >
+              This Week
+            </button>
+            <button
+              onClick={() => setSelectedDateFilter('month')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'month' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+            >
+              This Month
+            </button>
+            <button
+              onClick={() => setSelectedDateFilter('year')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'year' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+            >
+              This Year
+            </button>
+          </div>
 
           {/* Alerts Section - Compact */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
@@ -362,6 +403,42 @@ const Dashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Top Customers - Compact Table */}
+          <div className="bg-white rounded-lg shadow p-4 border-t-4 border-indigo-500 mb-4">
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-sm font-semibold text-gray-900">Top Customers</p>
+              <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Customer Name</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-700">Revenue</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-700">Orders</th>
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Last Order</th>
+                    <th className="text-center py-2 px-2 font-semibold text-gray-700">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topCustomers.map((customer, index) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-2 px-2 text-gray-900 font-medium">{customer.name}</td>
+                      <td className="py-2 px-2 text-right text-gray-900 font-semibold">{customer.revenue}</td>
+                      <td className="py-2 px-2 text-right text-gray-700">{customer.orders}</td>
+                      <td className="py-2 px-2 text-gray-700 text-xs">{customer.lastOrder}</td>
+                      <td className="py-2 px-2 text-center">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${customer.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {customer.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
