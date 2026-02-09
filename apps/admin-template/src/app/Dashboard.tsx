@@ -150,6 +150,64 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Filtering functions
+  const getFilteredData = (data: any[], filterType: string) => {
+    const now = new Date();
+    let startDate = new Date();
+
+    switch (filterType) {
+      case 'today':
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case 'week':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case 'year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        return data;
+    }
+
+    return data.filter((item: any) => {
+      const itemDate = new Date(item.date);
+      return itemDate >= startDate && itemDate <= now;
+    });
+  };
+
+  const filteredOrders = getFilteredData(recentOrders, selectedDateFilter).filter((order: any) =>
+    order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredCustomers = topCustomers.filter((customer: any) =>
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getFilteredChartData = () => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    let dataPoints = 12;
+
+    if (selectedDateFilter === 'today') {
+      dataPoints = 24; // Show 24 hours
+    } else if (selectedDateFilter === 'week') {
+      dataPoints = 7;
+      return salesData.slice(-7);
+    } else if (selectedDateFilter === 'month') {
+      dataPoints = 30;
+      return salesData;
+    } else if (selectedDateFilter === 'year') {
+      return salesData;
+    }
+
+    return salesData;
+  };
+
+  const filteredChartData = getFilteredChartData();
+
   return (
     <div className="flex h-screen bg-gray-50">
       <AdminSidebar collapsed={sidebarCollapsed} />
@@ -157,7 +215,10 @@ const Dashboard: React.FC = () => {
         <AdminNavbar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} onSearch={setSearchQuery} />
         <main className="flex-1 overflow-y-auto p-4">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold text-blue-900">Dashboard</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-blue-900">Dashboard</h1>
+              <p className="text-xs text-gray-500 mt-1">Filter: <span className="font-semibold text-gray-700 capitalize">{selectedDateFilter}</span>{searchQuery && ` • Search: "${searchQuery}"`}</p>
+            </div>
           </div>
 
           {/* Quick Date Filters */}
@@ -255,7 +316,7 @@ const Dashboard: React.FC = () => {
               
               {activeChartTab === 'sales' && (
                 <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={salesData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                  <BarChart data={filteredChartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 11 }} />
                     <YAxis stroke="#6b7280" tick={{ fontSize: 11 }} />
@@ -267,7 +328,7 @@ const Dashboard: React.FC = () => {
               
               {activeChartTab === 'revenue' && (
                 <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={salesData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                  <LineChart data={filteredChartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 11 }} />
                     <YAxis stroke="#6b7280" tick={{ fontSize: 11 }} />
@@ -340,7 +401,7 @@ const Dashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {recentOrders.map((order, index) => (
+                  {filteredOrders.map((order, index) => (
                     <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-2 px-2 text-gray-900 font-medium">{order.id}</td>
                       <td className="py-2 px-2 text-gray-700">{order.customer}</td>
@@ -424,7 +485,7 @@ const Dashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {topCustomers.map((customer, index) => (
+                  {filteredCustomers.map((customer, index) => (
                     <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-2 px-2 text-gray-900 font-medium">{customer.name}</td>
                       <td className="py-2 px-2 text-right text-gray-900 font-semibold">{customer.revenue}</td>
