@@ -208,6 +208,55 @@ const Dashboard: React.FC = () => {
 
   const filteredChartData = getFilteredChartData();
 
+  // CSV Export functions
+  const convertToCSV = (data: any[], headers: string[]) => {
+    const headerRow = headers.join(',');
+    const dataRows = data.map((row) =>
+      headers.map((header) => {
+        const value = row[header];
+        // Escape quotes and wrap in quotes if contains comma
+        return typeof value === 'string' && value.includes(',') ? `"${value.replace(/"/g, '""')}"` : value;
+      }).join(',')
+    );
+    return [headerRow, ...dataRows].join('\n');
+  };
+
+  const downloadCSV = (csvContent: string, filename: string) => {
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const exportOrdersToCSV = () => {
+    const headers = ['id', 'customer', 'amount', 'status', 'date'];
+    const dataToExport = filteredOrders.map(order => ({
+      id: order.id,
+      customer: order.customer,
+      amount: order.amount,
+      status: order.status,
+      date: order.date
+    }));
+    const csv = convertToCSV(dataToExport, headers);
+    downloadCSV(csv, `orders_${selectedDateFilter}_${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
+  const exportCustomersToCSV = () => {
+    const headers = ['name', 'revenue', 'orders', 'lastOrder', 'status'];
+    const dataToExport = filteredCustomers.map(customer => ({
+      name: customer.name,
+      revenue: customer.revenue,
+      orders: customer.orders,
+      lastOrder: customer.lastOrder,
+      status: customer.status
+    }));
+    const csv = convertToCSV(dataToExport, headers);
+    downloadCSV(csv, `customers_${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <AdminSidebar collapsed={sidebarCollapsed} />
@@ -387,9 +436,25 @@ const Dashboard: React.FC = () => {
           {/* Recent Orders - Compact Table */}
           <div className="bg-white rounded-lg shadow p-4 border-t-4 border-purple-500 mb-4">
             <div className="flex justify-between items-center mb-3">
-              <p className="text-sm font-semibold text-gray-900">Recent Orders</p>
-              <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
+              <p className="text-sm font-semibold text-gray-900">Recent Orders {filteredOrders.length < recentOrders.length && <span className="text-xs text-gray-500 font-normal">({filteredOrders.length})</span>}</p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={exportOrdersToCSV}
+                  disabled={filteredOrders.length === 0}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium disabled:text-gray-400 flex items-center gap-1"
+                  title="Export to CSV"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export
+                </button>
+                <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
+              </div>
             </div>
+            {filteredOrders.length === 0 ? (
+              <div className="text-center py-6 text-gray-500 text-sm">No orders found for selected filters</div>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
@@ -416,6 +481,7 @@ const Dashboard: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            )}
           </div>
 
           {/* Top Products & System Health Row */}
@@ -470,9 +536,25 @@ const Dashboard: React.FC = () => {
           {/* Top Customers - Compact Table */}
           <div className="bg-white rounded-lg shadow p-4 border-t-4 border-indigo-500 mb-4">
             <div className="flex justify-between items-center mb-3">
-              <p className="text-sm font-semibold text-gray-900">Top Customers</p>
-              <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
+              <p className="text-sm font-semibold text-gray-900">Top Customers {filteredCustomers.length < topCustomers.length && <span className="text-xs text-gray-500 font-normal">({filteredCustomers.length})</span>}</p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={exportCustomersToCSV}
+                  disabled={filteredCustomers.length === 0}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium disabled:text-gray-400 flex items-center gap-1"
+                  title="Export to CSV"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Export
+                </button>
+                <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
+              </div>
             </div>
+            {filteredCustomers.length === 0 ? (
+              <div className="text-center py-6 text-gray-500 text-sm">No customers found for search</div>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
@@ -501,10 +583,11 @@ const Dashboard: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            )}
           </div>
 
           {/* Footer Stats Summary */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             {footerStats.map((stat, index) => (
               <div key={index} className="bg-white rounded-lg shadow p-4 text-center border-t-4 border-blue-500">
                 <p className="text-2xl mb-1">{stat.icon}</p>
