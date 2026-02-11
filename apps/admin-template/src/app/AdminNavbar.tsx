@@ -11,11 +11,56 @@ interface AdminNavbarProps {
 
 const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [notifications, setNotifications] = useState([
+    { id: 1, message: 'New order #ORD004 received', type: 'info', time: '2 min ago', read: false },
+    { id: 2, message: 'Payment from Acme Corp completed', type: 'success', time: '15 min ago', read: false },
+    { id: 3, message: 'Low stock alert for Wireless Headphones', type: 'warning', time: '1 hour ago', read: true },
+    { id: 4, message: 'System backup completed successfully', type: 'success', time: '3 hours ago', read: true },
+  ]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     onSearch?.(value);
+  };
+
+  const dismissNotification = (id: number) => {
+    setNotifications(notifications.filter(n => n.id !== id));
+  };
+
+  const markAsRead = (id: number) => {
+    setNotifications(notifications.map(n => 
+      n.id === id ? { ...n, read: true } : n
+    ));
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'success':
+        return '✓';
+      case 'warning':
+        return '⚠';
+      case 'error':
+        return '✕';
+      default:
+        return 'ℹ';
+    }
+  };
+
+  const getNotificationColor = (type: string) => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-50 border-l-4 border-green-400';
+      case 'warning':
+        return 'bg-yellow-50 border-l-4 border-yellow-400';
+      case 'error':
+        return 'bg-red-50 border-l-4 border-red-400';
+      default:
+        return 'bg-blue-50 border-l-4 border-blue-400';
+    }
   };
 
   return (
@@ -48,6 +93,73 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch }) 
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Notifications Bell */}
+          <div className="relative">
+            <button
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              className="text-blue-100 hover:text-blue-100 hover:bg-blue-800 font-medium px-2 py-2 rounded transition-colors duration-150 relative flex items-center"
+              title="Notifications"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {isNotificationsOpen && (
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                  <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <span className="text-xs text-blue-600 font-medium">{unreadCount} new</span>
+                  )}
+                </div>
+                {notifications.length === 0 ? (
+                  <div className="px-4 py-6 text-center text-gray-500 text-sm">No notifications</div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${!notification.read ? 'bg-blue-50' : ''}`}
+                        onClick={() => markAsRead(notification.id)}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2 flex-1 min-w-0">
+                            <span className={`text-lg ${notification.type === 'success' ? 'text-green-600' : notification.type === 'warning' ? 'text-yellow-600' : notification.type === 'error' ? 'text-red-600' : 'text-blue-600'}`}>
+                              {getNotificationIcon(notification.type)}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-gray-900 font-medium break-words">{notification.message}</p>
+                              <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              dismissNotification(notification.id);
+                            }}
+                            className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                            title="Dismiss"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        {!notification.read && (
+                          <div className="mt-2 h-1 w-full bg-blue-500 rounded-full"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
