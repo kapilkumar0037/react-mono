@@ -9,6 +9,7 @@ const Dashboard: React.FC = () => {
   const [activeChartTab, setActiveChartTab] = useState<'sales' | 'revenue' | 'customers'>('sales');
   const [selectedDateFilter, setSelectedDateFilter] = useState<'today' | 'week' | 'month' | 'year'>('month');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Mock data for last 12 months
   const salesData = [
@@ -258,15 +259,15 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className={`flex h-screen ${isDarkMode ? 'dark bg-gray-950' : 'bg-gray-50'}`}>
       <AdminSidebar collapsed={sidebarCollapsed} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminNavbar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} onSearch={setSearchQuery} />
-        <main className="flex-1 overflow-y-auto p-4">
+        <AdminNavbar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} onSearch={setSearchQuery} isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} />
+        <main className="flex-1 overflow-y-auto p-4 dark:bg-gray-950">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-blue-900">Dashboard</h1>
-              <p className="text-xs text-gray-500 mt-1">Filter: <span className="font-semibold text-gray-700 capitalize">{selectedDateFilter}</span>{searchQuery && ` • Search: "${searchQuery}"`}</p>
+              <h1 className="text-2xl font-bold text-blue-900 dark:text-blue-100">Dashboard</h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Filter: <span className="font-semibold text-gray-700 dark:text-gray-300 capitalize">{selectedDateFilter}</span>{searchQuery && ` • Search: "${searchQuery}"`}</p>
             </div>
           </div>
 
@@ -310,29 +311,29 @@ const Dashboard: React.FC = () => {
 
           {/* Stat Cards - Compact */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            <div className="bg-white rounded-lg shadow p-3 border-l-4 border-blue-500">
-              <div className="text-gray-600 text-xs font-medium">Users</div>
-              <div className="text-xl font-bold text-gray-900">1,234</div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-l-4 border-blue-500">
+              <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Users</div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">1,234</div>
             </div>
-            <div className="bg-white rounded-lg shadow p-3 border-l-4 border-green-500">
-              <div className="text-gray-600 text-xs font-medium">Sales</div>
-              <div className="text-xl font-bold text-gray-900">$12.3K</div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-l-4 border-green-500">
+              <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Sales</div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">$12.3K</div>
             </div>
-            <div className="bg-white rounded-lg shadow p-3 border-l-4 border-purple-500">
-              <div className="text-gray-600 text-xs font-medium">Active</div>
-              <div className="text-xl font-bold text-gray-900">567</div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-l-4 border-purple-500">
+              <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Active</div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">567</div>
             </div>
-            <div className="bg-white rounded-lg shadow p-3 border-l-4 border-orange-500">
-              <div className="text-gray-600 text-xs font-medium">Pending</div>
-              <div className="text-xl font-bold text-gray-900">89</div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-l-4 border-orange-500">
+              <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Pending</div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">89</div>
             </div>
           </div>
 
           {/* KPI Metrics Row - Compact */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             {kpis.map((kpi, index) => (
-              <div key={index} className="bg-white rounded-lg shadow p-3">
-                <p className="text-gray-600 text-xs font-medium">{kpi.label}</p>
+              <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
+                <p className="text-gray-600 dark:text-gray-400 text-xs font-medium">{kpi.label}</p>
                 <p className={`text-lg font-bold ${kpi.color}`}>{kpi.value}</p>
               </div>
             ))}
@@ -341,23 +342,23 @@ const Dashboard: React.FC = () => {
           {/* Charts Row - Tabbed Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
             {/* Chart Tabs */}
-            <div className="lg:col-span-2 bg-white rounded-lg shadow p-4 border-t-4 border-blue-500">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-blue-500">
               <div className="flex gap-2 mb-4">
                 <button 
                   onClick={() => setActiveChartTab('sales')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'sales' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'sales' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
                 >
                   Sales
                 </button>
                 <button 
                   onClick={() => setActiveChartTab('revenue')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'revenue' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'revenue' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
                 >
                   Revenue Trend
                 </button>
                 <button 
                   onClick={() => setActiveChartTab('customers')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'customers' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'customers' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
                 >
                   Customer Growth
                 </button>
@@ -401,8 +402,8 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Pie Chart - Sales by Category */}
-            <div className="bg-white rounded-lg shadow p-4 border-t-4 border-green-500">
-              <p className="text-sm font-semibold mb-3 text-gray-900">Sales by Category</p>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-green-500">
+              <p className="text-sm font-semibold mb-3 text-gray-900 dark:text-white">Sales by Category</p>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
@@ -426,7 +427,7 @@ const Dashboard: React.FC = () => {
                 {salesByCategory.map((category, index) => (
                   <div key={index} className="flex items-center gap-1 text-xs">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                    <span className="text-gray-600">{category.name}</span>
+                    <span className="text-gray-600 dark:text-gray-400">{category.name}</span>
                   </div>
                 ))}
               </div>
@@ -434,14 +435,14 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Recent Orders - Compact Table */}
-          <div className="bg-white rounded-lg shadow p-4 border-t-4 border-purple-500 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-purple-500 mb-4">
             <div className="flex justify-between items-center mb-3">
-              <p className="text-sm font-semibold text-gray-900">Recent Orders {filteredOrders.length < recentOrders.length && <span className="text-xs text-gray-500 font-normal">({filteredOrders.length})</span>}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Recent Orders {filteredOrders.length < recentOrders.length && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">({filteredOrders.length})</span>}</p>
               <div className="flex gap-2">
                 <button 
                   onClick={exportOrdersToCSV}
                   disabled={filteredOrders.length === 0}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium disabled:text-gray-400 flex items-center gap-1"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium disabled:text-gray-400 flex items-center gap-1"
                   title="Export to CSV"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -453,24 +454,24 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             {filteredOrders.length === 0 ? (
-              <div className="text-center py-6 text-gray-500 text-sm">No orders found for selected filters</div>
+              <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">No orders found for selected filters</div>
             ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Order</th>
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Customer</th>
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Amount</th>
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Status</th>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Order</th>
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Customer</th>
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Amount</th>
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredOrders.map((order, index) => (
-                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-2 px-2 text-gray-900 font-medium">{order.id}</td>
-                      <td className="py-2 px-2 text-gray-700">{order.customer}</td>
-                      <td className="py-2 px-2 text-gray-900 font-semibold">{order.amount}</td>
+                    <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{order.id}</td>
+                      <td className="py-2 px-2 text-gray-700 dark:text-gray-300">{order.customer}</td>
+                      <td className="py-2 px-2 text-gray-900 dark:text-white font-semibold">{order.amount}</td>
                       <td className="py-2 px-2">
                         <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
                           {order.status}
@@ -487,26 +488,26 @@ const Dashboard: React.FC = () => {
           {/* Top Products & System Health Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             {/* Top Products - Compact Table */}
-            <div className="bg-white rounded-lg shadow p-4 border-t-4 border-green-500">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-green-500">
               <div className="flex justify-between items-center mb-3">
-                <p className="text-sm font-semibold text-gray-900">Top Products</p>
-                <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">Top Products</p>
+                <button className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">View All →</button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-2 px-2 font-semibold text-gray-700">Product</th>
-                      <th className="text-right py-2 px-2 font-semibold text-gray-700">Sales</th>
-                      <th className="text-right py-2 px-2 font-semibold text-gray-700">Revenue</th>
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Product</th>
+                      <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Sales</th>
+                      <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Revenue</th>
                     </tr>
                   </thead>
                   <tbody>
                     {topProducts.map((product, index) => (
-                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-2 px-2 text-gray-900 font-medium">{product.name}</td>
-                        <td className="py-2 px-2 text-right text-gray-700">{product.sales}</td>
-                        <td className="py-2 px-2 text-right text-gray-900 font-semibold">{product.revenue}</td>
+                      <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{product.name}</td>
+                        <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{product.sales}</td>
+                        <td className="py-2 px-2 text-right text-gray-900 dark:text-white font-semibold">{product.revenue}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -515,15 +516,15 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* System Health Indicators */}
-            <div className="bg-white rounded-lg shadow p-4 border-t-4 border-orange-500">
-              <p className="text-sm font-semibold text-gray-900 mb-3">System Health</p>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-orange-500">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-3">System Health</p>
               <div className="space-y-2">
                 {systemHealth.map((health, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border-l-4" style={{ borderColor: health.status === 'healthy' ? '#10b981' : '#f59e0b' }}>
-                    <span className="text-xs font-medium text-gray-700">{health.name}</span>
+                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded border-l-4" style={{ borderColor: health.status === 'healthy' ? '#10b981' : '#f59e0b' }}>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{health.name}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-gray-900">{health.value}</span>
-                      <span className={`text-xs font-medium px-2 py-1 rounded ${health.status === 'healthy' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      <span className="text-xs font-bold text-gray-900 dark:text-white">{health.value}</span>
+                      <span className={`text-xs font-medium px-2 py-1 rounded ${health.status === 'healthy' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-400'}`}>
                         {health.status === 'healthy' ? '✓ OK' : '⚠ Warning'}
                       </span>
                     </div>
@@ -534,14 +535,14 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Top Customers - Compact Table */}
-          <div className="bg-white rounded-lg shadow p-4 border-t-4 border-indigo-500 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-indigo-500 mb-4">
             <div className="flex justify-between items-center mb-3">
-              <p className="text-sm font-semibold text-gray-900">Top Customers {filteredCustomers.length < topCustomers.length && <span className="text-xs text-gray-500 font-normal">({filteredCustomers.length})</span>}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Top Customers {filteredCustomers.length < topCustomers.length && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">({filteredCustomers.length})</span>}</p>
               <div className="flex gap-2">
                 <button 
                   onClick={exportCustomersToCSV}
                   disabled={filteredCustomers.length === 0}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium disabled:text-gray-400 flex items-center gap-1"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium disabled:text-gray-400 flex items-center gap-1"
                   title="Export to CSV"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -549,32 +550,32 @@ const Dashboard: React.FC = () => {
                   </svg>
                   Export
                 </button>
-                <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
+                <button className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">View All →</button>
               </div>
             </div>
             {filteredCustomers.length === 0 ? (
-              <div className="text-center py-6 text-gray-500 text-sm">No customers found for search</div>
+              <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">No customers found for search</div>
             ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Customer Name</th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-700">Revenue</th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-700">Orders</th>
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700">Last Order</th>
-                    <th className="text-center py-2 px-2 font-semibold text-gray-700">Status</th>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Customer Name</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Revenue</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Orders</th>
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Last Order</th>
+                    <th className="text-center py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredCustomers.map((customer, index) => (
-                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-2 px-2 text-gray-900 font-medium">{customer.name}</td>
-                      <td className="py-2 px-2 text-right text-gray-900 font-semibold">{customer.revenue}</td>
-                      <td className="py-2 px-2 text-right text-gray-700">{customer.orders}</td>
-                      <td className="py-2 px-2 text-gray-700 text-xs">{customer.lastOrder}</td>
+                    <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{customer.name}</td>
+                      <td className="py-2 px-2 text-right text-gray-900 dark:text-white font-semibold">{customer.revenue}</td>
+                      <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{customer.orders}</td>
+                      <td className="py-2 px-2 text-gray-700 dark:text-gray-300 text-xs">{customer.lastOrder}</td>
                       <td className="py-2 px-2 text-center">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${customer.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${customer.status === 'Active' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'}`}>
                           {customer.status}
                         </span>
                       </td>
@@ -589,10 +590,10 @@ const Dashboard: React.FC = () => {
           {/* Footer Stats Summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             {footerStats.map((stat, index) => (
-              <div key={index} className="bg-white rounded-lg shadow p-4 text-center border-t-4 border-blue-500">
+              <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center border-t-4 border-blue-500">
                 <p className="text-2xl mb-1">{stat.icon}</p>
-                <p className="text-xs font-semibold text-gray-600 mb-1">{stat.label}</p>
-                <p className="text-lg font-bold text-gray-900">{stat.value}</p>
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">{stat.label}</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</p>
               </div>
             ))}
           </div>
