@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ListGroup, ListGroupItem } from '../ListGroup/ListGroup';
 import { NavLink, useInRouterContext, BrowserRouter, useLocation } from 'react-router-dom';
 import './Sidebar.css';
@@ -76,7 +76,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
   const sidebarContent = (
     <>
       <button
-        className="absolute top-4 left-4 z-50 p-2 rounded-md bg-blue-800 text-blue-100 border border-blue-700 hover:bg-blue-700 focus:outline-none md:hidden"
+        className="absolute top-4 left-4 z-50 p-2 rounded-md bg-blue-800 dark:bg-gray-700 text-blue-100 dark:text-gray-300 border border-blue-700 dark:border-gray-600 hover:bg-blue-700 dark:hover:bg-gray-600 focus:outline-none md:hidden"
         onClick={() => setOpen((v) => !v)}
         aria-label="Toggle sidebar"
       >
@@ -84,25 +84,21 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
         <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <aside
-        className={`min-h-screen h-full bg-blue-900 text-blue-100 flex flex-col shadow-lg border-r border-blue-800 transition-all duration-300 fixed md:static z-40 ${
+        className={`min-h-screen h-full bg-blue-900 dark:bg-gray-800 text-blue-100 dark:text-gray-200 flex flex-col shadow-lg border-r border-blue-800 dark:border-gray-700 transition-all duration-300 fixed md:static z-40 ${
           collapsed ? 'w-20' : 'w-64'
         } ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
         style={{
           width: collapsed ? '5rem' : '16rem'
         }}
       >
-        <div className={`flex items-center border-b border-blue-800 transition-all duration-300 h-14 ${
+        <div className={`flex items-center border-b border-blue-800 dark:border-gray-700 transition-all duration-300 h-14 ${
           collapsed ? 'justify-center px-2' : 'justify-start px-6'
         }`}>
-          {!collapsed && <span className="font-bold text-blue-100 text-xl">AdminPro</span>}
-          {collapsed && <span className="text-lg font-bold text-blue-100">A</span>}
+          {!collapsed && <span className="font-bold text-blue-100 dark:text-gray-200 text-xl">AdminPro</span>}
+          {collapsed && <span className="text-lg font-bold text-blue-100 dark:text-gray-200">A</span>}
         </div>
         <nav 
-          className="flex-1 overflow-y-auto px-4 pt-2 sidebar-nav bg-blue-900"
-          style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#3b82f6 #1e3a8a'
-          }}
+          className="flex-1 overflow-y-auto px-4 pt-2 sidebar-nav"
         >
           {groups ? (
             // Hierarchical menu with groups and subgroups
@@ -111,7 +107,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
                 <div key={group.name} className="pb-2">
                   <button
                     onClick={() => toggleGroup(group.name)}
-                    className={`w-full flex items-center transition-all duration-300 text-left text-sm font-semibold text-blue-100 rounded-none hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800 ${
+                    className={`w-full flex items-center transition-all duration-300 text-left text-sm font-semibold text-blue-100 dark:text-gray-300 rounded-none hover:bg-blue-800 dark:hover:bg-gray-700 focus:bg-blue-800 dark:focus:bg-gray-700 active:bg-blue-800 dark:active:bg-gray-700 ${
                       collapsed ? 'justify-center px-2 py-2' : 'justify-between px-3 py-2'
                     }`}
                     title={collapsed ? group.name : ''}
@@ -137,7 +133,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
                         <div key={subGroup.name} className="mb-2">
                           <button
                             onClick={() => toggleSubGroup(subGroup.name)}
-                            className={`w-full flex items-center transition-all duration-300 text-left text-sm text-blue-200 hover:bg-blue-800 focus:bg-blue-800 active:bg-blue-800 rounded-none ${
+                            className={`w-full flex items-center transition-all duration-300 text-left text-sm text-blue-200 dark:text-gray-400 hover:bg-blue-800 dark:hover:bg-gray-700 focus:bg-blue-800 dark:focus:bg-gray-700 active:bg-blue-800 dark:active:bg-gray-700 rounded-none ${
                               collapsed ? 'justify-center px-2 py-2' : 'justify-between px-3 py-2'
                             }`}
                           >
@@ -162,8 +158,8 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
                                   className={({ isActive }) =>
                                     `block px-3 py-2 rounded-none text-sm transition-colors ${
                                       isActive
-                                        ? 'bg-blue-700 text-white font-medium'
-                                        : 'text-blue-100 hover:bg-blue-800'
+                                        ? 'bg-blue-700 dark:bg-blue-600 text-white dark:text-white font-medium'
+                                        : 'text-blue-100 dark:text-gray-400 hover:bg-blue-800 dark:hover:bg-gray-700'
                                     }`
                                   }
                                   title={collapsed ? item.label : ''}
@@ -182,9 +178,9 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
             </div>
           ) : (
             // Flat menu for simple items
-            <ListGroup as="div" className="divide-y divide-blue-800 bg-blue-900">
+            <ListGroup as="div" className="divide-y divide-blue-800 dark:divide-gray-700 bg-blue-900 dark:bg-gray-800">
               {items?.map((item) => (
-                <ListGroupItem key={item.to} className="bg-blue-900" as="div">
+                <ListGroupItem key={item.to} className="bg-blue-900 dark:bg-gray-800" as="div">
                   <NavLink
                     to={item.to}
                     className={({ isActive }) =>
@@ -194,8 +190,8 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
                           : 'px-4 py-2'
                       } ${
                         isActive
-                          ? 'bg-blue-700 text-white border-blue-300 shadow-sm'
-                          : 'bg-blue-900 text-blue-100 border-transparent hover:bg-blue-800 hover:text-white hover:border-blue-400'
+                          ? 'bg-blue-700 dark:bg-blue-600 text-white dark:text-white border-blue-300 dark:border-blue-400 shadow-sm'
+                          : 'bg-blue-900 dark:bg-gray-800 text-blue-100 dark:text-gray-400 border-transparent hover:bg-blue-800 dark:hover:bg-gray-700 hover:text-white hover:border-blue-400 dark:hover:border-gray-600'
                       }`
                     }
                     title={collapsed ? item.label : ''}
@@ -208,7 +204,7 @@ const SidebarContent: React.FC<SidebarProps> = ({ items, groups, collapsed = fal
             </ListGroup>
           )}
         </nav>
-        <div className={`border-t border-blue-800 text-xs text-blue-300 text-center bg-blue-900 transition-all duration-300 mt-auto ${
+        <div className={`border-t border-blue-800 dark:border-gray-700 text-xs text-blue-300 dark:text-gray-500 text-center bg-blue-900 dark:bg-gray-800 transition-all duration-300 mt-auto ${
           collapsed ? 'p-2 hidden md:block' : 'p-4'
         }`}>© 2025 AdminPro</div>
       </aside>

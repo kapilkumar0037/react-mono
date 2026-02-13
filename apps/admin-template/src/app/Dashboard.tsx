@@ -128,13 +128,13 @@ const Dashboard: React.FC = () => {
   const getAlertColor = (type: string) => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 border-l-4 border-green-400';
+        return 'bg-green-50 dark:bg-green-900 border-l-4 border-green-400 dark:border-green-400';
       case 'warning':
-        return 'bg-yellow-50 border-l-4 border-yellow-400';
+        return 'bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 dark:border-yellow-400';
       case 'error':
-        return 'bg-red-50 border-l-4 border-red-400';
+        return 'bg-red-50 dark:bg-red-900 border-l-4 border-red-400 dark:border-red-400';
       default:
-        return 'bg-blue-50 border-l-4 border-blue-400';
+        return 'bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 dark:border-blue-400';
     }
   };
 
@@ -275,25 +275,25 @@ const Dashboard: React.FC = () => {
           <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
             <button
               onClick={() => setSelectedDateFilter('today')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'today' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'today' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
             >
               Today
             </button>
             <button
               onClick={() => setSelectedDateFilter('week')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'week' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'week' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
             >
               This Week
             </button>
             <button
               onClick={() => setSelectedDateFilter('month')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'month' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'month' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
             >
               This Month
             </button>
             <button
               onClick={() => setSelectedDateFilter('year')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'year' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'year' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
             >
               This Year
             </button>
@@ -303,8 +303,8 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             {alerts.map((alert) => (
               <div key={alert.id} className={`p-3 rounded-lg ${getAlertColor(alert.type)}`}>
-                <p className="text-sm font-medium text-gray-900">{alert.message}</p>
-                <p className="text-xs text-gray-500 mt-1">{alert.time}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{alert.message}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">{alert.time}</p>
               </div>
             ))}
           </div>

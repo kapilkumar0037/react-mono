@@ -16,9 +16,9 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState([
-    { id: 1, message: 'New order #ORD004 received', type: 'info', time: '2 min ago', read: false },
-    { id: 2, message: 'Payment from Acme Corp completed', type: 'success', time: '15 min ago', read: false },
-    { id: 3, message: 'Low stock alert for Wireless Headphones', type: 'warning', time: '1 hour ago', read: true },
+    { id: 1, message: 'High inventory levels in Electronics', type: 'info', time: '5 min ago', read: false },
+    { id: 2, message: 'New customer milestone: 1000 users reached!', type: 'success', time: '1 hour ago', read: false },
+    { id: 3, message: 'Payment processing delay detected', type: 'warning', time: '2 hours ago', read: true },
     { id: 4, message: 'System backup completed successfully', type: 'success', time: '3 hours ago', read: true },
   ]);
 
@@ -66,11 +66,11 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
   };
 
   return (
-    <Navbar className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 h-14 flex items-center border-b border-blue-800 shadow-sm">
+    <Navbar className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 h-14 flex items-center border-b border-blue-800 dark:border-gray-700 shadow-sm">
       <NavbarSection align="end" className="w-full flex items-center justify-between gap-4 relative -ml-3 pr-6">
         <button
           onClick={() => onToggleSidebar?.()}
-          className="text-blue-100 hover:text-blue-100 hover:bg-blue-800 font-medium px-2 py-2 rounded transition-colors duration-150 hidden md:flex items-center"
+          className="text-blue-100 dark:text-gray-300 hover:text-blue-100 dark:hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 hidden md:flex items-center"
           title="Toggle Sidebar"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
               placeholder="Search orders, customers..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full px-3 py-2 bg-blue-800 text-white text-sm placeholder-blue-300 rounded focus:outline-none focus:bg-blue-700 transition-colors"
+              className="w-full px-3 py-2 bg-blue-800 dark:bg-gray-700 text-white dark:text-gray-100 text-sm placeholder-blue-300 dark:placeholder-gray-500 rounded focus:outline-none focus:bg-blue-700 dark:focus:bg-gray-600 transition-colors"
             />
             <svg className="absolute right-3 top-2.5 w-4 h-4 text-blue-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -99,7 +99,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
           <div className="relative">
             <button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className="text-blue-100 hover:text-blue-100 hover:bg-blue-800 font-medium px-2 py-2 rounded transition-colors duration-150 relative flex items-center"
+              className="text-blue-100 dark:text-gray-300 hover:text-blue-100 dark:hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 relative flex items-center"
               title="Notifications"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,31 +113,31 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
             </button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
-                <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                  <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto">
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Notifications</h3>
                   {unreadCount > 0 && (
-                    <span className="text-xs text-blue-600 font-medium">{unreadCount} new</span>
+                    <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">{unreadCount} new</span>
                   )}
                 </div>
                 {notifications.length === 0 ? (
-                  <div className="px-4 py-6 text-center text-gray-500 text-sm">No notifications</div>
+                  <div className="px-4 py-6 text-center text-gray-500 dark:text-gray-400 text-sm">No notifications</div>
                 ) : (
-                  <div className="divide-y divide-gray-100">
+                  <div className="p-2 space-y-2">
                     {notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        className={`px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${!notification.read ? 'bg-blue-50' : ''}`}
+                        className={`p-3 rounded-lg transition-colors cursor-pointer border-l-4 ${!notification.read ? 'bg-blue-50 dark:bg-gray-700 border-blue-500 dark:border-blue-500 shadow-sm' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'} hover:shadow-md dark:hover:shadow-lg`}
                         onClick={() => markAsRead(notification.id)}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-start gap-2 flex-1 min-w-0">
-                            <span className={`text-lg ${notification.type === 'success' ? 'text-green-600' : notification.type === 'warning' ? 'text-yellow-600' : notification.type === 'error' ? 'text-red-600' : 'text-blue-600'}`}>
+                            <span className={`text-lg ${notification.type === 'success' ? 'text-green-600 dark:text-green-400' : notification.type === 'warning' ? 'text-yellow-600 dark:text-yellow-400' : notification.type === 'error' ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
                               {getNotificationIcon(notification.type)}
                             </span>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm text-gray-900 font-medium break-words">{notification.message}</p>
-                              <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                              <p className="text-sm text-gray-900 dark:text-white font-medium break-words">{notification.message}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{notification.time}</p>
                             </div>
                           </div>
                           <button
@@ -145,15 +145,12 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
                               e.stopPropagation();
                               dismissNotification(notification.id);
                             }}
-                            className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
                             title="Dismiss"
                           >
                             ✕
                           </button>
                         </div>
-                        {!notification.read && (
-                          <div className="mt-2 h-1 w-full bg-blue-500 rounded-full"></div>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -165,7 +162,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
           {/* Dark Mode Toggle */}
           <button
             onClick={() => onToggleDarkMode?.()}
-            className="text-blue-100 hover:text-blue-100 hover:bg-blue-800 font-medium px-2 py-2 rounded transition-colors duration-150 flex items-center"
+            className="text-blue-100 dark:text-gray-300 hover:text-blue-100 dark:hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 flex items-center"
             title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
           >
             {isDarkMode ? (
@@ -182,7 +179,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="text-blue-100 hover:text-blue-100 hover:bg-blue-800 font-medium px-3 py-2 rounded transition-colors duration-150 flex items-center gap-2"
+            className="text-blue-100 dark:text-gray-300 hover:text-blue-100 dark:hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-3 py-2 rounded transition-colors duration-150 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -191,12 +188,12 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50">
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 first:rounded-t-lg transition-colors"
+                className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-lg transition-colors"
               >
                 Profile
               </button>
@@ -204,7 +201,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
                 onClick={() => {
                   setIsDropdownOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 Settings
               </button>
@@ -212,7 +209,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
                 onClick={() => {
                   setIsDropdownOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 last:rounded-b-lg transition-colors border-t border-gray-200"
+                className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 last:rounded-b-lg transition-colors border-t border-gray-200 dark:border-gray-700"
               >
                 Logout
               </button>
