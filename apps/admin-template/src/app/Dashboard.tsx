@@ -11,6 +11,35 @@ const Dashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
+  // Pagination state
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [customersPage, setCustomersPage] = useState(1);
+  const [productsPage, setProductsPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Sorting state
+  const [ordersSortBy, setOrdersSortBy] = useState<'date' | 'amount'>('date');
+  const [ordersSortDir, setOrdersSortDir] = useState<'asc' | 'desc'>('desc');
+  const [customersSortBy, setCustomersSortBy] = useState<'revenue' | 'orders'>('revenue');
+  const [customersSortDir, setCustomersSortDir] = useState<'asc' | 'desc'>('desc');
+  const [productsSortBy, setProductsSortBy] = useState<'sales' | 'revenue'>('sales');
+  const [productsSortDir, setProductsSortDir] = useState<'asc' | 'desc'>('desc');
+
+  // Advanced filter state
+  const [showOrderFilters, setShowOrderFilters] = useState(false);
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
+  const [orderAmountMin, setOrderAmountMin] = useState('');
+  const [orderAmountMax, setOrderAmountMax] = useState('');
+
+  const [showCustomerFilters, setShowCustomerFilters] = useState(false);
+  const [customerStatusFilter, setCustomerStatusFilter] = useState<string>('all');
+  const [customerRevenueMin, setCustomerRevenueMin] = useState('');
+  const [customerRevenueMax, setCustomerRevenueMax] = useState('');
+
+  const [showProductFilters, setShowProductFilters] = useState(false);
+  const [productSalesMin, setProductSalesMin] = useState('');
+  const [productSalesMax, setProductSalesMax] = useState('');
+
   // Mock data for last 12 months
   const salesData = [
     { month: 'Jan', sales: 4000, revenue: 2400 },
@@ -258,6 +287,94 @@ const Dashboard: React.FC = () => {
     downloadCSV(csv, `customers_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
+  // Sorting function
+  const sortData = (data: any[], sortBy: string, sortDir: 'asc' | 'desc') => {
+    return [...data].sort((a, b) => {
+      let aVal = a[sortBy];
+      let bVal = b[sortBy];
+      
+      // Handle numeric strings (e.g., "$1,234.50")
+      if (typeof aVal === 'string' && aVal.includes('$')) {
+        aVal = parseFloat(aVal.replace(/[$,]/g, ''));
+        bVal = parseFloat(bVal.replace(/[$,]/g, ''));
+      }
+      
+      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  // Pagination function
+  const paginate = (data: any[], page: number, itemsPerPage: number) => {
+    const start = (page - 1) * itemsPerPage;
+    return data.slice(start, start + itemsPerPage);
+  };
+
+  const getTotalPages = (dataLength: number) => Math.ceil(dataLength / itemsPerPage);
+
+  // Advanced filtering functions
+  const applyOrderFilters = (orders: any[]) => {
+    return orders.filter(order => {
+      // Status filter
+      if (orderStatusFilter !== 'all' && order.status !== orderStatusFilter) return false;
+      
+      // Amount range filter
+      if (orderAmountMin || orderAmountMax) {
+        const amount = parseFloat(order.amount.replace(/[$,]/g, ''));
+        if (orderAmountMin && amount < parseFloat(orderAmountMin)) return false;
+        if (orderAmountMax && amount > parseFloat(orderAmountMax)) return false;
+      }
+      
+      return true;
+    });
+  };
+
+  const applyCustomerFilters = (customers: any[]) => {
+    return customers.filter(customer => {
+      // Status filter
+      if (customerStatusFilter !== 'all' && customer.status !== customerStatusFilter) return false;
+      
+      // Revenue range filter
+      if (customerRevenueMin || customerRevenueMax) {
+        const revenue = parseFloat(customer.revenue.replace(/[$,]/g, ''));
+        if (customerRevenueMin && revenue < parseFloat(customerRevenueMin)) return false;
+        if (customerRevenueMax && revenue > parseFloat(customerRevenueMax)) return false;
+      }
+      
+      return true;
+    });
+  };
+
+  const applyProductFilters = (products: any[]) => {
+    return products.filter(product => {
+      // Sales range filter
+      if (productSalesMin || productSalesMax) {
+        const sales = product.sales;
+        if (productSalesMin && sales < parseFloat(productSalesMin)) return false;
+        if (productSalesMax && sales > parseFloat(productSalesMax)) return false;
+      }
+      
+      return true;
+    });
+  };
+
+  // Get sorted and paginated data
+  const sortedOrders = sortData(filteredOrders, ordersSortBy, ordersSortDir);
+  const filteredOrdersAdvanced = applyOrderFilters(sortedOrders);
+  const paginatedOrders = paginate(filteredOrdersAdvanced, ordersPage, itemsPerPage);
+  const ordersTotalPages = getTotalPages(filteredOrdersAdvanced.length);
+
+  const sortedCustomers = sortData(filteredCustomers, customersSortBy, customersSortDir);
+  const filteredCustomersAdvanced = applyCustomerFilters(sortedCustomers);
+  const paginatedCustomers = paginate(filteredCustomersAdvanced, customersPage, itemsPerPage);
+  const customersTotalPages = getTotalPages(filteredCustomersAdvanced.length);
+
+  const sortedProducts = sortData(topProducts, productsSortBy, productsSortDir);
+  const filteredProductsAdvanced = applyProductFilters(sortedProducts);
+  const paginatedProducts = paginate(filteredProductsAdvanced, productsPage, itemsPerPage);
+  const productsTotalPages = getTotalPages(filteredProductsAdvanced.length);
+
   return (
     <div className={`flex h-screen ${isDarkMode ? 'dark bg-gray-950' : 'bg-gray-50'}`}>
       <AdminSidebar collapsed={sidebarCollapsed} />
@@ -460,14 +577,18 @@ const Dashboard: React.FC = () => {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Order</th>
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => setOrdersSortBy(ordersSortBy === 'date' ? 'amount' : 'date')}>
+                      Order {ordersSortBy === 'date' && (ordersSortDir === 'asc' ? '↑' : '↓')}
+                    </th>
                     <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Customer</th>
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Amount</th>
+                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (ordersSortBy === 'amount') { setOrdersSortDir(ordersSortDir === 'asc' ? 'desc' : 'asc'); } else { setOrdersSortBy('amount'); setOrdersSortDir('desc'); } }}>
+                      Amount {ordersSortBy === 'amount' && (ordersSortDir === 'asc' ? '↑' : '↓')}
+                    </th>
                     <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredOrders.map((order, index) => (
+                  {paginatedOrders.map((order, index) => (
                     <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{order.id}</td>
                       <td className="py-2 px-2 text-gray-700 dark:text-gray-300">{order.customer}</td>
@@ -481,6 +602,26 @@ const Dashboard: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-3 px-2">
+                <span className="text-xs text-gray-600 dark:text-gray-400">Page {ordersPage} of {ordersTotalPages}</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setOrdersPage(Math.max(1, ordersPage - 1))}
+                    disabled={ordersPage === 1}
+                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    ← Prev
+                  </button>
+                  <button
+                    onClick={() => setOrdersPage(Math.min(ordersTotalPages, ordersPage + 1))}
+                    disabled={ordersPage === ordersTotalPages}
+                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
             </div>
             )}
           </div>
@@ -498,12 +639,16 @@ const Dashboard: React.FC = () => {
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700">
                       <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Product</th>
-                      <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Sales</th>
-                      <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Revenue</th>
+                      <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (productsSortBy === 'sales') { setProductsSortDir(productsSortDir === 'asc' ? 'desc' : 'asc'); } else { setProductsSortBy('sales'); setProductsSortDir('desc'); } }}>
+                        Sales {productsSortBy === 'sales' && (productsSortDir === 'asc' ? '↑' : '↓')}
+                      </th>
+                      <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (productsSortBy === 'revenue') { setProductsSortDir(productsSortDir === 'asc' ? 'desc' : 'asc'); } else { setProductsSortBy('revenue'); setProductsSortDir('desc'); } }}>
+                        Revenue {productsSortBy === 'revenue' && (productsSortDir === 'asc' ? '↑' : '↓')}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {topProducts.map((product, index) => (
+                    {paginatedProducts.map((product, index) => (
                       <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{product.name}</td>
                         <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{product.sales}</td>
@@ -512,6 +657,26 @@ const Dashboard: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-3 px-2">
+                <span className="text-xs text-gray-600 dark:text-gray-400">Page {productsPage} of {productsTotalPages}</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setProductsPage(Math.max(1, productsPage - 1))}
+                    disabled={productsPage === 1}
+                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    ← Prev
+                  </button>
+                  <button
+                    onClick={() => setProductsPage(Math.min(productsTotalPages, productsPage + 1))}
+                    disabled={productsPage === productsTotalPages}
+                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    Next →
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -561,14 +726,18 @@ const Dashboard: React.FC = () => {
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
                     <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Customer Name</th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Revenue</th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Orders</th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (customersSortBy === 'revenue') { setCustomersSortDir(customersSortDir === 'asc' ? 'desc' : 'asc'); } else { setCustomersSortBy('revenue'); setCustomersSortDir('desc'); } }}>
+                      Revenue {customersSortBy === 'revenue' && (customersSortDir === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (customersSortBy === 'orders') { setCustomersSortDir(customersSortDir === 'asc' ? 'desc' : 'asc'); } else { setCustomersSortBy('orders'); setCustomersSortDir('desc'); } }}>
+                      Orders {customersSortBy === 'orders' && (customersSortDir === 'asc' ? '↑' : '↓')}
+                    </th>
                     <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Last Order</th>
                     <th className="text-center py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCustomers.map((customer, index) => (
+                  {paginatedCustomers.map((customer, index) => (
                     <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{customer.name}</td>
                       <td className="py-2 px-2 text-right text-gray-900 dark:text-white font-semibold">{customer.revenue}</td>
@@ -583,6 +752,26 @@ const Dashboard: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-3 px-2">
+                <span className="text-xs text-gray-600 dark:text-gray-400">Page {customersPage} of {customersTotalPages}</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCustomersPage(Math.max(1, customersPage - 1))}
+                    disabled={customersPage === 1}
+                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    ← Prev
+                  </button>
+                  <button
+                    onClick={() => setCustomersPage(Math.min(customersTotalPages, customersPage + 1))}
+                    disabled={customersPage === customersTotalPages}
+                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
             </div>
             )}
           </div>
