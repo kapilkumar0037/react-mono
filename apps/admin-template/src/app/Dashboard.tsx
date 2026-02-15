@@ -1,15 +1,11 @@
 
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import AdminSidebar from './AdminSidebar';
-import AdminNavbar from './AdminNavbar';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 
 const Dashboard: React.FC = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeChartTab, setActiveChartTab] = useState<'sales' | 'revenue' | 'customers'>('sales');
   const [selectedDateFilter, setSelectedDateFilter] = useState<'today' | 'week' | 'month' | 'year'>('month');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [searchQuery] = useState(''); // Used in JSX
 
   // Pagination state
   const [ordersPage, setOrdersPage] = useState(1);
@@ -167,18 +163,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const getSystemHealthColor = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return 'bg-green-50 border-l-4 border-green-400 text-green-700';
-      case 'warning':
-        return 'bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700';
-      case 'critical':
-        return 'bg-red-50 border-l-4 border-red-400 text-red-700';
-      default:
-        return 'bg-gray-50 border-l-4 border-gray-400 text-gray-700';
-    }
-  };
+
 
   // Filtering functions
   const getFilteredData = (data: any[], filterType: string) => {
@@ -218,16 +203,12 @@ const Dashboard: React.FC = () => {
   );
 
   const getFilteredChartData = () => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    let dataPoints = 12;
-
     if (selectedDateFilter === 'today') {
-      dataPoints = 24; // Show 24 hours
+      // Show 24 hours
+      return salesData;
     } else if (selectedDateFilter === 'week') {
-      dataPoints = 7;
       return salesData.slice(-7);
     } else if (selectedDateFilter === 'month') {
-      dataPoints = 30;
       return salesData;
     } else if (selectedDateFilter === 'year') {
       return salesData;
@@ -376,20 +357,16 @@ const Dashboard: React.FC = () => {
   const productsTotalPages = getTotalPages(filteredProductsAdvanced.length);
 
   return (
-    <div className={`flex h-screen ${isDarkMode ? 'dark bg-gray-950' : 'bg-gray-50'}`}>
-      <AdminSidebar collapsed={sidebarCollapsed} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminNavbar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} onSearch={setSearchQuery} isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} />
-        <main className="flex-1 overflow-y-auto p-4 dark:bg-gray-950">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-blue-900 dark:text-blue-100">Dashboard</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Filter: <span className="font-semibold text-gray-700 dark:text-gray-300 capitalize">{selectedDateFilter}</span>{searchQuery && ` • Search: "${searchQuery}"`}</p>
-            </div>
-          </div>
+    <div className="p-6 max-w-7xl mx-auto w-full">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-600 mt-1">Filter: <span className="font-semibold text-gray-900 capitalize">{selectedDateFilter}</span>{searchQuery && ` • Search: "${searchQuery}"`}</p>
+        </div>
+      </div>
 
-          {/* Quick Date Filters */}
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+      {/* Quick Date Filters */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
             <button
               onClick={() => setSelectedDateFilter('today')}
               className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'today' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
@@ -532,7 +509,6 @@ const Dashboard: React.FC = () => {
                     outerRadius={70}
                     fill="#8884d8"
                     dataKey="value"
-                    labelStyle={{ fontSize: '10px', fontWeight: 'bold' }}
                   >
                     {salesByCategory.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -554,11 +530,21 @@ const Dashboard: React.FC = () => {
           {/* Recent Orders - Compact Table */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-purple-500 mb-4">
             <div className="flex justify-between items-center mb-3">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">Recent Orders {filteredOrders.length < recentOrders.length && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">({filteredOrders.length})</span>}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Recent Orders {filteredOrdersAdvanced.length < recentOrders.length && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">({filteredOrdersAdvanced.length})</span>}</p>
               <div className="flex gap-2">
                 <button 
+                  onClick={() => setShowOrderFilters(!showOrderFilters)}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1"
+                  title="Advanced Filters"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  Filters
+                </button>
+                <button 
                   onClick={exportOrdersToCSV}
-                  disabled={filteredOrders.length === 0}
+                  disabled={filteredOrdersAdvanced.length === 0}
                   className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium disabled:text-gray-400 flex items-center gap-1"
                   title="Export to CSV"
                 >
@@ -567,10 +553,57 @@ const Dashboard: React.FC = () => {
                   </svg>
                   Export
                 </button>
-                <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">View All →</button>
               </div>
             </div>
-            {filteredOrders.length === 0 ? (
+
+            {/* Advanced Filters */}
+            {showOrderFilters && (
+              <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Status</label>
+                    <select 
+                      value={orderStatusFilter} 
+                      onChange={(e) => { setOrderStatusFilter(e.target.value); setOrdersPage(1); }}
+                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Shipped">Shipped</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Min Amount ($)</label>
+                    <input 
+                      type="number" 
+                      placeholder="0" 
+                      value={orderAmountMin}
+                      onChange={(e) => { setOrderAmountMin(e.target.value); setOrdersPage(1); }}
+                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Max Amount ($)</label>
+                    <input 
+                      type="number" 
+                      placeholder="Unlimited" 
+                      value={orderAmountMax}
+                      onChange={(e) => { setOrderAmountMax(e.target.value); setOrdersPage(1); }}
+                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+                <button 
+                  onClick={() => { setOrderStatusFilter('all'); setOrderAmountMin(''); setOrderAmountMax(''); setOrdersPage(1); }}
+                  className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )}
+
+            {filteredOrdersAdvanced.length === 0 ? (
               <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">No orders found for selected filters</div>
             ) : (
             <div className="overflow-x-auto">
@@ -632,8 +665,51 @@ const Dashboard: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-green-500">
               <div className="flex justify-between items-center mb-3">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">Top Products</p>
-                <button className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">View All →</button>
+                <button 
+                  onClick={() => setShowProductFilters(!showProductFilters)}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  Filters
+                </button>
               </div>
+
+              {/* Advanced Filters */}
+              {showProductFilters && (
+                <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Min Sales</label>
+                      <input 
+                        type="number" 
+                        placeholder="0" 
+                        value={productSalesMin}
+                        onChange={(e) => { setProductSalesMin(e.target.value); setProductsPage(1); }}
+                        className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Max Sales</label>
+                      <input 
+                        type="number" 
+                        placeholder="Unlimited" 
+                        value={productSalesMax}
+                        onChange={(e) => { setProductSalesMax(e.target.value); setProductsPage(1); }}
+                        className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => { setProductSalesMin(''); setProductSalesMax(''); setProductsPage(1); }}
+                    className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              )}
+
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
@@ -702,11 +778,20 @@ const Dashboard: React.FC = () => {
           {/* Top Customers - Compact Table */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-indigo-500 mb-4">
             <div className="flex justify-between items-center mb-3">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">Top Customers {filteredCustomers.length < topCustomers.length && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">({filteredCustomers.length})</span>}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Top Customers {filteredCustomersAdvanced.length < topCustomers.length && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">({filteredCustomersAdvanced.length})</span>}</p>
               <div className="flex gap-2">
                 <button 
+                  onClick={() => setShowCustomerFilters(!showCustomerFilters)}
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  Filters
+                </button>
+                <button 
                   onClick={exportCustomersToCSV}
-                  disabled={filteredCustomers.length === 0}
+                  disabled={filteredCustomersAdvanced.length === 0}
                   className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium disabled:text-gray-400 flex items-center gap-1"
                   title="Export to CSV"
                 >
@@ -715,13 +800,59 @@ const Dashboard: React.FC = () => {
                   </svg>
                   Export
                 </button>
-                <button className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">View All →</button>
               </div>
             </div>
-            {filteredCustomers.length === 0 ? (
+
+            {/* Advanced Filters */}
+            {showCustomerFilters && (
+              <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Status</label>
+                    <select 
+                      value={customerStatusFilter} 
+                      onChange={(e) => { setCustomerStatusFilter(e.target.value); setCustomersPage(1); }}
+                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Min Revenue ($)</label>
+                    <input 
+                      type="number" 
+                      placeholder="0" 
+                      value={customerRevenueMin}
+                      onChange={(e) => { setCustomerRevenueMin(e.target.value); setCustomersPage(1); }}
+                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Max Revenue ($)</label>
+                    <input 
+                      type="number" 
+                      placeholder="Unlimited" 
+                      value={customerRevenueMax}
+                      onChange={(e) => { setCustomerRevenueMax(e.target.value); setCustomersPage(1); }}
+                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+                <button 
+                  onClick={() => { setCustomerStatusFilter('all'); setCustomerRevenueMin(''); setCustomerRevenueMax(''); setCustomersPage(1); }}
+                  className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )}
+
+            {filteredCustomersAdvanced.length === 0 ? (
               <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">No customers found for search</div>
             ) : (
-            <div className="overflow-x-auto">
+              <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -786,7 +917,7 @@ const Dashboard: React.FC = () => {
               </div>
             ))}
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

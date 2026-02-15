@@ -1,14 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, ChangeEvent } from 'react';
 import {
   Modal,
   Button,
   InputGroup,
+  InputGroupInput,
   Card,
   Badge,
   Pagination,
 } from '@react-mono/ui-controls';
-import AdminSidebar from './AdminSidebar';
-import AdminNavbar from './AdminNavbar';
 
 interface User {
   id: number;
@@ -27,12 +26,10 @@ interface FormData {
 }
 
 const Users: React.FC = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
@@ -161,221 +158,169 @@ const Users: React.FC = () => {
   };
 
   return (
-    <div className={`flex h-screen overflow-hidden ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <AdminSidebar />
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminNavbar
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-          isDarkMode={isDarkMode}
-          onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-        />
-
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6 max-w-7xl mx-auto">
-            {/* Page Header */}
-            <div className="mb-8">
-              <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Users
-              </h1>
-              <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                Manage and view all users in your system
-              </p>
-            </div>
-
-            {/* Filters and Actions */}
-            <Card className="mb-6">
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  {/* Search */}
-                  <InputGroup
-                    placeholder="Search by name or email..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full"
-                  />
-
-                  {/* Role Filter */}
-                  <select
-                    value={filterRole}
-                    onChange={(e) => {
-                      setFilterRole(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="all">All Roles</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Moderator">Moderator</option>
-                    <option value="User">User</option>
-                  </select>
-
-                  {/* Status Filter */}
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => {
-                      setFilterStatus(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                    <option value="Suspended">Suspended</option>
-                  </select>
-
-                  {/* Add User Button */}
-                  <Button onClick={handleOpenAddModal} className="bg-blue-600 text-white">
-                    + Add User
-                  </Button>
-                </div>
-
-                {/* Results Count */}
-                <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Showing {paginatedUsers.length} of {filteredUsers.length} users
-                </div>
-              </div>
-            </Card>
-
-            {/* Users Table */}
-            <Card>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className={`border-b ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-                      <th className={`px-6 py-3 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                        Name
-                      </th>
-                      <th className={`px-6 py-3 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                        Email
-                      </th>
-                      <th className={`px-6 py-3 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                        Role
-                      </th>
-                      <th className={`px-6 py-3 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                        Status
-                      </th>
-                      <th className={`px-6 py-3 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                        Join Date
-                      </th>
-                      <th className={`px-6 py-3 text-left text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedUsers.length > 0 ? (
-                      paginatedUsers.map((user) => (
-                        <tr
-                          key={user.id}
-                          className={`border-b transition-colors ${
-                            isDarkMode
-                              ? 'border-gray-700 hover:bg-gray-800'
-                              : 'border-gray-200 hover:bg-gray-50'
-                          }`}
-                        >
-                          <td className={`px-6 py-4 text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                            {user.name}
-                          </td>
-                          <td className={`px-6 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                            {user.email}
-                          </td>
-                          <td className={`px-6 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                            {user.role}
-                          </td>
-                          <td className="px-6 py-4 text-sm">
-                            <Badge variant={getStatusColor(user.status)} className="inline-block">
-                              {user.status}
-                            </Badge>
-                          </td>
-                          <td className={`px-6 py-4 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                            {user.joinDate}
-                          </td>
-                          <td className="px-6 py-4 text-sm">
-                            <div className="flex gap-2">
-                              <Button
-                                onClick={() => handleOpenEditModal(user)}
-                                className="bg-blue-500 text-white text-xs px-3 py-1"
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                onClick={() => handleDeleteUser(user.id)}
-                                className="bg-red-500 text-white text-xs px-3 py-1"
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className={`px-6 py-4 text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
-                        >
-                          No users found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="p-6 border-t">
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                  />
-                </div>
-              )}
-            </Card>
-          </div>
-        </main>
+    <div className="p-6 max-w-7xl mx-auto w-full">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Users</h1>
+        <p className="mt-2 text-gray-600">Manage and view all users in your system</p>
       </div>
 
-      {/* User Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title={isEditMode ? 'Edit User' : 'Add New User'}
-        footer={
-          <div className="flex gap-2 justify-end">
-            <Button onClick={handleCloseModal} className="bg-gray-500 text-white">
-              Cancel
-            </Button>
-            <Button onClick={handleSaveUser} className="bg-blue-600 text-white">
-              {isEditMode ? 'Update' : 'Add'} User
+      {/* Filters and Actions */}
+      <Card className="mb-6">
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {/* Search */}
+            <InputGroup>
+              <InputGroupInput
+                placeholder="Search by name or email..."
+                value={searchQuery}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </InputGroup>
+
+            {/* Role Filter */}
+            <select
+              value={filterRole}
+              onChange={(e) => {
+                setFilterRole(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Roles</option>
+              <option value="Admin">Admin</option>
+              <option value="Moderator">Moderator</option>
+              <option value="User">User</option>
+            </select>
+
+            {/* Status Filter */}
+            <select
+              value={filterStatus}
+              onChange={(e) => {
+                setFilterStatus(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+
+            {/* Add User Button */}
+            <Button onClick={handleOpenAddModal} className="bg-blue-600 text-white">
+              + Add User
             </Button>
           </div>
-        }
-      >
+
+          {/* Results Count */}
+          <div className="text-sm text-gray-600">
+            Showing {paginatedUsers.length} of {filteredUsers.length} users
+          </div>
+        </div>
+      </Card>
+
+      {/* Users Table */}
+      <Card>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b bg-gray-50 border-gray-200">
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Email</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Role</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Join Date</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedUsers.length > 0 ? (
+                paginatedUsers.map((user) => (
+                  <tr key={user.id} className="border-b transition-colors border-gray-200 hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{user.role}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <Badge variant={getStatusColor(user.status)} className="inline-block">
+                        {user.status}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{user.joinDate}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleOpenEditModal(user)}
+                          className="bg-blue-500 text-white text-xs px-3 py-1"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="bg-red-500 text-white text-xs px-3 py-1"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-600">
+                    No users found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="p-6 border-t">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={filteredUsers.length}
+              pageSize={itemsPerPage}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
+      </Card>
+
+      {/* User Modal */}
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={isEditMode ? 'Edit User' : 'Add New User'}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">Name</label>
-            <InputGroup
-              placeholder="Enter full name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
+            <InputGroup>
+              <InputGroupInput
+                placeholder="Enter full name"
+                value={formData.name}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+            </InputGroup>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">Email</label>
-            <InputGroup
-              type="email"
-              placeholder="Enter email address"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
+            <InputGroup>
+              <InputGroupInput
+                type="email"
+                placeholder="Enter email address"
+                value={formData.email}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+              />
+            </InputGroup>
           </div>
 
           <div>
@@ -395,7 +340,12 @@ const Users: React.FC = () => {
             <label className="block text-sm font-medium mb-2">Status</label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'Active' | 'Inactive' | 'Suspended' })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  status: e.target.value as 'Active' | 'Inactive' | 'Suspended',
+                })
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="Active">Active</option>
@@ -403,6 +353,14 @@ const Users: React.FC = () => {
               <option value="Suspended">Suspended</option>
             </select>
           </div>
+        </div>
+        <div className="flex gap-2 justify-end mt-6">
+          <Button onClick={handleCloseModal} className="bg-gray-500 text-white">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveUser} className="bg-blue-600 text-white">
+            {isEditMode ? 'Update' : 'Add'} User
+          </Button>
         </div>
       </Modal>
     </div>
