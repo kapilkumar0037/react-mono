@@ -84,8 +84,14 @@ const sidebarGroups: SidebarGroup[] = [
   }
 ];
 
-const AdminSidebar: React.FC<{ collapsed?: boolean }> = ({ collapsed = false }) => {
-  return <Sidebar groups={sidebarGroups} collapsed={collapsed} />;
+const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({ collapsed = false, isDarkMode = false }) => {
+  return (
+    <Sidebar 
+      groups={sidebarGroups} 
+      collapsed={collapsed}
+      className={isDarkMode ? 'dark bg-gray-800' : 'bg-white'}
+    />
+  );
 };
 
 export default AdminSidebar;

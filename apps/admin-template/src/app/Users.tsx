@@ -25,7 +25,11 @@ interface FormData {
   status: 'Active' | 'Inactive' | 'Suspended';
 }
 
-const Users: React.FC = () => {
+interface UsersProps {
+  isDarkMode?: boolean;
+}
+
+const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');

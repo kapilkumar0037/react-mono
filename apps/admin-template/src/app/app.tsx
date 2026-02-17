@@ -11,30 +11,32 @@ function AppLayout() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   return (
-    <div className={`flex h-screen overflow-hidden ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <AdminSidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminNavbar
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-          isDarkMode={isDarkMode}
-          onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-        />
+    <div className={`${isDarkMode ? 'dark' : ''}`}>
+      <div className={`flex h-screen overflow-hidden ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <AdminSidebar isDarkMode={isDarkMode} />
+        
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <AdminNavbar
+            onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+          />
 
-        <main className="flex-1 overflow-y-auto">
-          <Routes>
-            <Route path="/" element={
-              <ErrorBoundary>
-                <Dashboard />
-              </ErrorBoundary>
-            } />
-            <Route path="/users" element={
-              <ErrorBoundary>
-                <Users />
-              </ErrorBoundary>
-            } />
-          </Routes>
-        </main>
+          <main className="flex-1 overflow-y-auto">
+            <Routes>
+              <Route path="/" element={
+                <ErrorBoundary>
+                  <Dashboard isDarkMode={isDarkMode} />
+                </ErrorBoundary>
+              } />
+              <Route path="/users" element={
+                <ErrorBoundary>
+                  <Users isDarkMode={isDarkMode} />
+                </ErrorBoundary>
+              } />
+            </Routes>
+          </main>
+        </div>
       </div>
     </div>
   );
