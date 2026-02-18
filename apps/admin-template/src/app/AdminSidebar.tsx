@@ -75,9 +75,10 @@ const sidebarGroups: SidebarGroup[] = [
       {
         name: 'Configuration',
         items: [
-          { label: 'General Settings', to: '/settings/general' },
-          { label: 'Security', to: '/settings/security' },
-          { label: 'Preferences', to: '/settings/preferences' },
+          { label: 'Profile Settings', to: '/settings' },
+          { label: 'Notifications', to: '/settings' },
+          { label: 'Security', to: '/settings' },
+          { label: 'Preferences', to: '/settings' },
         ]
       }
     ]

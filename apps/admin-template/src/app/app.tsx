@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import Users from './Users';
+import Settings from './Settings';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
@@ -32,6 +33,11 @@ function AppLayout() {
               <Route path="/users" element={
                 <ErrorBoundary>
                   <Users isDarkMode={isDarkMode} />
+                </ErrorBoundary>
+              } />
+              <Route path="/settings" element={
+                <ErrorBoundary>
+                  <Settings isDarkMode={isDarkMode} />
                 </ErrorBoundary>
               } />
             </Routes>
