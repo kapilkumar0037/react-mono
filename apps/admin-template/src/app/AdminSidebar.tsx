@@ -90,7 +90,6 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
     <Sidebar 
       groups={sidebarGroups} 
       collapsed={collapsed}
-      className={isDarkMode ? 'dark bg-gray-800' : 'bg-white'}
     />
   );
 };

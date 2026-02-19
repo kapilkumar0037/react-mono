@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Button, Card, InputGroup, InputGroupInput } from '@react-mono/ui-controls';
 
 interface SettingsProps {
   isDarkMode?: boolean;
