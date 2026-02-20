@@ -1,20 +1,15 @@
-import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import Users from './Users';
 import Settings from './Settings';
 import Login from './Login';
-import ProtectedRoute from './ProtectedRoute';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 
-function AppLayout({ isDarkMode, onToggleDarkMode, isLoggedIn }: { isDarkMode: boolean; onToggleDarkMode: () => void; isLoggedIn: boolean }) {
+function ProtectedLayout({ isDarkMode, onToggleDarkMode }: { isDarkMode: boolean; onToggleDarkMode: () => void }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
 
   return (
     <div className={`${isDarkMode ? 'dark' : ''}`}>
@@ -29,7 +24,65 @@ function AppLayout({ isDarkMode, onToggleDarkMode, isLoggedIn }: { isDarkMode: b
           />
 
           <main className="flex-1 overflow-y-auto">
-            <Routes>
+            <Outlet />
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function App() {
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    // Initialize from localStorage
+    const saved = localStorage.getItem('isLoggedIn');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Persist login state
+  useEffect(() => {
+    localStorage.setItem('isLoggedIn', JSON.stringify(isLoggedIn));
+  }, [isLoggedIn]);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+  };
+
+  // Show loading state briefly to prevent layout flashing
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return null;
+  }
+
+  return (
+    <Router>
+      <div className={`${isDarkMode ? 'dark' : ''}`}>
+        <Routes>
+          {/* Login Route */}
+          <Route path="/login" element={
+            isLoggedIn ? (
+              <Navigate to="/" replace />
+            ) : (
+              <ErrorBoundary>
+                <Login isDarkMode={isDarkMode} onLogin={handleLogin} />
+              </ErrorBoundary>
+            )
+          } />
+
+          {/* Protected routes with layout */}
+          {isLoggedIn && (
+            <Route
+              element={
+                <ProtectedLayout isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} />
+              }
+            >
               <Route path="/" element={
                 <ErrorBoundary>
                   <Dashboard isDarkMode={isDarkMode} />
@@ -45,47 +98,13 @@ function AppLayout({ isDarkMode, onToggleDarkMode, isLoggedIn }: { isDarkMode: b
                   <Settings isDarkMode={isDarkMode} />
                 </ErrorBoundary>
               } />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-        </div>
+            </Route>
+          )}
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"} replace />} />
+        </Routes>
       </div>
-    </div>
-  );
-}
-
-export function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
-
-  return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={
-          isLoggedIn ? (
-            <Navigate to="/" replace />
-          ) : (
-            <ErrorBoundary>
-              <Login isDarkMode={isDarkMode} onLogin={handleLogin} />
-            </ErrorBoundary>
-          )
-        } />
-        <Route path="*" element={
-          <AppLayout 
-            isDarkMode={isDarkMode} 
-            onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-            isLoggedIn={isLoggedIn}
-          />
-        } />
-      </Routes>
     </Router>
   );
 }

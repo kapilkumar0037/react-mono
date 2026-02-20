@@ -66,11 +66,11 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
   };
 
   return (
-    <Navbar className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 h-14 flex items-center border-b border-blue-800 dark:border-gray-700 shadow-sm">
+    <Navbar className={`${isDarkMode ? 'bg-gradient-to-r from-gray-800 via-gray-800 to-gray-800' : 'bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700'} h-14 flex items-center border-b ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} shadow-sm`}>
       <NavbarSection align="end" className="w-full flex items-center justify-between gap-4 relative -ml-3 pr-6">
         <button
           onClick={() => onToggleSidebar?.()}
-          className="text-blue-100 dark:text-gray-300 hover:text-blue-100 dark:hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 hidden md:flex items-center"
+          className="text-blue-100 hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 hidden md:flex items-center"
           title="Toggle Sidebar"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,9 +86,9 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
               placeholder="Search orders, customers..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full px-3 py-2 bg-blue-800 dark:bg-gray-700 text-white dark:text-gray-100 text-sm placeholder-blue-300 dark:placeholder-gray-500 rounded focus:outline-none focus:bg-blue-700 dark:focus:bg-gray-600 transition-colors"
+              className={`w-full px-3 py-2 ${isDarkMode ? 'bg-gray-700' : 'bg-blue-800'} text-white text-sm ${isDarkMode ? 'placeholder-gray-500' : 'placeholder-blue-300'} rounded focus:outline-none ${isDarkMode ? 'focus:bg-gray-600' : 'focus:bg-blue-700'} transition-colors`}
             />
-            <svg className="absolute right-3 top-2.5 w-4 h-4 text-blue-300 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`absolute right-3 top-2.5 w-4 h-4 ${isDarkMode ? 'text-gray-500' : 'text-blue-300'} pointer-events-none`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -99,7 +99,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
           <div className="relative">
             <button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className="text-blue-100 dark:text-gray-300 hover:text-blue-100 dark:hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 relative flex items-center"
+              className="text-blue-100 hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 relative flex items-center"
               title="Notifications"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +162,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
           {/* Dark Mode Toggle */}
           <button
             onClick={() => onToggleDarkMode?.()}
-            className="text-blue-100 dark:text-gray-300 hover:text-blue-100 dark:hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 flex items-center"
+            className="text-blue-100 hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 flex items-center"
             title={isDarkMode ? 'Light Mode' : 'Dark Mode'}
           >
             {isDarkMode ? (
@@ -179,7 +179,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="text-blue-100 dark:text-gray-300 hover:text-blue-100 dark:hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-3 py-2 rounded transition-colors duration-150 flex items-center gap-2"
+            className="text-blue-100 hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-3 py-2 rounded transition-colors duration-150 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
