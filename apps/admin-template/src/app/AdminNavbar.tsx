@@ -52,18 +52,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
     }
   };
 
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case 'success':
-        return 'bg-green-50 border-l-4 border-green-400';
-      case 'warning':
-        return 'bg-yellow-50 border-l-4 border-yellow-400';
-      case 'error':
-        return 'bg-red-50 border-l-4 border-red-400';
-      default:
-        return 'bg-blue-50 border-l-4 border-blue-400';
-    }
-  };
+
 
   return (
     <Navbar className={`${isDarkMode ? 'bg-gradient-to-r from-gray-800 via-gray-800 to-gray-800' : 'bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700'} h-14 flex items-center border-b ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} shadow-sm`}>

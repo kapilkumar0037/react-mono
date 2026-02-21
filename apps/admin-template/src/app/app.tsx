@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-
 import Dashboard from './Dashboard';
 import Users from './Users';
 import Settings from './Settings';
+import Reports from './Reports';
 import Login from './Login';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
@@ -96,6 +97,11 @@ export function App() {
               <Route path="/settings" element={
                 <ErrorBoundary>
                   <Settings isDarkMode={isDarkMode} />
+                </ErrorBoundary>
+              } />
+              <Route path="/reports" element={
+                <ErrorBoundary>
+                  <Reports isDarkMode={isDarkMode} />
                 </ErrorBoundary>
               } />
             </Route>
