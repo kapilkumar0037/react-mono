@@ -4,6 +4,7 @@ import Dashboard from './Dashboard';
 import Users from './Users';
 import Settings from './Settings';
 import Reports from './Reports';
+import ActivityLog from './ActivityLog';
 import Login from './Login';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
@@ -102,6 +103,11 @@ export function App() {
               <Route path="/reports" element={
                 <ErrorBoundary>
                   <Reports isDarkMode={isDarkMode} />
+                </ErrorBoundary>
+              } />
+              <Route path="/activity" element={
+                <ErrorBoundary>
+                  <ActivityLog isDarkMode={isDarkMode} />
                 </ErrorBoundary>
               } />
             </Route>
