@@ -348,7 +348,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ isDarkMode = false }) => {
                       No activities found
                     </td>
                   </tr>
-                )}}
+                )}
               </tbody>
             </table>
           </div>
