@@ -5,6 +5,7 @@ import Users from './Users';
 import Settings from './Settings';
 import Reports from './Reports';
 import ActivityLog from './ActivityLog';
+import NotificationsCenter from './NotificationsCenter';
 import Login from './Login';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
@@ -108,6 +109,11 @@ export function App() {
               <Route path="/activity" element={
                 <ErrorBoundary>
                   <ActivityLog isDarkMode={isDarkMode} />
+                </ErrorBoundary>
+              } />
+              <Route path="/notifications" element={
+                <ErrorBoundary>
+                  <NotificationsCenter isDarkMode={isDarkMode} />
                 </ErrorBoundary>
               } />
             </Route>

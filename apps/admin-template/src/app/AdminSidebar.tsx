@@ -60,6 +60,7 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
       items: [
         { label: 'Reports', to: '/reports' },
         { label: 'Activity Log', to: '/activity' },
+        { label: 'Notifications', to: '/notifications' },
       ]
     },
   ];
