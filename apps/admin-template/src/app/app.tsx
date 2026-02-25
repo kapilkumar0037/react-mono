@@ -6,6 +6,7 @@ import Settings from './Settings';
 import Reports from './Reports';
 import ActivityLog from './ActivityLog';
 import NotificationsCenter from './NotificationsCenter';
+import SystemHealth from './SystemHealth';
 import Login from './Login';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
@@ -114,6 +115,11 @@ export function App() {
               <Route path="/notifications" element={
                 <ErrorBoundary>
                   <NotificationsCenter isDarkMode={isDarkMode} />
+                </ErrorBoundary>
+              } />
+              <Route path="/system-health" element={
+                <ErrorBoundary>
+                  <SystemHealth isDarkMode={isDarkMode} />
                 </ErrorBoundary>
               } />
             </Route>
