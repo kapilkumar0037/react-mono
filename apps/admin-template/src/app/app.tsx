@@ -7,6 +7,7 @@ import Reports from './Reports';
 import ActivityLog from './ActivityLog';
 import NotificationsCenter from './NotificationsCenter';
 import SystemHealth from './SystemHealth';
+import BackupRecovery from './BackupRecovery';
 import Login from './Login';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
@@ -120,6 +121,11 @@ export function App() {
               <Route path="/system-health" element={
                 <ErrorBoundary>
                   <SystemHealth isDarkMode={isDarkMode} />
+                </ErrorBoundary>
+              } />
+              <Route path="/backup-recovery" element={
+                <ErrorBoundary>
+                  <BackupRecovery isDarkMode={isDarkMode} />
                 </ErrorBoundary>
               } />
             </Route>

@@ -72,6 +72,7 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
       ),
       items: [
         { label: 'System Health', to: '/system-health' },
+        { label: 'Backup & Recovery', to: '/backup-recovery' },
       ]
     },
   ];
