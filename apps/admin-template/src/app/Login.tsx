@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 interface LoginProps {
   isDarkMode?: boolean;
-  onLogin?: (credentials: { email: string; password: string }) => void;
+  onLogin?: (credentials: { email: string; password: string; rememberMe: boolean }) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
@@ -32,7 +32,7 @@ const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
       }
 
       // Simulate successful login
-      onLogin?.({ email, password });
+      onLogin?.({ email, password, rememberMe });
       setLoading(false);
     }, 500);
   };

@@ -9,9 +9,18 @@ interface AdminNavbarProps {
   onSearch?: (query: string) => void;
   isDarkMode?: boolean;
   onToggleDarkMode?: () => void;
+  userEmail?: string;
+  onLogout?: () => void;
 }
 
-const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, isDarkMode, onToggleDarkMode }) => {
+const AdminNavbar: React.FC<AdminNavbarProps> = ({
+  onToggleSidebar,
+  onSearch,
+  isDarkMode,
+  onToggleDarkMode,
+  userEmail,
+  onLogout,
+}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -173,7 +182,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span>Admin User</span>
+            <span>{userEmail ?? 'Admin User'}</span>
           </button>
 
           {isDropdownOpen && (
@@ -196,6 +205,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({ onToggleSidebar, onSearch, is
               </button>
               <button
                 onClick={() => {
+                  onLogout?.();
                   setIsDropdownOpen(false);
                 }}
                 className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 last:rounded-b-lg transition-colors border-t border-gray-200 dark:border-gray-700"

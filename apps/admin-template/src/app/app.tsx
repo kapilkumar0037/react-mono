@@ -12,8 +12,27 @@ import Login from './Login';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
+import ProtectedRoute from './ProtectedRoute';
+import {
+  AuthSession,
+  clearStoredSession,
+  persistSession,
+  persistTheme,
+  readStoredSession,
+  readStoredTheme,
+} from './authStorage';
 
-function ProtectedLayout({ isDarkMode, onToggleDarkMode }: { isDarkMode: boolean; onToggleDarkMode: () => void }) {
+function ProtectedLayout({
+  isDarkMode,
+  onToggleDarkMode,
+  userEmail,
+  onLogout,
+}: {
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
+  userEmail?: string;
+  onLogout: () => void;
+}) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
@@ -26,6 +45,8 @@ function ProtectedLayout({ isDarkMode, onToggleDarkMode }: { isDarkMode: boolean
             onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
             isDarkMode={isDarkMode}
             onToggleDarkMode={onToggleDarkMode}
+            userEmail={userEmail}
+            onLogout={onLogout}
           />
 
           <main className="flex-1 overflow-y-auto">
@@ -38,21 +59,29 @@ function ProtectedLayout({ isDarkMode, onToggleDarkMode }: { isDarkMode: boolean
 }
 
 export function App() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    // Initialize from localStorage
-    const saved = localStorage.getItem('isLoggedIn');
-    return saved ? JSON.parse(saved) : false;
-  });
+  const [isDarkMode, setIsDarkMode] = useState(() => readStoredTheme());
+  const [session, setSession] = useState<AuthSession | null>(() => readStoredSession());
   const [isLoading, setIsLoading] = useState(false);
 
-  // Persist login state
-  useEffect(() => {
-    localStorage.setItem('isLoggedIn', JSON.stringify(isLoggedIn));
-  }, [isLoggedIn]);
+  const isAuthenticated = session !== null;
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
+  useEffect(() => {
+    persistTheme(isDarkMode);
+  }, [isDarkMode]);
+
+  const handleLogin = (credentials: { email: string; password: string; rememberMe: boolean }) => {
+    const nextSession: AuthSession = {
+      email: credentials.email,
+      loginAt: new Date().toISOString(),
+    };
+
+    persistSession(nextSession, credentials.rememberMe);
+    setSession(nextSession);
+  };
+
+  const handleLogout = () => {
+    clearStoredSession();
+    setSession(null);
   };
 
   // Show loading state briefly to prevent layout flashing
@@ -72,7 +101,7 @@ export function App() {
         <Routes>
           {/* Login Route */}
           <Route path="/login" element={
-            isLoggedIn ? (
+            isAuthenticated ? (
               <Navigate to="/" replace />
             ) : (
               <ErrorBoundary>
@@ -82,10 +111,15 @@ export function App() {
           } />
 
           {/* Protected routes with layout */}
-          {isLoggedIn && (
+          <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
             <Route
               element={
-                <ProtectedLayout isDarkMode={isDarkMode} onToggleDarkMode={() => setIsDarkMode(!isDarkMode)} />
+                <ProtectedLayout
+                  isDarkMode={isDarkMode}
+                  onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+                  userEmail={session?.email}
+                  onLogout={handleLogout}
+                />
               }
             >
               <Route path="/" element={
@@ -129,10 +163,10 @@ export function App() {
                 </ErrorBoundary>
               } />
             </Route>
-          )}
+          </Route>
 
           {/* Fallback */}
-          <Route path="*" element={<Navigate to={isLoggedIn ? "/" : "/login"} replace />} />
+          <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
         </Routes>
       </div>
     </Router>
