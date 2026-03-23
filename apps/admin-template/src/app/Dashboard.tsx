@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 
 interface DashboardProps {
   isDarkMode?: boolean;
@@ -9,7 +10,7 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
   const [activeChartTab, setActiveChartTab] = useState<'sales' | 'revenue' | 'customers'>('sales');
   const [selectedDateFilter, setSelectedDateFilter] = useState<'today' | 'week' | 'month' | 'year'>('month');
-  const [searchQuery] = useState(''); // Used in JSX
+  const [searchQuery] = useSyncedSearchQuery();
 
   // Pagination state
   const [ordersPage, setOrdersPage] = useState(1);

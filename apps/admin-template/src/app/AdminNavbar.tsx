@@ -3,10 +3,10 @@ import {
   Navbar,
   NavbarSection,
 } from '@react-mono/ui-controls';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
 interface AdminNavbarProps {
   onToggleSidebar?: () => void;
-  onSearch?: (query: string) => void;
   isDarkMode?: boolean;
   onToggleDarkMode?: () => void;
   userEmail?: string;
@@ -15,15 +15,15 @@ interface AdminNavbarProps {
 
 const AdminNavbar: React.FC<AdminNavbarProps> = ({
   onToggleSidebar,
-  onSearch,
   isDarkMode,
   onToggleDarkMode,
   userEmail,
   onLogout,
 }) => {
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState([
     { id: 1, message: 'High inventory levels in Electronics', type: 'info', time: '5 min ago', read: false },
     { id: 2, message: 'New customer milestone: 1000 users reached!', type: 'success', time: '1 hour ago', read: false },
@@ -31,11 +31,19 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
     { id: 4, message: 'System backup completed successfully', type: 'success', time: '3 hours ago', read: true },
   ]);
 
+  const searchQuery = searchParams.get('q') ?? '';
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleSearch = (value: string) => {
-    setSearchQuery(value);
-    onSearch?.(value);
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (value.trim()) {
+      nextParams.set('q', value);
+    } else {
+      nextParams.delete('q');
+    }
+
+    setSearchParams(nextParams, { replace: true });
   };
 
   const dismissNotification = (id: number) => {
@@ -61,6 +69,21 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
     }
   };
 
+  const searchPlaceholder = (() => {
+    switch (location.pathname) {
+      case '/users':
+        return 'Search users by name or email...';
+      case '/activity':
+        return 'Search activity by user, action, or detail...';
+      case '/notifications':
+        return 'Search notifications...';
+      case '/reports':
+        return 'Search reports, metrics, and products...';
+      default:
+        return 'Search orders, customers...';
+    }
+  })();
+
 
 
   return (
@@ -81,7 +104,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
           <div className="relative">
             <input
               type="text"
-              placeholder="Search orders, customers..."
+              placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className={`w-full px-3 py-2 ${isDarkMode ? 'bg-gray-700' : 'bg-blue-800'} text-white text-sm ${isDarkMode ? 'placeholder-gray-500' : 'placeholder-blue-300'} rounded focus:outline-none ${isDarkMode ? 'focus:bg-gray-600' : 'focus:bg-blue-700'} transition-colors`}

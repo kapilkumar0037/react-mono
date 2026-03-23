@@ -8,6 +8,7 @@ import {
   Badge,
   Pagination,
 } from '@react-mono/ui-controls';
+import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 
 interface User {
   id: number;
@@ -30,7 +31,7 @@ interface UsersProps {
 }
 
 const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);

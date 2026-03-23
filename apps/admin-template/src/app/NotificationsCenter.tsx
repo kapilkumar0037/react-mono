@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card } from '@react-mono/ui-controls';
+import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 
 interface Notification {
   id: number;
@@ -16,6 +17,7 @@ interface NotificationsCenterProps {
 }
 
 const NotificationsCenter: React.FC<NotificationsCenterProps> = ({ isDarkMode = false }) => {
+  const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: 1,
@@ -115,7 +117,12 @@ const NotificationsCenter: React.FC<NotificationsCenterProps> = ({ isDarkMode = 
   const filtered = notifications.filter((notif) => {
     const typeMatch = filterType === 'all' || notif.type === filterType;
     const readMatch = filterRead === 'all' || (filterRead === 'unread' ? !notif.read : notif.read);
-    return typeMatch && readMatch;
+    const searchMatch =
+      searchQuery === '' ||
+      notif.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      notif.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      notif.source.toLowerCase().includes(searchQuery.toLowerCase());
+    return typeMatch && readMatch && searchMatch;
   });
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -218,7 +225,20 @@ const NotificationsCenter: React.FC<NotificationsCenterProps> = ({ isDarkMode = 
 
         {/* Filters */}
         <div className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Search
+              </label>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Title, message, or source..."
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+            </div>
+
             {/* Type Filter */}
             <div>
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>

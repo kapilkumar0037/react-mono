@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card } from '@react-mono/ui-controls';
+import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 
 interface ActivityLog {
   id: number;
@@ -18,7 +19,7 @@ interface ActivityLogProps {
 const ActivityLog: React.FC<ActivityLogProps> = ({ isDarkMode = false }) => {
   const [filteredCategory, setFilteredCategory] = useState('all');
   const [filteredStatus, setFilteredStatus] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [currentPage, setCurrentPage] = useState(1);
 
   // Mock activity data
