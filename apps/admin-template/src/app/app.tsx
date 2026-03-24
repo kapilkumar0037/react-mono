@@ -13,6 +13,7 @@ import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 import ProtectedRoute from './ProtectedRoute';
+import { ToastProvider } from '@react-mono/ui-controls';
 import {
   AuthSession,
   clearStoredSession,
@@ -96,80 +97,82 @@ export function App() {
   }
 
   return (
-    <Router>
-      <div className={`${isDarkMode ? 'dark' : ''}`}>
-        <Routes>
-          {/* Login Route */}
-          <Route path="/login" element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
-              <ErrorBoundary>
-                <Login isDarkMode={isDarkMode} onLogin={handleLogin} />
-              </ErrorBoundary>
-            )
-          } />
+    <ToastProvider>
+      <Router>
+        <div className={`${isDarkMode ? 'dark' : ''}`}>
+          <Routes>
+            {/* Login Route */}
+            <Route path="/login" element={
+              isAuthenticated ? (
+                <Navigate to="/" replace />
+              ) : (
+                <ErrorBoundary>
+                  <Login isDarkMode={isDarkMode} onLogin={handleLogin} />
+                </ErrorBoundary>
+              )
+            } />
 
-          {/* Protected routes with layout */}
-          <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
-            <Route
-              element={
-                <ProtectedLayout
-                  isDarkMode={isDarkMode}
-                  onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-                  userEmail={session?.email}
-                  onLogout={handleLogout}
-                />
-              }
-            >
-              <Route path="/" element={
-                <ErrorBoundary>
-                  <Dashboard isDarkMode={isDarkMode} />
-                </ErrorBoundary>
-              } />
-              <Route path="/users" element={
-                <ErrorBoundary>
-                  <Users isDarkMode={isDarkMode} />
-                </ErrorBoundary>
-              } />
-              <Route path="/settings" element={
-                <ErrorBoundary>
-                  <Settings isDarkMode={isDarkMode} />
-                </ErrorBoundary>
-              } />
-              <Route path="/reports" element={
-                <ErrorBoundary>
-                  <Reports isDarkMode={isDarkMode} />
-                </ErrorBoundary>
-              } />
-              <Route path="/activity" element={
-                <ErrorBoundary>
-                  <ActivityLog isDarkMode={isDarkMode} />
-                </ErrorBoundary>
-              } />
-              <Route path="/notifications" element={
-                <ErrorBoundary>
-                  <NotificationsCenter isDarkMode={isDarkMode} />
-                </ErrorBoundary>
-              } />
-              <Route path="/system-health" element={
-                <ErrorBoundary>
-                  <SystemHealth isDarkMode={isDarkMode} />
-                </ErrorBoundary>
-              } />
-              <Route path="/backup-recovery" element={
-                <ErrorBoundary>
-                  <BackupRecovery isDarkMode={isDarkMode} />
-                </ErrorBoundary>
-              } />
+            {/* Protected routes with layout */}
+            <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
+              <Route
+                element={
+                  <ProtectedLayout
+                    isDarkMode={isDarkMode}
+                    onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+                    userEmail={session?.email}
+                    onLogout={handleLogout}
+                  />
+                }
+              >
+                <Route path="/" element={
+                  <ErrorBoundary>
+                    <Dashboard isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/users" element={
+                  <ErrorBoundary>
+                    <Users isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/settings" element={
+                  <ErrorBoundary>
+                    <Settings isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/reports" element={
+                  <ErrorBoundary>
+                    <Reports isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/activity" element={
+                  <ErrorBoundary>
+                    <ActivityLog isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/notifications" element={
+                  <ErrorBoundary>
+                    <NotificationsCenter isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/system-health" element={
+                  <ErrorBoundary>
+                    <SystemHealth isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/backup-recovery" element={
+                  <ErrorBoundary>
+                    <BackupRecovery isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
-        </Routes>
-      </div>
-    </Router>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </ToastProvider>
   );
 }
 

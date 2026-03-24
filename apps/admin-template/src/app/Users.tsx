@@ -7,6 +7,7 @@ import {
   Card,
   Badge,
   Pagination,
+  useToast,
 } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 
@@ -31,6 +32,7 @@ interface UsersProps {
 }
 
 const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
+  const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -38,6 +40,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [userPendingDelete, setUserPendingDelete] = useState<User | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -108,7 +111,10 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
 
   const handleSaveUser = () => {
     if (!formData.name || !formData.email) {
-      alert('Please fill in all fields');
+      showToast({
+        message: 'Please fill in all fields before saving the user.',
+        variant: 'warning',
+      });
       return;
     }
 
@@ -127,6 +133,10 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
             : user
         )
       );
+      showToast({
+        message: `${formData.name} was updated successfully.`,
+        variant: 'success',
+      });
     } else {
       // Add new user
       const newUser: User = {
@@ -138,15 +148,30 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
         joinDate: new Date().toISOString().split('T')[0],
       };
       setUsers([...users, newUser]);
+      showToast({
+        message: `${newUser.name} was added to the user directory.`,
+        variant: 'success',
+      });
     }
 
     handleCloseModal();
   };
 
-  const handleDeleteUser = (id: number) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter((user) => user.id !== id));
+  const handleDeleteUser = (user: User) => {
+    setUserPendingDelete(user);
+  };
+
+  const confirmDeleteUser = () => {
+    if (!userPendingDelete) {
+      return;
     }
+
+    setUsers(users.filter((user) => user.id !== userPendingDelete.id));
+    showToast({
+      message: `${userPendingDelete.name} was removed from the user directory.`,
+      variant: 'info',
+    });
+    setUserPendingDelete(null);
   };
 
   const getStatusColor = (status: string) => {
@@ -265,7 +290,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
                           Edit
                         </Button>
                         <Button
-                          onClick={() => handleDeleteUser(user.id)}
+                          onClick={() => handleDeleteUser(user)}
                           className="bg-red-500 text-white text-xs px-3 py-1"
                         >
                           Delete
@@ -366,6 +391,29 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
           <Button onClick={handleSaveUser} className="bg-blue-600 text-white">
             {isEditMode ? 'Update' : 'Add'} User
           </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={userPendingDelete !== null}
+        onClose={() => setUserPendingDelete(null)}
+        title="Delete User"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            {userPendingDelete
+              ? `Are you sure you want to delete ${userPendingDelete.name}? This mock action removes them from the current session.`
+              : 'Are you sure you want to delete this user?'}
+          </p>
+          <div className="flex gap-2 justify-end">
+            <Button onClick={() => setUserPendingDelete(null)} className="bg-gray-500 text-white">
+              Cancel
+            </Button>
+            <Button onClick={confirmDeleteUser} className="bg-red-600 text-white">
+              Delete User
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>

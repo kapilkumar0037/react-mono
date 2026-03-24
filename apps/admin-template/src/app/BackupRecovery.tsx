@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card } from '@react-mono/ui-controls';
+import { Card, Modal, useToast } from '@react-mono/ui-controls';
 
 interface Backup {
   id: number;
@@ -29,6 +29,7 @@ interface BackupRecoveryProps {
 }
 
 const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) => {
+  const { showToast } = useToast();
   const [backups, setBackups] = useState<Backup[]>([
     {
       id: 1,
@@ -133,6 +134,7 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
 
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [selectedBackup, setSelectedBackup] = useState<Backup | null>(null);
+  const [backupPendingDelete, setBackupPendingDelete] = useState<Backup | null>(null);
 
   const backupStats = [
     { label: 'Total Backups', value: backups.length.toString(), color: 'blue' },
@@ -183,7 +185,15 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
   };
 
   const deleteBackup = (id: number) => {
+    const backupToDelete = backups.find((backup) => backup.id === id);
     setBackups(backups.filter(b => b.id !== id));
+
+    if (backupToDelete) {
+      showToast({
+        message: `${backupToDelete.name} was deleted from backup history.`,
+        variant: 'info',
+      });
+    }
   };
 
   return (
@@ -199,7 +209,15 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
               Manage system backups, schedules, and data recovery
             </p>
           </div>
-          <button onClick={() => alert('Creating manual backup...')} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+          <button
+            onClick={() =>
+              showToast({
+                message: 'Manual backup started. A new backup entry will appear once processing completes.',
+                variant: 'success',
+              })
+            }
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
             + Create Backup
           </button>
         </div>
@@ -273,6 +291,11 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
               >
                 + Add Schedule
               </button>
+              {showScheduleForm && (
+                <div className={`rounded border p-3 text-sm ${isDarkMode ? 'border-gray-600 bg-gray-700 text-gray-300' : 'border-blue-200 bg-blue-50 text-blue-700'}`}>
+                  Schedule builder is the next step here. For now, this confirms where the schedule form will live.
+                </div>
+              )}
             </div>
           </Card>
 
@@ -390,7 +413,7 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
                           Restore
                         </button>
                         <button
-                          onClick={() => deleteBackup(backup.id)}
+                          onClick={() => setBackupPendingDelete(backup)}
                           title="Delete"
                           className={`px-2 py-1 text-xs rounded transition-colors ${
                             isDarkMode
@@ -409,42 +432,84 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
           </div>
         </Card>
 
-        {/* Restore Confirmation Modal */}
-        {selectedBackup && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <Card className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} max-w-md`}>
-              <div>
-                <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  Restore from Backup
-                </h3>
-                <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Are you sure you want to restore from backup "{selectedBackup.name}"? This action will overwrite current data.
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setSelectedBackup(null)}
-                    className={`flex-1 px-4 py-2 rounded border transition-colors ${
-                      isDarkMode
-                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
-                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      alert(`Restoring from ${selectedBackup.name}...`);
-                      setSelectedBackup(null);
-                    }}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                  >
-                    Restore
-                  </button>
-                </div>
-              </div>
-            </Card>
+        <Modal
+          isOpen={selectedBackup !== null}
+          onClose={() => setSelectedBackup(null)}
+          title="Restore from Backup"
+          size="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              {selectedBackup
+                ? `Are you sure you want to restore from "${selectedBackup.name}"? This mock action would overwrite current data.`
+                : 'Are you sure you want to restore from this backup?'}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSelectedBackup(null)}
+                className={`flex-1 px-4 py-2 rounded border transition-colors ${
+                  isDarkMode
+                    ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedBackup) {
+                    showToast({
+                      message: `Restore started from ${selectedBackup.name}.`,
+                      variant: 'warning',
+                    });
+                  }
+                  setSelectedBackup(null);
+                }}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              >
+                Restore
+              </button>
+            </div>
           </div>
-        )}
+        </Modal>
+
+        <Modal
+          isOpen={backupPendingDelete !== null}
+          onClose={() => setBackupPendingDelete(null)}
+          title="Delete Backup"
+          size="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              {backupPendingDelete
+                ? `Delete "${backupPendingDelete.name}" from backup history?`
+                : 'Delete this backup from backup history?'}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setBackupPendingDelete(null)}
+                className={`flex-1 px-4 py-2 rounded border transition-colors ${
+                  isDarkMode
+                    ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (backupPendingDelete) {
+                    deleteBackup(backupPendingDelete.id);
+                  }
+                  setBackupPendingDelete(null);
+                }}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );

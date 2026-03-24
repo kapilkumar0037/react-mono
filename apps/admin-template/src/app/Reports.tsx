@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Badge } from '@react-mono/ui-controls';
+import { Card, Badge, useToast } from '@react-mono/ui-controls';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface ReportsProps {
@@ -7,6 +7,7 @@ interface ReportsProps {
 }
 
 const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('sales');
   const [dateRange, setDateRange] = useState({ start: '2024-01-01', end: '2024-12-31' });
 
@@ -55,7 +56,10 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
 
   const exportReport = (format: string) => {
     const reportName = `${activeTab}-report-${new Date().toISOString().split('T')[0]}`;
-    alert(`Exporting ${reportName} as ${format.toUpperCase()}`);
+    showToast({
+      message: `Exporting ${reportName} as ${format.toUpperCase()}.`,
+      variant: 'info',
+    });
   };
 
   return (
@@ -100,7 +104,15 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
               <button onClick={() => exportReport('pdf')} className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
                 Export PDF
               </button>
-              <button onClick={() => alert('Report generated!')} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              <button
+                onClick={() =>
+                  showToast({
+                    message: `Generated ${activeTab} report for ${dateRange.start} to ${dateRange.end}.`,
+                    variant: 'success',
+                  })
+                }
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
                 Generate Report
               </button>
             </div>
