@@ -36,6 +36,7 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
         </svg>
       ),
       items: [
+        { label: 'Orders', to: '/orders' },
         { label: 'Users', to: '/users' },
       ]
     },

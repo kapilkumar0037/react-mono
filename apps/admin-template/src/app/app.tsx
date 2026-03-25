@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Dashboard from './Dashboard';
+import Orders from './Orders';
 import Users from './Users';
 import Settings from './Settings';
 import Reports from './Reports';
@@ -132,6 +133,11 @@ export function App() {
                 <Route path="/users" element={
                   <ErrorBoundary>
                     <Users isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/orders" element={
+                  <ErrorBoundary>
+                    <Orders isDarkMode={isDarkMode} />
                   </ErrorBoundary>
                 } />
                 <Route path="/settings" element={
