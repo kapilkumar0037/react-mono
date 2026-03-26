@@ -202,28 +202,28 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
   const getPaymentClasses = (paymentStatus: PaymentStatus) => {
     switch (paymentStatus) {
       case 'Paid':
-        return 'bg-green-100 text-green-700';
+        return 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200';
       case 'Pending':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200';
       case 'Failed':
-        return 'bg-red-100 text-red-700';
+        return 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200';
       case 'Refunded':
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200';
     }
   };
 
   const getPriorityClasses = (priority: FulfillmentPriority) => {
     switch (priority) {
       case 'High':
-        return 'bg-red-100 text-red-700';
+        return 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200';
       case 'Medium':
-        return 'bg-amber-100 text-amber-700';
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200';
       case 'Low':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200';
     }
   };
 
@@ -288,12 +288,19 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {orderStats.map((stat) => (
-            <Card key={stat.label} className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} border-l-4 ${stat.tone}`}>
-              <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{stat.label}</p>
-              <p className={`mt-2 text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{stat.value}</p>
-            </Card>
+            <div
+              key={stat.label}
+              className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-3 border-l-4 ${stat.tone}`}
+            >
+              <div className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-xs font-medium`}>
+                {stat.label}
+              </div>
+              <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {stat.value}
+              </div>
+            </div>
           ))}
         </div>
 
@@ -451,42 +458,42 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
         {selectedOrder && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <p className="text-xs uppercase tracking-wide text-gray-500">Customer</p>
-                <p className="mt-2 font-semibold text-gray-900">{selectedOrder.customer}</p>
-                <p className="text-sm text-gray-600">{selectedOrder.email}</p>
+              <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}>
+                <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Customer</p>
+                <p className={`mt-2 font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{selectedOrder.customer}</p>
+                <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{selectedOrder.email}</p>
               </Card>
-              <Card>
-                <p className="text-xs uppercase tracking-wide text-gray-500">Fulfillment</p>
-                <p className="mt-2 font-semibold text-gray-900">{selectedOrder.shippingMethod}</p>
-                <p className="text-sm text-gray-600">ETA {selectedOrder.deliveryEta}</p>
+              <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}>
+                <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Fulfillment</p>
+                <p className={`mt-2 font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{selectedOrder.shippingMethod}</p>
+                <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>ETA {selectedOrder.deliveryEta}</p>
               </Card>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-500">Status</p>
+                <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Status</p>
                 <div className="mt-2">
                   <Badge variant={getStatusBadge(selectedOrder.status)}>{selectedOrder.status}</Badge>
                 </div>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-500">Payment</p>
-                <p className="mt-2 font-semibold text-gray-900">{selectedOrder.paymentStatus}</p>
+                <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Payment</p>
+                <p className={`mt-2 font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{selectedOrder.paymentStatus}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-500">Order Total</p>
-                <p className="mt-2 font-semibold text-gray-900">${selectedOrder.total.toFixed(2)}</p>
+                <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Order Total</p>
+                <p className={`mt-2 font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>${selectedOrder.total.toFixed(2)}</p>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-500">Placed</p>
-                <p className="mt-2 font-semibold text-gray-900">{selectedOrder.createdAt}</p>
+                <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Placed</p>
+                <p className={`mt-2 font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{selectedOrder.createdAt}</p>
               </div>
             </div>
 
-            <div className="rounded-lg border border-gray-200 p-4">
-              <h3 className="text-sm font-semibold text-gray-900">Operational Notes</h3>
-              <ul className="mt-3 space-y-2 text-sm text-gray-600">
+            <div className={`rounded-lg border p-4 ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'}`}>
+              <h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Operational Notes</h3>
+              <ul className={`mt-3 space-y-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                 <li>Channel: {selectedOrder.channel}</li>
                 <li>Priority: {selectedOrder.priority}</li>
                 <li>Item count: {selectedOrder.items}</li>
