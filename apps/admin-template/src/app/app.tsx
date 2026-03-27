@@ -40,7 +40,7 @@ function ProtectedLayout({
   return (
     <div className={`${isDarkMode ? 'dark' : ''}`}>
       <div className={`flex h-screen overflow-hidden ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <AdminSidebar isDarkMode={isDarkMode} />
+        <AdminSidebar collapsed={sidebarCollapsed} isDarkMode={isDarkMode} />
         
         <div className="flex-1 flex flex-col overflow-hidden">
           <AdminNavbar

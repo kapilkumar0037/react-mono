@@ -89,11 +89,13 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
   };
 
   return (
-    <div className={`flex flex-col h-screen ${isDarkMode ? 'bg-gradient-to-b from-gray-800 via-gray-800 to-gray-800' : 'bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700'} border-r ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} w-64`}>
+    <div
+      className={`flex flex-col h-screen transition-all duration-200 ${isDarkMode ? 'bg-gradient-to-b from-gray-800 via-gray-800 to-gray-800' : 'bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700'} border-r ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${collapsed ? 'w-20' : 'w-64'}`}
+    >
       {/* Header */}
-      <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-blue-600'}`}>
-        <Link to="/" className={`text-lg font-bold text-white`}>
-          Admin
+      <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${collapsed ? 'flex justify-center' : ''}`}>
+        <Link to="/" className={`text-lg font-bold text-white whitespace-nowrap`}>
+          {collapsed ? 'A' : 'Admin'}
         </Link>
       </div>
 
@@ -104,27 +106,32 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
             {/* Group Header */}
             <button
               onClick={() => toggleGroup(group.name)}
-              className={`w-full flex items-center gap-3 px-2 py-2 rounded-md transition-colors text-blue-100 hover:text-white ${
+              className={`w-full flex items-center px-2 py-2 rounded-md transition-colors text-blue-100 hover:text-white ${
                 isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-600'
-              }`}
+              } ${collapsed ? 'justify-center' : 'gap-3'}`}
+              title={collapsed ? group.name : undefined}
             >
               <span className="text-blue-100">
                 {group.icon}
               </span>
-              <span className="flex-1 text-sm font-medium text-left">{group.name}</span>
-              <svg
-                className={`w-4 h-4 transition-transform ${expandedGroups.includes(group.name) ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
+              {!collapsed && (
+                <>
+                  <span className="flex-1 text-sm font-medium text-left">{group.name}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${expandedGroups.includes(group.name) ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </>
+              )}
             </button>
 
             {/* Group Items */}
             {expandedGroups.includes(group.name) && (
-              <div className="space-y-1 ml-6">
+              <div className={`space-y-1 ${collapsed ? '' : 'ml-6'}`}>
                 {group.items.map((item) => (
                   <Link
                     key={item.to}
@@ -137,9 +144,10 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
                         : isDarkMode
                         ? 'text-blue-100 hover:text-white hover:bg-gray-700'
                         : 'text-blue-100 hover:text-white hover:bg-blue-600'
-                    }`}
+                    } ${collapsed ? 'text-center' : ''}`}
+                    title={collapsed ? item.label : undefined}
                   >
-                    {item.label}
+                    {collapsed ? item.label.charAt(0) : item.label}
                   </Link>
                 ))}
               </div>
@@ -149,9 +157,9 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
       </nav>
 
       {/* Footer */}
-      <div className={`p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-blue-600'}`}>
+      <div className={`p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${collapsed ? 'text-center' : ''}`}>
         <p className="text-xs text-blue-200">
-          Admin Dashboard v1.0.0
+          {collapsed ? 'v1.0' : 'Admin Dashboard v1.0.0'}
         </p>
       </div>
     </div>
