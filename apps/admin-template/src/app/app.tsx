@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import Orders from './Orders';
+import ReturnsRefunds from './ReturnsRefunds';
 import Users from './Users';
 import Settings from './Settings';
 import Reports from './Reports';
@@ -9,6 +10,7 @@ import ActivityLog from './ActivityLog';
 import NotificationsCenter from './NotificationsCenter';
 import SystemHealth from './SystemHealth';
 import BackupRecovery from './BackupRecovery';
+import ApiKeyManagement from './ApiKeyManagement';
 import Login from './Login';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
@@ -140,6 +142,11 @@ export function App() {
                     <Orders isDarkMode={isDarkMode} />
                   </ErrorBoundary>
                 } />
+                <Route path="/returns-refunds" element={
+                  <ErrorBoundary>
+                    <ReturnsRefunds isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
                 <Route path="/settings" element={
                   <ErrorBoundary>
                     <Settings isDarkMode={isDarkMode} />
@@ -168,6 +175,11 @@ export function App() {
                 <Route path="/backup-recovery" element={
                   <ErrorBoundary>
                     <BackupRecovery isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/api-keys" element={
+                  <ErrorBoundary>
+                    <ApiKeyManagement isDarkMode={isDarkMode} />
                   </ErrorBoundary>
                 } />
               </Route>

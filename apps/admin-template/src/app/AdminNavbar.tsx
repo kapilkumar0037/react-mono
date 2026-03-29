@@ -73,6 +73,8 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
     switch (location.pathname) {
       case '/orders':
         return 'Search orders by ID, customer, or email...';
+      case '/returns-refunds':
+        return 'Search return cases, orders, or customers...';
       case '/users':
         return 'Search users by name or email...';
       case '/activity':
@@ -81,6 +83,8 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
         return 'Search notifications...';
       case '/reports':
         return 'Search reports, metrics, and products...';
+      case '/api-keys':
+        return 'Search keys, integrations, and usage...';
       default:
         return 'Search orders, customers...';
     }
