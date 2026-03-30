@@ -75,6 +75,8 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
         return 'Search orders by ID, customer, or email...';
       case '/returns-refunds':
         return 'Search return cases, orders, or customers...';
+      case '/support-tickets':
+        return 'Search tickets, customers, subjects, or orders...';
       case '/users':
         return 'Search users by name or email...';
       case '/activity':

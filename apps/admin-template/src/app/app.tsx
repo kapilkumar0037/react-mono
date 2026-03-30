@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-
 import Dashboard from './Dashboard';
 import Orders from './Orders';
 import ReturnsRefunds from './ReturnsRefunds';
+import SupportTickets from './SupportTickets';
 import Users from './Users';
 import Settings from './Settings';
 import Reports from './Reports';
@@ -145,6 +146,11 @@ export function App() {
                 <Route path="/returns-refunds" element={
                   <ErrorBoundary>
                     <ReturnsRefunds isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/support-tickets" element={
+                  <ErrorBoundary>
+                    <SupportTickets isDarkMode={isDarkMode} />
                   </ErrorBoundary>
                 } />
                 <Route path="/settings" element={

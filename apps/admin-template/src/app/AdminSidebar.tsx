@@ -72,6 +72,15 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
             </svg>
           ),
         },
+        {
+          label: 'Support',
+          to: '/support-tickets',
+          icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h8M8 14h5m7 1a2 2 0 01-2 2H9l-4 4V5a2 2 0 012-2h11a2 2 0 012 2v10z" />
+            </svg>
+          ),
+        },
       ]
     },
     {
