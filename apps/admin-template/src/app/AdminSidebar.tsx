@@ -55,6 +55,15 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
           ),
         },
         {
+          label: 'Customers',
+          to: '/customers',
+          icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-1a4 4 0 00-5-3.87M9 20H4v-1a4 4 0 015-3.87m8-7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          ),
+        },
+        {
           label: 'Returns',
           to: '/returns-refunds',
           icon: (
