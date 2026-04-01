@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import Customers from './Customers';
+import InventoryManagement from './InventoryManagement';
 import Orders from './Orders';
 import ReturnsRefunds from './ReturnsRefunds';
 import SupportTickets from './SupportTickets';
@@ -142,6 +143,11 @@ export function App() {
                 <Route path="/orders" element={
                   <ErrorBoundary>
                     <Orders isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/inventory" element={
+                  <ErrorBoundary>
+                    <InventoryManagement isDarkMode={isDarkMode} />
                   </ErrorBoundary>
                 } />
                 <Route path="/customers" element={
