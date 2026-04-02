@@ -71,6 +71,8 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
 
   const searchPlaceholder = (() => {
     switch (location.pathname) {
+      case '/billing-subscriptions':
+        return 'Search subscriptions, accounts, owners, or invoices...';
       case '/inventory':
         return 'Search SKUs, products, suppliers, or categories...';
       case '/customers':

@@ -64,6 +64,15 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
           ),
         },
         {
+          label: 'Billing',
+          to: '/billing-subscriptions',
+          icon: (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-2.21 0-4 .895-4 2s1.79 2 4 2 4 .895 4 2-1.79 2-4 2m0-10c1.861 0 3.41.638 3.858 1.5M12 8V6m0 12v-2m0 0c-1.861 0-3.41-.638-3.858-1.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          ),
+        },
+        {
           label: 'Customers',
           to: '/customers',
           icon: (
