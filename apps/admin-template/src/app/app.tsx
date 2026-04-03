@@ -4,6 +4,7 @@ import Dashboard from './Dashboard';
 import Customers from './Customers';
 import BillingSubscriptions from './BillingSubscriptions';
 import InventoryManagement from './InventoryManagement';
+import IntegrationsHub from './IntegrationsHub';
 import Orders from './Orders';
 import ReturnsRefunds from './ReturnsRefunds';
 import SupportTickets from './SupportTickets';
@@ -154,6 +155,11 @@ export function App() {
                 <Route path="/billing-subscriptions" element={
                   <ErrorBoundary>
                     <BillingSubscriptions isDarkMode={isDarkMode} />
+                  </ErrorBoundary>
+                } />
+                <Route path="/integrations" element={
+                  <ErrorBoundary>
+                    <IntegrationsHub isDarkMode={isDarkMode} />
                   </ErrorBoundary>
                 } />
                 <Route path="/customers" element={
