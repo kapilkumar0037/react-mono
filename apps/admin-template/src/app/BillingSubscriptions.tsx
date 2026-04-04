@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import {
+  AdminEmptyState,
+  AdminFilterFooter,
+  AdminMetricCards,
+  AdminRelatedLinks,
+} from './AdminPageSections';
 
 type SubscriptionStatus = 'Active' | 'Trial' | 'Past Due' | 'Cancelled';
 type BillingPlan = 'Starter' | 'Growth' | 'Enterprise';
@@ -114,6 +121,7 @@ const initialAccounts: SubscriptionAccount[] = [
 
 const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode = false }) => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [accounts, setAccounts] = useState<SubscriptionAccount[]>(initialAccounts);
   const [statusFilter, setStatusFilter] = useState<SubscriptionStatus | 'all'>('all');
@@ -129,7 +137,8 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
         account.id.toLowerCase().includes(query) ||
         account.accountName.toLowerCase().includes(query) ||
         account.owner.toLowerCase().includes(query) ||
-        account.email.toLowerCase().includes(query);
+        account.email.toLowerCase().includes(query) ||
+        account.region.toLowerCase().includes(query);
       const matchesStatus = statusFilter === 'all' || account.status === statusFilter;
       const matchesPlan = planFilter === 'all' || account.plan === planFilter;
       const matchesPayment = paymentFilter === 'all' || account.paymentHealth === paymentFilter;
@@ -147,6 +156,19 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
     ],
     [accounts]
   );
+
+  const activeFilterCount =
+    (searchQuery !== '' ? 1 : 0) +
+    (statusFilter !== 'all' ? 1 : 0) +
+    (planFilter !== 'all' ? 1 : 0) +
+    (paymentFilter !== 'all' ? 1 : 0);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setPlanFilter('all');
+    setPaymentFilter('all');
+  };
 
   const getStatusVariant = (status: SubscriptionStatus) => {
     switch (status) {
@@ -279,21 +301,7 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-3 border-l-4 ${stat.tone}`}
-            >
-              <div className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-xs font-medium`}>
-                {stat.label}
-              </div>
-              <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                {stat.value}
-              </div>
-            </div>
-          ))}
-        </div>
+        <AdminMetricCards isDarkMode={isDarkMode} items={stats} />
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
@@ -348,9 +356,13 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
               </select>
             </div>
           </div>
-          <div className={`mt-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Showing {filteredAccounts.length} subscription{filteredAccounts.length === 1 ? '' : 's'} in the current view.
-          </div>
+          <AdminFilterFooter
+            isDarkMode={isDarkMode}
+            resultLabel="subscription"
+            resultCount={filteredAccounts.length}
+            activeFilterCount={activeFilterCount}
+            onClearFilters={clearFilters}
+          />
         </Card>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
@@ -371,7 +383,8 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
                 {filteredAccounts.map((account) => (
                   <tr
                     key={account.id}
-                    className={`border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
+                    onClick={() => setSelectedAccount(account)}
+                    className={`cursor-pointer border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
                   >
                     <td className="px-3 py-2 align-top">
                       <div className={`font-semibold whitespace-nowrap ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{account.accountName}</div>
@@ -405,21 +418,21 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
                     </td>
                     <td className="px-3 py-2 align-top">
                       <div className="flex justify-end gap-1.5">
-                        <Button onClick={() => setSelectedAccount(account)} className="bg-gray-700 text-white text-xs px-2.5 py-1">
+                        <Button onClick={(event) => { event.stopPropagation(); setSelectedAccount(account); }} className="bg-gray-700 text-white text-xs px-2.5 py-1">
                           View
                         </Button>
                         {account.paymentHealth === 'Failed' && (
-                          <Button onClick={() => retryPayment(account)} className="bg-red-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); retryPayment(account); }} className="bg-red-600 text-white text-xs px-2.5 py-1">
                             Retry
                           </Button>
                         )}
                         {account.status === 'Trial' && (
-                          <Button onClick={() => extendTrial(account)} className="bg-blue-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); extendTrial(account); }} className="bg-blue-600 text-white text-xs px-2.5 py-1">
                             Extend
                           </Button>
                         )}
                         {account.plan !== 'Enterprise' && (
-                          <Button onClick={() => upgradePlan(account)} className="bg-purple-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); upgradePlan(account); }} className="bg-purple-600 text-white text-xs px-2.5 py-1">
                             Upgrade
                           </Button>
                         )}
@@ -432,9 +445,10 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
           </div>
 
           {filteredAccounts.length === 0 && (
-            <div className={`px-4 py-10 text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              No subscriptions match the current filters. Try widening the plan or payment filters.
-            </div>
+            <AdminEmptyState
+              isDarkMode={isDarkMode}
+              message="No subscriptions match the current filters. Try widening the plan or payment filters."
+            />
           )}
         </Card>
       </div>
@@ -492,6 +506,15 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
                 <li>Renewal date: {selectedAccount.renewalDate}</li>
               </ul>
             </div>
+
+            <AdminRelatedLinks
+              isDarkMode={isDarkMode}
+              links={[
+                { label: 'Open Customers', onClick: () => navigate('/customers?q=' + encodeURIComponent(selectedAccount.accountName)) },
+                { label: 'Open Orders', onClick: () => navigate('/orders?q=' + encodeURIComponent(selectedAccount.owner)) },
+                { label: 'Open Integrations', onClick: () => navigate('/integrations?q=' + encodeURIComponent(selectedAccount.accountName)) },
+              ]}
+            />
 
             <div className="flex flex-wrap justify-end gap-2">
               <Button onClick={() => setSelectedAccount(null)} className="bg-gray-600 text-white">

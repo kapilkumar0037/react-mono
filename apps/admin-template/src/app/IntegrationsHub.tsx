@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import {
+  AdminEmptyState,
+  AdminFilterFooter,
+  AdminMetricCards,
+  AdminRelatedLinks,
+} from './AdminPageSections';
 
 type IntegrationStatus = 'Connected' | 'Needs Attention' | 'Disconnected' | 'Syncing';
 type IntegrationCategory = 'Payments' | 'Communication' | 'Commerce' | 'Analytics';
@@ -107,6 +114,7 @@ const initialIntegrations: Integration[] = [
 
 const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false }) => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [integrations, setIntegrations] = useState<Integration[]>(initialIntegrations);
   const [statusFilter, setStatusFilter] = useState<IntegrationStatus | 'all'>('all');
@@ -122,7 +130,8 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
         integration.id.toLowerCase().includes(query) ||
         integration.name.toLowerCase().includes(query) ||
         integration.provider.toLowerCase().includes(query) ||
-        integration.owner.toLowerCase().includes(query);
+        integration.owner.toLowerCase().includes(query) ||
+        integration.environment.toLowerCase().includes(query);
       const matchesStatus = statusFilter === 'all' || integration.status === statusFilter;
       const matchesCategory = categoryFilter === 'all' || integration.category === categoryFilter;
       const matchesHealth = healthFilter === 'all' || integration.syncHealth === healthFilter;
@@ -140,6 +149,19 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
     ],
     [integrations]
   );
+
+  const activeFilterCount =
+    (searchQuery !== '' ? 1 : 0) +
+    (statusFilter !== 'all' ? 1 : 0) +
+    (categoryFilter !== 'all' ? 1 : 0) +
+    (healthFilter !== 'all' ? 1 : 0);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setCategoryFilter('all');
+    setHealthFilter('all');
+  };
 
   const getStatusVariant = (status: IntegrationStatus) => {
     switch (status) {
@@ -279,21 +301,7 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-3 border-l-4 ${stat.tone}`}
-            >
-              <div className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-xs font-medium`}>
-                {stat.label}
-              </div>
-              <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                {stat.value}
-              </div>
-            </div>
-          ))}
-        </div>
+        <AdminMetricCards isDarkMode={isDarkMode} items={stats} />
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
@@ -349,9 +357,13 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
               </select>
             </div>
           </div>
-          <div className={`mt-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Showing {filteredIntegrations.length} integration{filteredIntegrations.length === 1 ? '' : 's'} in the current view.
-          </div>
+          <AdminFilterFooter
+            isDarkMode={isDarkMode}
+            resultLabel="integration"
+            resultCount={filteredIntegrations.length}
+            activeFilterCount={activeFilterCount}
+            onClearFilters={clearFilters}
+          />
         </Card>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
@@ -372,7 +384,8 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
                 {filteredIntegrations.map((integration) => (
                   <tr
                     key={integration.id}
-                    className={`border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
+                    onClick={() => setSelectedIntegration(integration)}
+                    className={`cursor-pointer border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
                   >
                     <td className="px-3 py-2 align-top">
                       <div className={`font-semibold whitespace-nowrap ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{integration.name}</div>
@@ -403,16 +416,16 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
                     </td>
                     <td className="px-3 py-2 align-top">
                       <div className="flex justify-end gap-1.5">
-                        <Button onClick={() => setSelectedIntegration(integration)} className="bg-gray-700 text-white text-xs px-2.5 py-1">
+                        <Button onClick={(event) => { event.stopPropagation(); setSelectedIntegration(integration); }} className="bg-gray-700 text-white text-xs px-2.5 py-1">
                           View
                         </Button>
                         {integration.status !== 'Connected' && (
-                          <Button onClick={() => reconnectIntegration(integration)} className="bg-blue-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); reconnectIntegration(integration); }} className="bg-blue-600 text-white text-xs px-2.5 py-1">
                             Reconnect
                           </Button>
                         )}
                         {integration.status !== 'Syncing' && (
-                          <Button onClick={() => runSync(integration)} className="bg-indigo-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); runSync(integration); }} className="bg-indigo-600 text-white text-xs px-2.5 py-1">
                             Sync
                           </Button>
                         )}
@@ -425,9 +438,10 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
           </div>
 
           {filteredIntegrations.length === 0 && (
-            <div className={`px-4 py-10 text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              No integrations match the current filters. Try clearing a health or status filter.
-            </div>
+            <AdminEmptyState
+              isDarkMode={isDarkMode}
+              message="No integrations match the current filters. Try clearing a health or status filter."
+            />
           )}
         </Card>
       </div>
@@ -485,6 +499,15 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
                 <li>Environment: {selectedIntegration.environment}</li>
               </ul>
             </div>
+
+            <AdminRelatedLinks
+              isDarkMode={isDarkMode}
+              links={[
+                { label: 'Open Billing', onClick: () => navigate('/billing-subscriptions?q=' + encodeURIComponent(selectedIntegration.provider)) },
+                { label: 'Open Inventory', onClick: () => navigate('/inventory?q=' + encodeURIComponent(selectedIntegration.owner)) },
+                { label: 'Open Notifications', onClick: () => navigate('/notifications?q=' + encodeURIComponent(selectedIntegration.name)) },
+              ]}
+            />
 
             <div className="flex flex-wrap justify-end gap-2">
               <Button onClick={() => setSelectedIntegration(null)} className="bg-gray-600 text-white">

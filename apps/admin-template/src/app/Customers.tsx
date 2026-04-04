@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import {
+  AdminEmptyState,
+  AdminFilterFooter,
+  AdminMetricCards,
+  AdminRelatedLinks,
+} from './AdminPageSections';
 
 type CustomerStatus = 'Active' | 'At Risk' | 'VIP' | 'Dormant';
 type LifecycleStage = 'New' | 'Engaged' | 'Loyal' | 'Churn Risk';
@@ -121,6 +128,7 @@ const initialCustomers: Customer[] = [
 
 const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [statusFilter, setStatusFilter] = useState<CustomerStatus | 'all'>('all');
@@ -136,7 +144,9 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
         customer.id.toLowerCase().includes(query) ||
         customer.name.toLowerCase().includes(query) ||
         customer.email.toLowerCase().includes(query) ||
-        customer.company.toLowerCase().includes(query);
+        customer.company.toLowerCase().includes(query) ||
+        customer.owner.toLowerCase().includes(query) ||
+        customer.region.toLowerCase().includes(query);
       const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
       const matchesStage = stageFilter === 'all' || customer.stage === stageFilter;
       const matchesChannel = channelFilter === 'all' || customer.channel === channelFilter;
@@ -154,6 +164,19 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
     ],
     [customers]
   );
+
+  const activeFilterCount =
+    (searchQuery !== '' ? 1 : 0) +
+    (statusFilter !== 'all' ? 1 : 0) +
+    (stageFilter !== 'all' ? 1 : 0) +
+    (channelFilter !== 'all' ? 1 : 0);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setStageFilter('all');
+    setChannelFilter('all');
+  };
 
   const getStatusVariant = (status: CustomerStatus) => {
     switch (status) {
@@ -273,21 +296,7 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-3 border-l-4 ${stat.tone}`}
-            >
-              <div className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-xs font-medium`}>
-                {stat.label}
-              </div>
-              <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                {stat.value}
-              </div>
-            </div>
-          ))}
-        </div>
+        <AdminMetricCards isDarkMode={isDarkMode} items={stats} />
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
@@ -344,9 +353,13 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
               </select>
             </div>
           </div>
-          <div className={`mt-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Showing {filteredCustomers.length} customer{filteredCustomers.length === 1 ? '' : 's'} in the current segment.
-          </div>
+          <AdminFilterFooter
+            isDarkMode={isDarkMode}
+            resultLabel="customer"
+            resultCount={filteredCustomers.length}
+            activeFilterCount={activeFilterCount}
+            onClearFilters={clearFilters}
+          />
         </Card>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
@@ -367,7 +380,8 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
                 {filteredCustomers.map((customer) => (
                   <tr
                     key={customer.id}
-                    className={`border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
+                    onClick={() => setSelectedCustomer(customer)}
+                    className={`cursor-pointer border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
                   >
                     <td className="px-3 py-2 align-top">
                       <div className={`font-semibold whitespace-nowrap ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{customer.name}</div>
@@ -401,16 +415,16 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
                     </td>
                     <td className="px-3 py-2 align-top">
                       <div className="flex justify-end gap-1.5">
-                        <Button onClick={() => setSelectedCustomer(customer)} className="bg-gray-700 text-white text-xs px-2.5 py-1">
+                        <Button onClick={(event) => { event.stopPropagation(); setSelectedCustomer(customer); }} className="bg-gray-700 text-white text-xs px-2.5 py-1">
                           View
                         </Button>
                         {customer.status !== 'VIP' && (
-                          <Button onClick={() => markVip(customer)} className="bg-purple-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); markVip(customer); }} className="bg-purple-600 text-white text-xs px-2.5 py-1">
                             VIP
                           </Button>
                         )}
                         {customer.status !== 'At Risk' && (
-                          <Button onClick={() => flagForFollowUp(customer)} className="bg-amber-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); flagForFollowUp(customer); }} className="bg-amber-600 text-white text-xs px-2.5 py-1">
                             Follow Up
                           </Button>
                         )}
@@ -423,9 +437,10 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
           </div>
 
           {filteredCustomers.length === 0 && (
-            <div className={`px-4 py-10 text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              No customers match the current segment. Try clearing a filter to widen the view.
-            </div>
+            <AdminEmptyState
+              isDarkMode={isDarkMode}
+              message="No customers match the current segment. Try clearing a filter to widen the view."
+            />
           )}
         </Card>
       </div>
@@ -483,6 +498,15 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
                 <li>Last order date: {selectedCustomer.lastOrderAt}</li>
               </ul>
             </div>
+
+            <AdminRelatedLinks
+              isDarkMode={isDarkMode}
+              links={[
+                { label: 'Open Orders', onClick: () => navigate('/orders?q=' + encodeURIComponent(selectedCustomer.name)) },
+                { label: 'Open Support', onClick: () => navigate('/support-tickets?q=' + encodeURIComponent(selectedCustomer.name)) },
+                { label: 'Open Billing', onClick: () => navigate('/billing-subscriptions?q=' + encodeURIComponent(selectedCustomer.company)) },
+              ]}
+            />
 
             <div className="flex flex-wrap justify-end gap-2">
               <Button onClick={() => setSelectedCustomer(null)} className="bg-gray-600 text-white">

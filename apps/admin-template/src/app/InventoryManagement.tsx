@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import {
+  AdminEmptyState,
+  AdminFilterFooter,
+  AdminMetricCards,
+  AdminRelatedLinks,
+} from './AdminPageSections';
 
 type InventoryStatus = 'Healthy' | 'Low Stock' | 'Out of Stock' | 'Backordered';
 type InventoryPriority = 'High' | 'Medium' | 'Low';
@@ -121,6 +128,7 @@ const initialInventory: InventoryItem[] = [
 
 const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = false }) => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [inventory, setInventory] = useState<InventoryItem[]>(initialInventory);
   const [statusFilter, setStatusFilter] = useState<InventoryStatus | 'all'>('all');
@@ -155,6 +163,19 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
     ],
     [inventory]
   );
+
+  const activeFilterCount =
+    (searchQuery !== '' ? 1 : 0) +
+    (statusFilter !== 'all' ? 1 : 0) +
+    (warehouseFilter !== 'all' ? 1 : 0) +
+    (priorityFilter !== 'all' ? 1 : 0);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setWarehouseFilter('all');
+    setPriorityFilter('all');
+  };
 
   const getStatusVariant = (status: InventoryStatus) => {
     switch (status) {
@@ -287,21 +308,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-3 border-l-4 ${stat.tone}`}
-            >
-              <div className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-xs font-medium`}>
-                {stat.label}
-              </div>
-              <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                {stat.value}
-              </div>
-            </div>
-          ))}
-        </div>
+        <AdminMetricCards isDarkMode={isDarkMode} items={stats} />
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
@@ -357,9 +364,13 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
               </select>
             </div>
           </div>
-          <div className={`mt-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            Showing {filteredInventory.length} SKU{filteredInventory.length === 1 ? '' : 's'} in the current inventory view.
-          </div>
+          <AdminFilterFooter
+            isDarkMode={isDarkMode}
+            resultLabel="SKU"
+            resultCount={filteredInventory.length}
+            activeFilterCount={activeFilterCount}
+            onClearFilters={clearFilters}
+          />
         </Card>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
@@ -380,7 +391,8 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
                 {filteredInventory.map((item) => (
                   <tr
                     key={item.id}
-                    className={`border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
+                    onClick={() => setSelectedItem(item)}
+                    className={`cursor-pointer border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
                   >
                     <td className="px-3 py-2 align-top">
                       <div className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{item.product}</div>
@@ -414,16 +426,16 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
                     </td>
                     <td className="px-3 py-2 align-top">
                       <div className="flex justify-end gap-1.5">
-                        <Button onClick={() => setSelectedItem(item)} className="bg-gray-700 text-white text-xs px-2.5 py-1">
+                        <Button onClick={(event) => { event.stopPropagation(); setSelectedItem(item); }} className="bg-gray-700 text-white text-xs px-2.5 py-1">
                           View
                         </Button>
                         {item.status !== 'Healthy' && (
-                          <Button onClick={() => expediteRestock(item)} className="bg-blue-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); expediteRestock(item); }} className="bg-blue-600 text-white text-xs px-2.5 py-1">
                             Restock
                           </Button>
                         )}
                         {item.onHand <= item.reorderPoint && (
-                          <Button onClick={() => transferStock(item)} className="bg-indigo-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); transferStock(item); }} className="bg-indigo-600 text-white text-xs px-2.5 py-1">
                             Transfer
                           </Button>
                         )}
@@ -436,9 +448,10 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
           </div>
 
           {filteredInventory.length === 0 && (
-            <div className={`px-4 py-10 text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              No inventory items match the current filters. Try widening the warehouse or status selection.
-            </div>
+            <AdminEmptyState
+              isDarkMode={isDarkMode}
+              message="No inventory items match the current filters. Try widening the warehouse or status selection."
+            />
           )}
         </Card>
       </div>
@@ -496,6 +509,15 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
                 <li>Last updated: {selectedItem.updatedAt}</li>
               </ul>
             </div>
+
+            <AdminRelatedLinks
+              isDarkMode={isDarkMode}
+              links={[
+                { label: 'Open Orders', onClick: () => navigate('/orders?q=' + encodeURIComponent(selectedItem.product)) },
+                { label: 'Open Returns', onClick: () => navigate('/returns-refunds?q=' + encodeURIComponent(selectedItem.product)) },
+                { label: 'Open Integrations', onClick: () => navigate('/integrations?q=' + encodeURIComponent(selectedItem.supplier)) },
+              ]}
+            />
 
             <div className="flex flex-wrap justify-end gap-2">
               <Button onClick={() => setSelectedItem(null)} className="bg-gray-600 text-white">
