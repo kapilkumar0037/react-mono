@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import AdminActionConfirm from './AdminActionConfirm';
 import {
   AdminEmptyState,
   AdminFilterFooter,
@@ -121,6 +122,13 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
   const [categoryFilter, setCategoryFilter] = useState<IntegrationCategory | 'all'>('all');
   const [healthFilter, setHealthFilter] = useState<SyncHealth | 'all'>('all');
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
+  const [pendingAction, setPendingAction] = useState<{
+    title: string;
+    message: string;
+    confirmLabel: string;
+    confirmClassName: string;
+    run: () => void;
+  } | null>(null);
 
   const filteredIntegrations = useMemo(() => {
     return integrations.filter((integration) => {
@@ -263,6 +271,36 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
       }),
       `${integration.name} paused for manual review.`
     );
+  };
+
+  const requestReconnectIntegration = (integration: Integration) => {
+    setPendingAction({
+      title: 'Reconnect Integration',
+      message: `Reconnect ${integration.name}? This will reset the mock sync health to healthy and clear recent failures.`,
+      confirmLabel: 'Reconnect',
+      confirmClassName: 'bg-blue-600 text-white',
+      run: () => reconnectIntegration(integration),
+    });
+  };
+
+  const requestRunSync = (integration: Integration) => {
+    setPendingAction({
+      title: 'Run Sync',
+      message: `Run a manual sync for ${integration.name}? This will update the mock status to syncing.`,
+      confirmLabel: 'Run Sync',
+      confirmClassName: 'bg-indigo-600 text-white',
+      run: () => runSync(integration),
+    });
+  };
+
+  const requestPauseIntegration = (integration: Integration) => {
+    setPendingAction({
+      title: 'Pause Integration',
+      message: `Pause ${integration.name} for manual review? This will mark the integration as disconnected in the current session.`,
+      confirmLabel: 'Pause Integration',
+      confirmClassName: 'bg-gray-700 text-white',
+      run: () => pauseIntegration(integration),
+    });
   };
 
   return (
@@ -420,12 +458,12 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
                           View
                         </Button>
                         {integration.status !== 'Connected' && (
-                          <Button onClick={(event) => { event.stopPropagation(); reconnectIntegration(integration); }} className="bg-blue-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); requestReconnectIntegration(integration); }} className="bg-blue-600 text-white text-xs px-2.5 py-1">
                             Reconnect
                           </Button>
                         )}
                         {integration.status !== 'Syncing' && (
-                          <Button onClick={(event) => { event.stopPropagation(); runSync(integration); }} className="bg-indigo-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); requestRunSync(integration); }} className="bg-indigo-600 text-white text-xs px-2.5 py-1">
                             Sync
                           </Button>
                         )}
@@ -514,17 +552,17 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
                 Close
               </Button>
               {selectedIntegration.status !== 'Connected' && (
-                <Button onClick={() => reconnectIntegration(selectedIntegration)} className="bg-blue-600 text-white">
+                <Button onClick={() => requestReconnectIntegration(selectedIntegration)} className="bg-blue-600 text-white">
                   Reconnect
                 </Button>
               )}
               {selectedIntegration.status !== 'Disconnected' && (
-                <Button onClick={() => pauseIntegration(selectedIntegration)} className="bg-gray-700 text-white">
+                <Button onClick={() => requestPauseIntegration(selectedIntegration)} className="bg-gray-700 text-white">
                   Pause
                 </Button>
               )}
               {selectedIntegration.status !== 'Syncing' && (
-                <Button onClick={() => runSync(selectedIntegration)} className="bg-indigo-600 text-white">
+                <Button onClick={() => requestRunSync(selectedIntegration)} className="bg-indigo-600 text-white">
                   Run Sync
                 </Button>
               )}
@@ -532,6 +570,20 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
           </div>
         )}
       </Modal>
+
+      <AdminActionConfirm
+        isOpen={pendingAction !== null}
+        title={pendingAction?.title ?? 'Confirm Action'}
+        message={pendingAction?.message ?? ''}
+        confirmLabel={pendingAction?.confirmLabel ?? 'Confirm'}
+        confirmClassName={pendingAction?.confirmClassName}
+        isDarkMode={isDarkMode}
+        onCancel={() => setPendingAction(null)}
+        onConfirm={() => {
+          pendingAction?.run();
+          setPendingAction(null);
+        }}
+      />
     </div>
   );
 };

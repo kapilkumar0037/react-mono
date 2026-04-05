@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import AdminActionConfirm from './AdminActionConfirm';
 import {
   AdminEmptyState,
   AdminFilterFooter,
@@ -128,6 +129,13 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
   const [planFilter, setPlanFilter] = useState<BillingPlan | 'all'>('all');
   const [paymentFilter, setPaymentFilter] = useState<PaymentHealth | 'all'>('all');
   const [selectedAccount, setSelectedAccount] = useState<SubscriptionAccount | null>(null);
+  const [pendingAction, setPendingAction] = useState<{
+    title: string;
+    message: string;
+    confirmLabel: string;
+    confirmClassName: string;
+    run: () => void;
+  } | null>(null);
 
   const filteredAccounts = useMemo(() => {
     return accounts.filter((account) => {
@@ -263,6 +271,37 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
       }),
       `${account.accountName} trial extended through April 15, 2026.`
     );
+  };
+
+  const requestRetryPayment = (account: SubscriptionAccount) => {
+    setPendingAction({
+      title: 'Retry Payment',
+      message: `Retry payment collection for ${account.accountName}? This will attempt to recover ${account.invoicesDue} due invoice${account.invoicesDue === 1 ? '' : 's'}.`,
+      confirmLabel: 'Retry Payment',
+      confirmClassName: 'bg-red-600 text-white',
+      run: () => retryPayment(account),
+    });
+  };
+
+  const requestUpgradePlan = (account: SubscriptionAccount) => {
+    const nextPlan = account.plan === 'Starter' ? 'Growth' : 'Enterprise';
+    setPendingAction({
+      title: 'Upgrade Subscription',
+      message: `Upgrade ${account.accountName} from ${account.plan} to ${nextPlan}? This will update the mock monthly revenue and plan state immediately.`,
+      confirmLabel: 'Upgrade Plan',
+      confirmClassName: 'bg-purple-600 text-white',
+      run: () => upgradePlan(account),
+    });
+  };
+
+  const requestExtendTrial = (account: SubscriptionAccount) => {
+    setPendingAction({
+      title: 'Extend Trial',
+      message: `Extend the trial for ${account.accountName} through April 15, 2026?`,
+      confirmLabel: 'Extend Trial',
+      confirmClassName: 'bg-blue-600 text-white',
+      run: () => extendTrial(account),
+    });
   };
 
   return (
@@ -422,17 +461,17 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
                           View
                         </Button>
                         {account.paymentHealth === 'Failed' && (
-                          <Button onClick={(event) => { event.stopPropagation(); retryPayment(account); }} className="bg-red-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); requestRetryPayment(account); }} className="bg-red-600 text-white text-xs px-2.5 py-1">
                             Retry
                           </Button>
                         )}
                         {account.status === 'Trial' && (
-                          <Button onClick={(event) => { event.stopPropagation(); extendTrial(account); }} className="bg-blue-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); requestExtendTrial(account); }} className="bg-blue-600 text-white text-xs px-2.5 py-1">
                             Extend
                           </Button>
                         )}
                         {account.plan !== 'Enterprise' && (
-                          <Button onClick={(event) => { event.stopPropagation(); upgradePlan(account); }} className="bg-purple-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); requestUpgradePlan(account); }} className="bg-purple-600 text-white text-xs px-2.5 py-1">
                             Upgrade
                           </Button>
                         )}
@@ -521,17 +560,17 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
                 Close
               </Button>
               {selectedAccount.status === 'Trial' && (
-                <Button onClick={() => extendTrial(selectedAccount)} className="bg-blue-600 text-white">
+                <Button onClick={() => requestExtendTrial(selectedAccount)} className="bg-blue-600 text-white">
                   Extend Trial
                 </Button>
               )}
               {selectedAccount.paymentHealth === 'Failed' && (
-                <Button onClick={() => retryPayment(selectedAccount)} className="bg-red-600 text-white">
+                <Button onClick={() => requestRetryPayment(selectedAccount)} className="bg-red-600 text-white">
                   Retry Payment
                 </Button>
               )}
               {selectedAccount.plan !== 'Enterprise' && (
-                <Button onClick={() => upgradePlan(selectedAccount)} className="bg-purple-600 text-white">
+                <Button onClick={() => requestUpgradePlan(selectedAccount)} className="bg-purple-600 text-white">
                   Upgrade Plan
                 </Button>
               )}
@@ -539,6 +578,20 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
           </div>
         )}
       </Modal>
+
+      <AdminActionConfirm
+        isOpen={pendingAction !== null}
+        title={pendingAction?.title ?? 'Confirm Action'}
+        message={pendingAction?.message ?? ''}
+        confirmLabel={pendingAction?.confirmLabel ?? 'Confirm'}
+        confirmClassName={pendingAction?.confirmClassName}
+        isDarkMode={isDarkMode}
+        onCancel={() => setPendingAction(null)}
+        onConfirm={() => {
+          pendingAction?.run();
+          setPendingAction(null);
+        }}
+      />
     </div>
   );
 };

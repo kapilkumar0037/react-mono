@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import AdminActionConfirm from './AdminActionConfirm';
 import {
   AdminEmptyState,
   AdminFilterFooter,
@@ -135,6 +136,13 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
   const [warehouseFilter, setWarehouseFilter] = useState<Warehouse | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<InventoryPriority | 'all'>('all');
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [pendingAction, setPendingAction] = useState<{
+    title: string;
+    message: string;
+    confirmLabel: string;
+    confirmClassName: string;
+    run: () => void;
+  } | null>(null);
 
   const filteredInventory = useMemo(() => {
     return inventory.filter((item) => {
@@ -270,6 +278,36 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
       }),
       `${item.product} marked as reviewed by inventory operations.`
     );
+  };
+
+  const requestExpediteRestock = (item: InventoryItem) => {
+    setPendingAction({
+      title: 'Expedite Restock',
+      message: `Expedite restock for ${item.product}? This will add 25 incoming units and raise the item priority.`,
+      confirmLabel: 'Expedite Restock',
+      confirmClassName: 'bg-blue-600 text-white',
+      run: () => expediteRestock(item),
+    });
+  };
+
+  const requestTransferStock = (item: InventoryItem) => {
+    setPendingAction({
+      title: 'Transfer Stock',
+      message: `Transfer 15 units into ${item.product} at ${item.warehouse}? This mock action updates on-hand inventory immediately.`,
+      confirmLabel: 'Transfer Stock',
+      confirmClassName: 'bg-indigo-600 text-white',
+      run: () => transferStock(item),
+    });
+  };
+
+  const requestMarkReviewed = (item: InventoryItem) => {
+    setPendingAction({
+      title: 'Mark Reviewed',
+      message: `Mark ${item.product} as reviewed by inventory operations? This will lower its priority to low.`,
+      confirmLabel: 'Mark Reviewed',
+      confirmClassName: 'bg-gray-700 text-white',
+      run: () => markReviewed(item),
+    });
   };
 
   return (
@@ -430,12 +468,12 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
                           View
                         </Button>
                         {item.status !== 'Healthy' && (
-                          <Button onClick={(event) => { event.stopPropagation(); expediteRestock(item); }} className="bg-blue-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); requestExpediteRestock(item); }} className="bg-blue-600 text-white text-xs px-2.5 py-1">
                             Restock
                           </Button>
                         )}
                         {item.onHand <= item.reorderPoint && (
-                          <Button onClick={(event) => { event.stopPropagation(); transferStock(item); }} className="bg-indigo-600 text-white text-xs px-2.5 py-1">
+                          <Button onClick={(event) => { event.stopPropagation(); requestTransferStock(item); }} className="bg-indigo-600 text-white text-xs px-2.5 py-1">
                             Transfer
                           </Button>
                         )}
@@ -524,12 +562,12 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
                 Close
               </Button>
               {selectedItem.priority !== 'Low' && (
-                <Button onClick={() => markReviewed(selectedItem)} className="bg-gray-700 text-white">
+                <Button onClick={() => requestMarkReviewed(selectedItem)} className="bg-gray-700 text-white">
                   Mark Reviewed
                 </Button>
               )}
               {selectedItem.status !== 'Healthy' && (
-                <Button onClick={() => expediteRestock(selectedItem)} className="bg-blue-600 text-white">
+                <Button onClick={() => requestExpediteRestock(selectedItem)} className="bg-blue-600 text-white">
                   Expedite Restock
                 </Button>
               )}
@@ -537,6 +575,20 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
           </div>
         )}
       </Modal>
+
+      <AdminActionConfirm
+        isOpen={pendingAction !== null}
+        title={pendingAction?.title ?? 'Confirm Action'}
+        message={pendingAction?.message ?? ''}
+        confirmLabel={pendingAction?.confirmLabel ?? 'Confirm'}
+        confirmClassName={pendingAction?.confirmClassName}
+        isDarkMode={isDarkMode}
+        onCancel={() => setPendingAction(null)}
+        onConfirm={() => {
+          pendingAction?.run();
+          setPendingAction(null);
+        }}
+      />
     </div>
   );
 };
