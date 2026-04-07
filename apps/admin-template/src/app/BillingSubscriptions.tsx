@@ -129,6 +129,7 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
   const [planFilter, setPlanFilter] = useState<BillingPlan | 'all'>('all');
   const [paymentFilter, setPaymentFilter] = useState<PaymentHealth | 'all'>('all');
   const [selectedAccount, setSelectedAccount] = useState<SubscriptionAccount | null>(null);
+  const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
   const [pendingAction, setPendingAction] = useState<{
     title: string;
     message: string;
@@ -177,6 +178,27 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
     setPlanFilter('all');
     setPaymentFilter('all');
   };
+
+  const toggleAccountSelection = (accountId: string) => {
+    setSelectedAccountIds((currentIds) =>
+      currentIds.includes(accountId)
+        ? currentIds.filter((id) => id !== accountId)
+        : [...currentIds, accountId]
+    );
+  };
+
+  const toggleSelectAllFiltered = () => {
+    const filteredIds = filteredAccounts.map((account) => account.id);
+    setSelectedAccountIds((currentIds) =>
+      filteredIds.every((id) => currentIds.includes(id))
+        ? currentIds.filter((id) => !filteredIds.includes(id))
+        : Array.from(new Set([...currentIds, ...filteredIds]))
+    );
+  };
+
+  const selectedAccounts = accounts.filter((account) => selectedAccountIds.includes(account.id));
+  const allFilteredSelected =
+    filteredAccounts.length > 0 && filteredAccounts.every((account) => selectedAccountIds.includes(account.id));
 
   const getStatusVariant = (status: SubscriptionStatus) => {
     switch (status) {
@@ -304,6 +326,64 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
     });
   };
 
+  const retryPaymentBulk = () => {
+    setAccounts((currentAccounts) =>
+      currentAccounts.map((account) =>
+        selectedAccountIds.includes(account.id)
+          ? {
+              ...account,
+              paymentHealth: 'Healthy',
+              status: account.status === 'Past Due' ? 'Active' : account.status,
+              invoicesDue: 0,
+            }
+          : account
+      )
+    );
+    setSelectedAccountIds([]);
+    showToast({
+      message: `${selectedAccounts.length} subscription${selectedAccounts.length === 1 ? '' : 's'} updated after payment retry.`,
+      variant: 'success',
+    });
+  };
+
+  const extendTrialBulk = () => {
+    setAccounts((currentAccounts) =>
+      currentAccounts.map((account) =>
+        selectedAccountIds.includes(account.id)
+          ? {
+              ...account,
+              renewalDate: '2026-04-15',
+              paymentHealth: 'Healthy',
+            }
+          : account
+      )
+    );
+    setSelectedAccountIds([]);
+    showToast({
+      message: `${selectedAccounts.length} trial subscription${selectedAccounts.length === 1 ? '' : 's'} extended.`,
+      variant: 'success',
+    });
+  };
+
+  const upgradePlanBulk = () => {
+    setAccounts((currentAccounts) =>
+      currentAccounts.map((account) =>
+        selectedAccountIds.includes(account.id)
+          ? {
+              ...account,
+              plan: account.plan === 'Starter' ? 'Growth' : 'Enterprise',
+              monthlyRevenue: account.plan === 'Starter' ? 499 : account.monthlyRevenue + 900,
+            }
+          : account
+      )
+    );
+    setSelectedAccountIds([]);
+    showToast({
+      message: `${selectedAccounts.length} subscription${selectedAccounts.length === 1 ? '' : 's'} upgraded.`,
+      variant: 'success',
+    });
+  };
+
   return (
     <div className={`flex-1 p-6 overflow-y-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -405,10 +485,75 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
         </Card>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+          {selectedAccountIds.length > 0 && (
+            <div className={`border-b px-4 py-3 ${isDarkMode ? 'border-gray-700 bg-gray-900/40' : 'border-gray-200 bg-gray-50'}`}>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                  {selectedAccountIds.length} subscription{selectedAccountIds.length === 1 ? '' : 's'} selected
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={() => setSelectedAccountIds([])} className="bg-gray-600 text-white text-xs px-3 py-1.5">
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setPendingAction({
+                        title: 'Retry Payments',
+                        message: `Retry payment collection for ${selectedAccounts.length} selected subscription${selectedAccounts.length === 1 ? '' : 's'}?`,
+                        confirmLabel: 'Retry Payments',
+                        confirmClassName: 'bg-red-600 text-white',
+                        run: retryPaymentBulk,
+                      })
+                    }
+                    className="bg-red-600 text-white text-xs px-3 py-1.5"
+                  >
+                    Retry Payments
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setPendingAction({
+                        title: 'Extend Trials',
+                        message: `Extend trial terms for ${selectedAccounts.length} selected subscription${selectedAccounts.length === 1 ? '' : 's'}?`,
+                        confirmLabel: 'Extend Trials',
+                        confirmClassName: 'bg-blue-600 text-white',
+                        run: extendTrialBulk,
+                      })
+                    }
+                    className="bg-blue-600 text-white text-xs px-3 py-1.5"
+                  >
+                    Extend Trials
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setPendingAction({
+                        title: 'Upgrade Plans',
+                        message: `Upgrade ${selectedAccounts.length} selected subscription${selectedAccounts.length === 1 ? '' : 's'} to the next plan tier?`,
+                        confirmLabel: 'Upgrade Plans',
+                        confirmClassName: 'bg-purple-600 text-white',
+                        run: upgradePlanBulk,
+                      })
+                    }
+                    className="bg-purple-600 text-white text-xs px-3 py-1.5"
+                  >
+                    Upgrade Plans
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <th className="px-3 py-2 text-left">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleSelectAllFiltered}
+                      className="h-4 w-4 rounded"
+                      aria-label="Select all filtered subscriptions"
+                    />
+                  </th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Account</th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Plan</th>
@@ -425,6 +570,18 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
                     onClick={() => setSelectedAccount(account)}
                     className={`cursor-pointer border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
                   >
+                    <td className="px-3 py-2 align-top">
+                      <input
+                        type="checkbox"
+                        checked={selectedAccountIds.includes(account.id)}
+                        onChange={(event) => {
+                          event.stopPropagation();
+                          toggleAccountSelection(account.id);
+                        }}
+                        className="h-4 w-4 rounded"
+                        aria-label={`Select ${account.accountName}`}
+                      />
+                    </td>
                     <td className="px-3 py-2 align-top">
                       <div className={`font-semibold whitespace-nowrap ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{account.accountName}</div>
                       <div className={`mt-0.5 truncate max-w-[220px] ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{account.owner} • {account.email}</div>

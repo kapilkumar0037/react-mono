@@ -136,6 +136,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
   const [warehouseFilter, setWarehouseFilter] = useState<Warehouse | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<InventoryPriority | 'all'>('all');
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
   const [pendingAction, setPendingAction] = useState<{
     title: string;
     message: string;
@@ -184,6 +185,27 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
     setWarehouseFilter('all');
     setPriorityFilter('all');
   };
+
+  const toggleItemSelection = (itemId: string) => {
+    setSelectedItemIds((currentIds) =>
+      currentIds.includes(itemId)
+        ? currentIds.filter((id) => id !== itemId)
+        : [...currentIds, itemId]
+    );
+  };
+
+  const toggleSelectAllFiltered = () => {
+    const filteredIds = filteredInventory.map((item) => item.id);
+    setSelectedItemIds((currentIds) =>
+      filteredIds.every((id) => currentIds.includes(id))
+        ? currentIds.filter((id) => !filteredIds.includes(id))
+        : Array.from(new Set([...currentIds, ...filteredIds]))
+    );
+  };
+
+  const selectedItems = inventory.filter((item) => selectedItemIds.includes(item.id));
+  const allFilteredSelected =
+    filteredInventory.length > 0 && filteredInventory.every((item) => selectedItemIds.includes(item.id));
 
   const getStatusVariant = (status: InventoryStatus) => {
     switch (status) {
@@ -310,6 +332,53 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
     });
   };
 
+  const expediteRestockBulk = () => {
+    setInventory((currentItems) =>
+      currentItems.map((item) =>
+        selectedItemIds.includes(item.id)
+          ? { ...item, incomingUnits: item.incomingUnits + 25, priority: 'High' }
+          : item
+      )
+    );
+    setSelectedItemIds([]);
+    showToast({
+      message: `${selectedItems.length} inventory item${selectedItems.length === 1 ? '' : 's'} queued for expedited restock.`,
+      variant: 'success',
+    });
+  };
+
+  const transferStockBulk = () => {
+    setInventory((currentItems) =>
+      currentItems.map((item) =>
+        selectedItemIds.includes(item.id)
+          ? {
+              ...item,
+              onHand: item.onHand + 15,
+              status: item.onHand + 15 > item.reorderPoint ? 'Healthy' : 'Low Stock',
+            }
+          : item
+      )
+    );
+    setSelectedItemIds([]);
+    showToast({
+      message: `${selectedItems.length} inventory item${selectedItems.length === 1 ? '' : 's'} received stock transfers.`,
+      variant: 'success',
+    });
+  };
+
+  const markReviewedBulk = () => {
+    setInventory((currentItems) =>
+      currentItems.map((item) =>
+        selectedItemIds.includes(item.id) ? { ...item, priority: 'Low' } : item
+      )
+    );
+    setSelectedItemIds([]);
+    showToast({
+      message: `${selectedItems.length} inventory item${selectedItems.length === 1 ? '' : 's'} marked as reviewed.`,
+      variant: 'success',
+    });
+  };
+
   return (
     <div className={`flex-1 p-6 overflow-y-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -412,10 +481,75 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
         </Card>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+          {selectedItemIds.length > 0 && (
+            <div className={`border-b px-4 py-3 ${isDarkMode ? 'border-gray-700 bg-gray-900/40' : 'border-gray-200 bg-gray-50'}`}>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                  {selectedItemIds.length} SKU{selectedItemIds.length === 1 ? '' : 's'} selected
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={() => setSelectedItemIds([])} className="bg-gray-600 text-white text-xs px-3 py-1.5">
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setPendingAction({
+                        title: 'Expedite Restock',
+                        message: `Expedite restock for ${selectedItems.length} selected SKU${selectedItems.length === 1 ? '' : 's'}?`,
+                        confirmLabel: 'Expedite Restock',
+                        confirmClassName: 'bg-blue-600 text-white',
+                        run: expediteRestockBulk,
+                      })
+                    }
+                    className="bg-blue-600 text-white text-xs px-3 py-1.5"
+                  >
+                    Expedite
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setPendingAction({
+                        title: 'Transfer Stock',
+                        message: `Transfer stock into ${selectedItems.length} selected SKU${selectedItems.length === 1 ? '' : 's'}?`,
+                        confirmLabel: 'Transfer Stock',
+                        confirmClassName: 'bg-indigo-600 text-white',
+                        run: transferStockBulk,
+                      })
+                    }
+                    className="bg-indigo-600 text-white text-xs px-3 py-1.5"
+                  >
+                    Transfer
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setPendingAction({
+                        title: 'Mark Reviewed',
+                        message: `Mark ${selectedItems.length} selected SKU${selectedItems.length === 1 ? '' : 's'} as reviewed?`,
+                        confirmLabel: 'Mark Reviewed',
+                        confirmClassName: 'bg-gray-700 text-white',
+                        run: markReviewedBulk,
+                      })
+                    }
+                    className="bg-gray-700 text-white text-xs px-3 py-1.5"
+                  >
+                    Review
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <th className="px-3 py-2 text-left">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleSelectAllFiltered}
+                      className="h-4 w-4 rounded"
+                      aria-label="Select all filtered inventory"
+                    />
+                  </th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Item</th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Warehouse</th>
@@ -432,6 +566,18 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
                     onClick={() => setSelectedItem(item)}
                     className={`cursor-pointer border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
                   >
+                    <td className="px-3 py-2 align-top">
+                      <input
+                        type="checkbox"
+                        checked={selectedItemIds.includes(item.id)}
+                        onChange={(event) => {
+                          event.stopPropagation();
+                          toggleItemSelection(item.id);
+                        }}
+                        className="h-4 w-4 rounded"
+                        aria-label={`Select ${item.product}`}
+                      />
+                    </td>
                     <td className="px-3 py-2 align-top">
                       <div className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{item.product}</div>
                       <div className={`mt-0.5 truncate max-w-[240px] ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{item.sku} • {item.category}</div>

@@ -122,6 +122,7 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
   const [categoryFilter, setCategoryFilter] = useState<IntegrationCategory | 'all'>('all');
   const [healthFilter, setHealthFilter] = useState<SyncHealth | 'all'>('all');
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
+  const [selectedIntegrationIds, setSelectedIntegrationIds] = useState<string[]>([]);
   const [pendingAction, setPendingAction] = useState<{
     title: string;
     message: string;
@@ -170,6 +171,30 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
     setCategoryFilter('all');
     setHealthFilter('all');
   };
+
+  const toggleIntegrationSelection = (integrationId: string) => {
+    setSelectedIntegrationIds((currentIds) =>
+      currentIds.includes(integrationId)
+        ? currentIds.filter((id) => id !== integrationId)
+        : [...currentIds, integrationId]
+    );
+  };
+
+  const toggleSelectAllFiltered = () => {
+    const filteredIds = filteredIntegrations.map((integration) => integration.id);
+    setSelectedIntegrationIds((currentIds) =>
+      filteredIds.every((id) => currentIds.includes(id))
+        ? currentIds.filter((id) => !filteredIds.includes(id))
+        : Array.from(new Set([...currentIds, ...filteredIds]))
+    );
+  };
+
+  const selectedIntegrations = integrations.filter((integration) =>
+    selectedIntegrationIds.includes(integration.id)
+  );
+  const allFilteredSelected =
+    filteredIntegrations.length > 0 &&
+    filteredIntegrations.every((integration) => selectedIntegrationIds.includes(integration.id));
 
   const getStatusVariant = (status: IntegrationStatus) => {
     switch (status) {
@@ -303,6 +328,62 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
     });
   };
 
+  const reconnectIntegrationBulk = () => {
+    setIntegrations((currentIntegrations) =>
+      currentIntegrations.map((integration) =>
+        selectedIntegrationIds.includes(integration.id)
+          ? {
+              ...integration,
+              status: 'Connected',
+              syncHealth: 'Healthy',
+              failures24h: 0,
+              lastSyncAt: '2026-04-05 10:00',
+            }
+          : integration
+      )
+    );
+    setSelectedIntegrationIds([]);
+    showToast({
+      message: `${selectedIntegrations.length} integration${selectedIntegrations.length === 1 ? '' : 's'} reconnected.`,
+      variant: 'success',
+    });
+  };
+
+  const runSyncBulk = () => {
+    setIntegrations((currentIntegrations) =>
+      currentIntegrations.map((integration) =>
+        selectedIntegrationIds.includes(integration.id)
+          ? {
+              ...integration,
+              status: 'Syncing',
+              syncHealth: 'Healthy',
+              lastSyncAt: '2026-04-05 10:00',
+            }
+          : integration
+      )
+    );
+    setSelectedIntegrationIds([]);
+    showToast({
+      message: `${selectedIntegrations.length} integration${selectedIntegrations.length === 1 ? '' : 's'} moved into syncing.`,
+      variant: 'success',
+    });
+  };
+
+  const pauseIntegrationBulk = () => {
+    setIntegrations((currentIntegrations) =>
+      currentIntegrations.map((integration) =>
+        selectedIntegrationIds.includes(integration.id)
+          ? { ...integration, status: 'Disconnected' }
+          : integration
+      )
+    );
+    setSelectedIntegrationIds([]);
+    showToast({
+      message: `${selectedIntegrations.length} integration${selectedIntegrations.length === 1 ? '' : 's'} paused for review.`,
+      variant: 'success',
+    });
+  };
+
   return (
     <div className={`flex-1 p-6 overflow-y-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -405,10 +486,75 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
         </Card>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+          {selectedIntegrationIds.length > 0 && (
+            <div className={`border-b px-4 py-3 ${isDarkMode ? 'border-gray-700 bg-gray-900/40' : 'border-gray-200 bg-gray-50'}`}>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                  {selectedIntegrationIds.length} integration{selectedIntegrationIds.length === 1 ? '' : 's'} selected
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={() => setSelectedIntegrationIds([])} className="bg-gray-600 text-white text-xs px-3 py-1.5">
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setPendingAction({
+                        title: 'Reconnect Integrations',
+                        message: `Reconnect ${selectedIntegrations.length} selected integration${selectedIntegrations.length === 1 ? '' : 's'}?`,
+                        confirmLabel: 'Reconnect',
+                        confirmClassName: 'bg-blue-600 text-white',
+                        run: reconnectIntegrationBulk,
+                      })
+                    }
+                    className="bg-blue-600 text-white text-xs px-3 py-1.5"
+                  >
+                    Reconnect
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setPendingAction({
+                        title: 'Run Sync',
+                        message: `Run manual sync for ${selectedIntegrations.length} selected integration${selectedIntegrations.length === 1 ? '' : 's'}?`,
+                        confirmLabel: 'Run Sync',
+                        confirmClassName: 'bg-indigo-600 text-white',
+                        run: runSyncBulk,
+                      })
+                    }
+                    className="bg-indigo-600 text-white text-xs px-3 py-1.5"
+                  >
+                    Sync
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setPendingAction({
+                        title: 'Pause Integrations',
+                        message: `Pause ${selectedIntegrations.length} selected integration${selectedIntegrations.length === 1 ? '' : 's'} for manual review?`,
+                        confirmLabel: 'Pause',
+                        confirmClassName: 'bg-gray-700 text-white',
+                        run: pauseIntegrationBulk,
+                      })
+                    }
+                    className="bg-gray-700 text-white text-xs px-3 py-1.5"
+                  >
+                    Pause
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <th className="px-3 py-2 text-left">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleSelectAllFiltered}
+                      className="h-4 w-4 rounded"
+                      aria-label="Select all filtered integrations"
+                    />
+                  </th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Integration</th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Category</th>
@@ -425,6 +571,18 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
                     onClick={() => setSelectedIntegration(integration)}
                     className={`cursor-pointer border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
                   >
+                    <td className="px-3 py-2 align-top">
+                      <input
+                        type="checkbox"
+                        checked={selectedIntegrationIds.includes(integration.id)}
+                        onChange={(event) => {
+                          event.stopPropagation();
+                          toggleIntegrationSelection(integration.id);
+                        }}
+                        className="h-4 w-4 rounded"
+                        aria-label={`Select ${integration.name}`}
+                      />
+                    </td>
                     <td className="px-3 py-2 align-top">
                       <div className={`font-semibold whitespace-nowrap ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{integration.name}</div>
                       <div className={`mt-0.5 truncate max-w-[220px] ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{integration.provider} • {integration.owner}</div>
