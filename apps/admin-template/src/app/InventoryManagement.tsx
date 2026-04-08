@@ -3,12 +3,14 @@ import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import AdminActionConfirm from './AdminActionConfirm';
+import AdminTableSortHeader from './AdminTableSortHeader';
 import {
   AdminEmptyState,
   AdminFilterFooter,
   AdminMetricCards,
   AdminRelatedLinks,
 } from './AdminPageSections';
+import { useSortableData } from './useSortableData';
 
 type InventoryStatus = 'Healthy' | 'Low Stock' | 'Out of Stock' | 'Backordered';
 type InventoryPriority = 'High' | 'Medium' | 'Low';
@@ -163,6 +165,11 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
     });
   }, [inventory, priorityFilter, searchQuery, statusFilter, warehouseFilter]);
 
+  const { items: sortedInventory, requestSort, sortConfig } = useSortableData(filteredInventory, {
+    key: 'priority',
+    direction: 'asc',
+  });
+
   const stats = useMemo(
     () => [
       { label: 'Tracked SKUs', value: inventory.length.toString(), tone: 'border-blue-500' },
@@ -195,7 +202,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
   };
 
   const toggleSelectAllFiltered = () => {
-    const filteredIds = filteredInventory.map((item) => item.id);
+    const filteredIds = sortedInventory.map((item) => item.id);
     setSelectedItemIds((currentIds) =>
       filteredIds.every((id) => currentIds.includes(id))
         ? currentIds.filter((id) => !filteredIds.includes(id))
@@ -205,7 +212,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
 
   const selectedItems = inventory.filter((item) => selectedItemIds.includes(item.id));
   const allFilteredSelected =
-    filteredInventory.length > 0 && filteredInventory.every((item) => selectedItemIds.includes(item.id));
+    sortedInventory.length > 0 && sortedInventory.every((item) => selectedItemIds.includes(item.id));
 
   const getStatusVariant = (status: InventoryStatus) => {
     switch (status) {
@@ -474,7 +481,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
           <AdminFilterFooter
             isDarkMode={isDarkMode}
             resultLabel="SKU"
-            resultCount={filteredInventory.length}
+            resultCount={sortedInventory.length}
             activeFilterCount={activeFilterCount}
             onClearFilters={clearFilters}
           />
@@ -550,17 +557,67 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
                       aria-label="Select all filtered inventory"
                     />
                   </th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Item</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Warehouse</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Priority</th>
-                  <th className={`px-3 py-2 text-right font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>On Hand</th>
-                  <th className={`px-3 py-2 text-right font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Incoming</th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Item"
+                      isActive={sortConfig?.key === 'product'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('product')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Status"
+                      isActive={sortConfig?.key === 'status'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('status')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Warehouse"
+                      isActive={sortConfig?.key === 'warehouse'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('warehouse')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Priority"
+                      isActive={sortConfig?.key === 'priority'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('priority')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-right">
+                    <AdminTableSortHeader
+                      label="On Hand"
+                      isActive={sortConfig?.key === 'onHand'}
+                      direction={sortConfig?.direction}
+                      align="right"
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('onHand')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-right">
+                    <AdminTableSortHeader
+                      label="Incoming"
+                      isActive={sortConfig?.key === 'incomingUnits'}
+                      direction={sortConfig?.direction}
+                      align="right"
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('incomingUnits')}
+                    />
+                  </th>
                   <th className={`px-3 py-2 text-right font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredInventory.map((item) => (
+                {sortedInventory.map((item) => (
                   <tr
                     key={item.id}
                     onClick={() => setSelectedItem(item)}
@@ -631,7 +688,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
             </table>
           </div>
 
-          {filteredInventory.length === 0 && (
+          {sortedInventory.length === 0 && (
             <AdminEmptyState
               isDarkMode={isDarkMode}
               message="No inventory items match the current filters. Try widening the warehouse or status selection."

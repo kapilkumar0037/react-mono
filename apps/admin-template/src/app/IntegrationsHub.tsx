@@ -3,12 +3,14 @@ import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import AdminActionConfirm from './AdminActionConfirm';
+import AdminTableSortHeader from './AdminTableSortHeader';
 import {
   AdminEmptyState,
   AdminFilterFooter,
   AdminMetricCards,
   AdminRelatedLinks,
 } from './AdminPageSections';
+import { useSortableData } from './useSortableData';
 
 type IntegrationStatus = 'Connected' | 'Needs Attention' | 'Disconnected' | 'Syncing';
 type IntegrationCategory = 'Payments' | 'Communication' | 'Commerce' | 'Analytics';
@@ -149,6 +151,11 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
     });
   }, [categoryFilter, healthFilter, integrations, searchQuery, statusFilter]);
 
+  const { items: sortedIntegrations, requestSort, sortConfig } = useSortableData(filteredIntegrations, {
+    key: 'failures24h',
+    direction: 'desc',
+  });
+
   const stats = useMemo(
     () => [
       { label: 'Connected', value: integrations.filter((integration) => integration.status === 'Connected').length.toString(), tone: 'border-green-500' },
@@ -181,7 +188,7 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
   };
 
   const toggleSelectAllFiltered = () => {
-    const filteredIds = filteredIntegrations.map((integration) => integration.id);
+    const filteredIds = sortedIntegrations.map((integration) => integration.id);
     setSelectedIntegrationIds((currentIds) =>
       filteredIds.every((id) => currentIds.includes(id))
         ? currentIds.filter((id) => !filteredIds.includes(id))
@@ -193,8 +200,8 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
     selectedIntegrationIds.includes(integration.id)
   );
   const allFilteredSelected =
-    filteredIntegrations.length > 0 &&
-    filteredIntegrations.every((integration) => selectedIntegrationIds.includes(integration.id));
+    sortedIntegrations.length > 0 &&
+    sortedIntegrations.every((integration) => selectedIntegrationIds.includes(integration.id));
 
   const getStatusVariant = (status: IntegrationStatus) => {
     switch (status) {
@@ -479,7 +486,7 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
           <AdminFilterFooter
             isDarkMode={isDarkMode}
             resultLabel="integration"
-            resultCount={filteredIntegrations.length}
+            resultCount={sortedIntegrations.length}
             activeFilterCount={activeFilterCount}
             onClearFilters={clearFilters}
           />
@@ -555,17 +562,66 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
                       aria-label="Select all filtered integrations"
                     />
                   </th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Integration</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Category</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Health</th>
-                  <th className={`px-3 py-2 text-right font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Events</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Last Sync</th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Integration"
+                      isActive={sortConfig?.key === 'name'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('name')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Status"
+                      isActive={sortConfig?.key === 'status'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('status')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Category"
+                      isActive={sortConfig?.key === 'category'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('category')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Health"
+                      isActive={sortConfig?.key === 'syncHealth'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('syncHealth')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-right">
+                    <AdminTableSortHeader
+                      label="Events"
+                      isActive={sortConfig?.key === 'events24h'}
+                      direction={sortConfig?.direction}
+                      align="right"
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('events24h')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Last Sync"
+                      isActive={sortConfig?.key === 'lastSyncAt'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('lastSyncAt')}
+                    />
+                  </th>
                   <th className={`px-3 py-2 text-right font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredIntegrations.map((integration) => (
+                {sortedIntegrations.map((integration) => (
                   <tr
                     key={integration.id}
                     onClick={() => setSelectedIntegration(integration)}
@@ -633,7 +689,7 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
             </table>
           </div>
 
-          {filteredIntegrations.length === 0 && (
+          {sortedIntegrations.length === 0 && (
             <AdminEmptyState
               isDarkMode={isDarkMode}
               message="No integrations match the current filters. Try clearing a health or status filter."

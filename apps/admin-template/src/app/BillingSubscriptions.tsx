@@ -3,12 +3,14 @@ import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import AdminActionConfirm from './AdminActionConfirm';
+import AdminTableSortHeader from './AdminTableSortHeader';
 import {
   AdminEmptyState,
   AdminFilterFooter,
   AdminMetricCards,
   AdminRelatedLinks,
 } from './AdminPageSections';
+import { useSortableData } from './useSortableData';
 
 type SubscriptionStatus = 'Active' | 'Trial' | 'Past Due' | 'Cancelled';
 type BillingPlan = 'Starter' | 'Growth' | 'Enterprise';
@@ -156,6 +158,11 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
     });
   }, [accounts, paymentFilter, planFilter, searchQuery, statusFilter]);
 
+  const { items: sortedAccounts, requestSort, sortConfig } = useSortableData(filteredAccounts, {
+    key: 'monthlyRevenue',
+    direction: 'desc',
+  });
+
   const stats = useMemo(
     () => [
       { label: 'Active MRR', value: `$${accounts.filter((account) => account.status === 'Active').reduce((sum, account) => sum + account.monthlyRevenue, 0).toLocaleString()}`, tone: 'border-green-500' },
@@ -188,7 +195,7 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
   };
 
   const toggleSelectAllFiltered = () => {
-    const filteredIds = filteredAccounts.map((account) => account.id);
+    const filteredIds = sortedAccounts.map((account) => account.id);
     setSelectedAccountIds((currentIds) =>
       filteredIds.every((id) => currentIds.includes(id))
         ? currentIds.filter((id) => !filteredIds.includes(id))
@@ -198,7 +205,7 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
 
   const selectedAccounts = accounts.filter((account) => selectedAccountIds.includes(account.id));
   const allFilteredSelected =
-    filteredAccounts.length > 0 && filteredAccounts.every((account) => selectedAccountIds.includes(account.id));
+    sortedAccounts.length > 0 && sortedAccounts.every((account) => selectedAccountIds.includes(account.id));
 
   const getStatusVariant = (status: SubscriptionStatus) => {
     switch (status) {
@@ -478,7 +485,7 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
           <AdminFilterFooter
             isDarkMode={isDarkMode}
             resultLabel="subscription"
-            resultCount={filteredAccounts.length}
+            resultCount={sortedAccounts.length}
             activeFilterCount={activeFilterCount}
             onClearFilters={clearFilters}
           />
@@ -554,17 +561,66 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
                       aria-label="Select all filtered subscriptions"
                     />
                   </th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Account</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Plan</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Payment</th>
-                  <th className={`px-3 py-2 text-right font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>MRR</th>
-                  <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Renewal</th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Account"
+                      isActive={sortConfig?.key === 'accountName'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('accountName')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Status"
+                      isActive={sortConfig?.key === 'status'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('status')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Plan"
+                      isActive={sortConfig?.key === 'plan'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('plan')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Payment"
+                      isActive={sortConfig?.key === 'paymentHealth'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('paymentHealth')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-right">
+                    <AdminTableSortHeader
+                      label="MRR"
+                      isActive={sortConfig?.key === 'monthlyRevenue'}
+                      direction={sortConfig?.direction}
+                      align="right"
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('monthlyRevenue')}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">
+                    <AdminTableSortHeader
+                      label="Renewal"
+                      isActive={sortConfig?.key === 'renewalDate'}
+                      direction={sortConfig?.direction}
+                      isDarkMode={isDarkMode}
+                      onClick={() => requestSort('renewalDate')}
+                    />
+                  </th>
                   <th className={`px-3 py-2 text-right font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredAccounts.map((account) => (
+                {sortedAccounts.map((account) => (
                   <tr
                     key={account.id}
                     onClick={() => setSelectedAccount(account)}
@@ -640,7 +696,7 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
             </table>
           </div>
 
-          {filteredAccounts.length === 0 && (
+          {sortedAccounts.length === 0 && (
             <AdminEmptyState
               isDarkMode={isDarkMode}
               message="No subscriptions match the current filters. Try widening the plan or payment filters."
