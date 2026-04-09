@@ -13,9 +13,20 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
-const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({ collapsed = false, isDarkMode = false }) => {
+const AdminSidebar: React.FC<{
+  collapsed?: boolean;
+  isDarkMode?: boolean;
+  mobileOpen?: boolean;
+  onRequestClose?: () => void;
+}> = ({
+  collapsed = false,
+  isDarkMode = false,
+  mobileOpen = false,
+  onRequestClose,
+}) => {
   const location = useLocation();
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['Dashboard', 'Management']);
+  const isCollapsedView = collapsed && !mobileOpen;
 
   const menuGroups: MenuGroup[] = [
     {
@@ -225,13 +236,22 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
   };
 
   return (
-    <div
-      className={`flex flex-col h-screen transition-all duration-200 ${isDarkMode ? 'bg-gradient-to-b from-gray-800 via-gray-800 to-gray-800' : 'bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700'} border-r ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${collapsed ? 'w-20' : 'w-64'}`}
-    >
+    <>
+      {mobileOpen && (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          className="fixed inset-0 z-30 bg-slate-950/50 md:hidden"
+          onClick={onRequestClose}
+        />
+      )}
+      <div
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-72 transform flex-col transition-transform duration-200 md:relative md:z-auto md:w-auto md:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} ${isDarkMode ? 'bg-gradient-to-b from-gray-800 via-gray-800 to-gray-800' : 'bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700'} border-r ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${collapsed ? 'md:w-20' : 'md:w-64'}`}
+      >
       {/* Header */}
-      <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${collapsed ? 'flex justify-center' : ''}`}>
+      <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${isCollapsedView ? 'flex justify-center' : ''}`}>
         <Link to="/" className={`text-lg font-bold text-white whitespace-nowrap`}>
-          {collapsed ? 'A' : 'Admin'}
+          {isCollapsedView ? 'A' : 'Admin'}
         </Link>
       </div>
 
@@ -244,13 +264,14 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
               onClick={() => toggleGroup(group.name)}
               className={`w-full flex items-center px-2 py-2 rounded-md transition-colors text-blue-100 hover:text-white ${
                 isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-600'
-              } ${collapsed ? 'justify-center' : 'gap-3'}`}
-              title={collapsed ? group.name : undefined}
+              } ${isCollapsedView ? 'justify-center' : 'gap-3'}`}
+              title={isCollapsedView ? group.name : undefined}
+              aria-expanded={expandedGroups.includes(group.name)}
             >
               <span className="text-blue-100">
                 {group.icon}
               </span>
-              {!collapsed && (
+              {!isCollapsedView && (
                 <>
                   <span className="flex-1 text-sm font-medium text-left">{group.name}</span>
                   <svg
@@ -267,11 +288,12 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
 
             {/* Group Items */}
             {expandedGroups.includes(group.name) && (
-              <div className={`space-y-1 ${collapsed ? '' : 'ml-6'}`}>
+              <div className={`space-y-1 ${isCollapsedView ? '' : 'ml-6'}`}>
                 {group.items.map((item) => (
                   <Link
                     key={item.to}
                     to={item.to}
+                    onClick={onRequestClose}
                     className={`block px-3 py-2 rounded-md text-sm transition-colors ${
                       isActive(item.to)
                         ? isDarkMode
@@ -280,10 +302,10 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
                         : isDarkMode
                         ? 'text-blue-100 hover:text-white hover:bg-gray-700'
                         : 'text-blue-100 hover:text-white hover:bg-blue-600'
-                    } ${collapsed ? 'flex justify-center' : ''}`}
-                    title={collapsed ? item.label : undefined}
+                    } ${isCollapsedView ? 'flex justify-center' : ''}`}
+                    title={isCollapsedView ? item.label : undefined}
                   >
-                    {collapsed ? item.icon : item.label}
+                    {isCollapsedView ? item.icon : item.label}
                   </Link>
                 ))}
               </div>
@@ -293,12 +315,13 @@ const AdminSidebar: React.FC<{ collapsed?: boolean; isDarkMode?: boolean }> = ({
       </nav>
 
       {/* Footer */}
-      <div className={`p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${collapsed ? 'text-center' : ''}`}>
+      <div className={`p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${isCollapsedView ? 'text-center' : ''}`}>
         <p className="text-xs text-blue-200">
-          {collapsed ? 'v1.0' : 'Admin Dashboard v1.0.0'}
+          {isCollapsedView ? 'v1.0' : 'Admin Dashboard v1.0.0'}
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

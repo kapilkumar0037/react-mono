@@ -39,4 +39,20 @@ describe('App', () => {
     expect(screen.getByText(/dashboard/i)).toBeTruthy();
     expect(screen.getByText(/demo@example.com/i)).toBeTruthy();
   });
+
+  it('restores the stored collapsed sidebar preference', async () => {
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'demo@example.com', loginAt: '2026-03-22T00:00:00.000Z' })
+    );
+    localStorage.setItem('admin-template.sidebar-collapsed', 'true');
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByRole('link', { name: 'A' })).toBeTruthy();
+  });
 });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import Customers from './Customers';
 import BillingSubscriptions from './BillingSubscriptions';
@@ -25,8 +25,10 @@ import { ToastProvider } from '@react-mono/ui-controls';
 import {
   AuthSession,
   clearStoredSession,
+  persistSidebarCollapsed,
   persistSession,
   persistTheme,
+  readStoredSidebarCollapsed,
   readStoredSession,
   readStoredTheme,
 } from './authStorage';
@@ -42,16 +44,56 @@ function ProtectedLayout({
   userEmail?: string;
   onLogout: () => void;
 }) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const location = useLocation();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => readStoredSidebarCollapsed());
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    persistSidebarCollapsed(sidebarCollapsed);
+  }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!isMobileSidebarOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMobileSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isMobileSidebarOpen]);
+
+  const handleSidebarToggle = () => {
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      setIsMobileSidebarOpen((current) => !current);
+      return;
+    }
+
+    setSidebarCollapsed((current) => !current);
+  };
 
   return (
     <div className={`${isDarkMode ? 'dark' : ''}`}>
       <div className={`flex h-screen overflow-hidden ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <AdminSidebar collapsed={sidebarCollapsed} isDarkMode={isDarkMode} />
+        <AdminSidebar
+          collapsed={sidebarCollapsed}
+          isDarkMode={isDarkMode}
+          mobileOpen={isMobileSidebarOpen}
+          onRequestClose={() => setIsMobileSidebarOpen(false)}
+        />
         
         <div className="flex-1 flex flex-col overflow-hidden">
           <AdminNavbar
-            onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onToggleSidebar={handleSidebarToggle}
             isDarkMode={isDarkMode}
             onToggleDarkMode={onToggleDarkMode}
             userEmail={userEmail}

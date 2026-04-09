@@ -6,6 +6,7 @@ export interface AuthSession {
 const SESSION_STORAGE_KEY = 'admin-template.session';
 const PERSISTED_SESSION_STORAGE_KEY = 'admin-template.persisted-session';
 const THEME_STORAGE_KEY = 'admin-template.theme';
+const SIDEBAR_COLLAPSED_STORAGE_KEY = 'admin-template.sidebar-collapsed';
 
 function parseSession(value: string | null): AuthSession | null {
   if (!value) {
@@ -59,4 +60,12 @@ export function readStoredTheme(): boolean {
 
 export function persistTheme(isDarkMode: boolean): void {
   localStorage.setItem(THEME_STORAGE_KEY, isDarkMode ? 'dark' : 'light');
+}
+
+export function readStoredSidebarCollapsed(): boolean {
+  return localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === 'true';
+}
+
+export function persistSidebarCollapsed(collapsed: boolean): void {
+  localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, collapsed ? 'true' : 'false');
 }
