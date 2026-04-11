@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import {
+  persistSidebarExpandedGroups,
+  readStoredSidebarExpandedGroups,
+} from './authStorage';
 
 interface MenuItem {
   label: string;
@@ -13,6 +17,8 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
+const DEFAULT_EXPANDED_GROUPS = ['Dashboard', 'Management'];
+
 const AdminSidebar: React.FC<{
   collapsed?: boolean;
   isDarkMode?: boolean;
@@ -25,7 +31,9 @@ const AdminSidebar: React.FC<{
   onRequestClose,
 }) => {
   const location = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['Dashboard', 'Management']);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(() =>
+    readStoredSidebarExpandedGroups(DEFAULT_EXPANDED_GROUPS)
+  );
   const isCollapsedView = collapsed && !mobileOpen;
 
   const menuGroups: MenuGroup[] = [
@@ -226,6 +234,24 @@ const AdminSidebar: React.FC<{
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const activeGroupName = menuGroups.find((group) =>
+    group.items.some((item) => isActive(item.to))
+  )?.name;
+
+  useEffect(() => {
+    persistSidebarExpandedGroups(expandedGroups);
+  }, [expandedGroups]);
+
+  useEffect(() => {
+    if (!activeGroupName) {
+      return;
+    }
+
+    setExpandedGroups((current) =>
+      current.includes(activeGroupName) ? current : [...current, activeGroupName]
+    );
+  }, [activeGroupName]);
 
   const toggleGroup = (groupName: string) => {
     setExpandedGroups(prev =>

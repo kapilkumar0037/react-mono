@@ -36,8 +36,8 @@ describe('App', () => {
       await new Promise((resolve) => setTimeout(resolve, 120));
     });
 
-    expect(screen.getByText(/dashboard/i)).toBeTruthy();
-    expect(screen.getByText(/demo@example.com/i)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /dashboard/i })).toBeTruthy();
+    expect(screen.getAllByText(/demo@example.com/i).length).toBeGreaterThan(0);
   });
 
   it('restores the stored collapsed sidebar preference', async () => {
@@ -54,5 +54,22 @@ describe('App', () => {
     });
 
     expect(screen.getByRole('link', { name: 'A' })).toBeTruthy();
+  });
+
+  it('restores stored expanded sidebar groups', async () => {
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'demo@example.com', loginAt: '2026-03-22T00:00:00.000Z' })
+    );
+    localStorage.setItem('admin-template.sidebar-expanded-groups', JSON.stringify(['Settings']));
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByRole('link', { name: /general settings/i })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /orders/i })).toBeNull();
   });
 });
