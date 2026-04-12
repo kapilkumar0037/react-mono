@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 import App from './app';
 
@@ -71,5 +71,38 @@ describe('App', () => {
 
     expect(screen.getByRole('link', { name: /general settings/i })).toBeTruthy();
     expect(screen.queryByRole('link', { name: /orders/i })).toBeNull();
+  });
+
+  it('opens and closes the mobile sidebar from the navbar toggle', async () => {
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(max-width: 767px)',
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'demo@example.com', loginAt: '2026-03-22T00:00:00.000Z' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /toggle sidebar/i }));
+    expect(screen.getByRole('button', { name: /close sidebar/i })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /close sidebar/i }));
+    expect(screen.queryByRole('button', { name: /close sidebar/i })).toBeNull();
+
+    window.matchMedia = originalMatchMedia;
   });
 });

@@ -107,7 +107,8 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
       <NavbarSection align="end" className="w-full flex items-center justify-between gap-4 relative -ml-3 pr-6">
         <button
           onClick={() => onToggleSidebar?.()}
-          className="text-blue-100 hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 hidden md:flex items-center"
+          className="text-blue-100 hover:text-white hover:bg-blue-800 dark:hover:bg-gray-700 font-medium px-2 py-2 rounded transition-colors duration-150 flex items-center"
+          aria-label="Toggle sidebar"
           title="Toggle Sidebar"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
