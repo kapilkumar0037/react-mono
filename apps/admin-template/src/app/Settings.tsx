@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 interface SettingsProps {
   isDarkMode?: boolean;
 }
 
+type SettingsTab = 'profile' | 'notifications' | 'security' | 'preferences';
+
+const SETTINGS_TABS: SettingsTab[] = ['profile', 'notifications', 'security', 'preferences'];
+
+function getSettingsTab(value: string | null): SettingsTab {
+  return SETTINGS_TABS.includes(value as SettingsTab) ? (value as SettingsTab) : 'profile';
+}
+
 const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     firstName: 'John',
     lastName: 'Doe',
@@ -33,7 +43,24 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
   });
 
   const [successMessage, setSuccessMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'security' | 'preferences'>('profile');
+  const [activeTab, setActiveTab] = useState<SettingsTab>(() => getSettingsTab(searchParams.get('tab')));
+
+  useEffect(() => {
+    setActiveTab(getSettingsTab(searchParams.get('tab')));
+  }, [searchParams]);
+
+  const handleTabChange = (tab: SettingsTab) => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (tab === 'profile') {
+      nextParams.delete('tab');
+    } else {
+      nextParams.set('tab', tab);
+    }
+
+    setActiveTab(tab);
+    setSearchParams(nextParams, { replace: true });
+  };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -80,7 +107,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
       {/* Tab Navigation */}
       <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
         <button
-          onClick={() => setActiveTab('profile')}
+          onClick={() => handleTabChange('profile')}
           className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'profile'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
@@ -90,7 +117,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
           Profile
         </button>
         <button
-          onClick={() => setActiveTab('notifications')}
+          onClick={() => handleTabChange('notifications')}
           className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'notifications'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
@@ -100,7 +127,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
           Notifications
         </button>
         <button
-          onClick={() => setActiveTab('security')}
+          onClick={() => handleTabChange('security')}
           className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'security'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
@@ -110,7 +137,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
           Security
         </button>
         <button
-          onClick={() => setActiveTab('preferences')}
+          onClick={() => handleTabChange('preferences')}
           className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'preferences'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'

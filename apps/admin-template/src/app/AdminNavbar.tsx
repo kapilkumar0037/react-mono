@@ -3,7 +3,7 @@ import {
   Navbar,
   NavbarSection,
 } from '@react-mono/ui-controls';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 interface AdminNavbarProps {
   onToggleSidebar?: () => void;
@@ -21,6 +21,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
   onLogout,
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -229,6 +230,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50">
               <button
                 onClick={() => {
+                  navigate('/settings?tab=profile');
                   setIsDropdownOpen(false);
                 }}
                 className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-lg transition-colors"
@@ -237,6 +239,7 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
               </button>
               <button
                 onClick={() => {
+                  navigate('/settings?tab=preferences');
                   setIsDropdownOpen(false);
                 }}
                 className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

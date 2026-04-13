@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 
 import App from './app';
 
@@ -6,6 +6,11 @@ describe('App', () => {
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
+    window.history.pushState({}, '', '/');
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it('should render successfully', () => {
@@ -97,12 +102,48 @@ describe('App', () => {
       await new Promise((resolve) => setTimeout(resolve, 120));
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /toggle sidebar/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /toggle sidebar/i })[0]);
     expect(screen.getByRole('button', { name: /close sidebar/i })).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /close sidebar/i }));
     expect(screen.queryByRole('button', { name: /close sidebar/i })).toBeNull();
 
     window.matchMedia = originalMatchMedia;
+  });
+
+  it('opens the profile settings tab from the account menu', async () => {
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'demo@example.com', loginAt: '2026-03-22T00:00:00.000Z' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.click(screen.getAllByRole('button', { name: /demo@example.com/i })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: /profile/i })[0]);
+
+    expect(screen.getByRole('heading', { name: /settings/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /personal information/i })).toBeTruthy();
+  });
+
+  it('opens the requested settings tab from the URL', async () => {
+    window.history.pushState({}, '', '/settings?tab=preferences');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'demo@example.com', loginAt: '2026-03-22T00:00:00.000Z' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByRole('heading', { name: /settings/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /backup frequency/i })).toBeTruthy();
   });
 });
