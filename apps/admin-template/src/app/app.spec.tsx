@@ -146,4 +146,57 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: /settings/i })).toBeTruthy();
     expect(screen.getByRole('heading', { name: /backup frequency/i })).toBeTruthy();
   });
+
+  it('persists profile settings after saving changes', async () => {
+    window.history.pushState({}, '', '/settings');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'demo@example.com', loginAt: '2026-03-22T00:00:00.000Z' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.change(screen.getByDisplayValue('John'), { target: { value: 'Jane' } });
+    fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
+
+    cleanup();
+    window.history.pushState({}, '', '/settings');
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByDisplayValue('Jane')).toBeTruthy();
+  });
+
+  it('persists app preferences when changed', async () => {
+    window.history.pushState({}, '', '/settings?tab=preferences');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'demo@example.com', loginAt: '2026-03-22T00:00:00.000Z' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'daily' } });
+
+    cleanup();
+    window.history.pushState({}, '', '/settings?tab=preferences');
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByRole<HTMLSelectElement>('combobox').value).toBe('daily');
+  });
 });

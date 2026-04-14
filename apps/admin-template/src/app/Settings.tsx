@@ -8,39 +8,77 @@ interface SettingsProps {
 type SettingsTab = 'profile' | 'notifications' | 'security' | 'preferences';
 
 const SETTINGS_TABS: SettingsTab[] = ['profile', 'notifications', 'security', 'preferences'];
+const SETTINGS_STORAGE_KEY = 'admin-template.settings';
+
+const DEFAULT_PROFILE_SETTINGS = {
+  firstName: 'John',
+  lastName: 'Doe',
+  email: 'john.doe@example.com',
+  company: 'Tech Corp',
+  phone: '+1 (555) 123-4567',
+  address: '123 Business Ave',
+  city: 'New York',
+  state: 'NY',
+  zipCode: '10001',
+  country: 'United States',
+};
+
+const DEFAULT_APP_SETTINGS = {
+  emailNotifications: true,
+  pushNotifications: true,
+  smsAlerts: false,
+  weeklyReport: true,
+  monthlyDigest: true,
+  marketingEmails: false,
+  dataCollection: true,
+  analyticsTracking: true,
+  twoFactorAuth: false,
+  sessionTimeout: '30',
+  backupFrequency: 'weekly',
+};
+
+type ProfileSettings = typeof DEFAULT_PROFILE_SETTINGS;
+type AppSettings = typeof DEFAULT_APP_SETTINGS;
+
+interface StoredSettings {
+  profile?: Partial<ProfileSettings>;
+  app?: Partial<AppSettings>;
+}
 
 function getSettingsTab(value: string | null): SettingsTab {
   return SETTINGS_TABS.includes(value as SettingsTab) ? (value as SettingsTab) : 'profile';
 }
 
+function readStoredSettings(): StoredSettings {
+  const value = localStorage.getItem(SETTINGS_STORAGE_KEY);
+
+  if (!value) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(value) as StoredSettings;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function persistStoredSettings(settings: StoredSettings): void {
+  localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+}
+
 const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [formData, setFormData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    company: 'Tech Corp',
-    phone: '+1 (555) 123-4567',
-    address: '123 Business Ave',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
-    country: 'United States',
-  });
+  const [formData, setFormData] = useState<ProfileSettings>(() => ({
+    ...DEFAULT_PROFILE_SETTINGS,
+    ...readStoredSettings().profile,
+  }));
 
-  const [appSettings, setAppSettings] = useState({
-    emailNotifications: true,
-    pushNotifications: true,
-    smsAlerts: false,
-    weeklyReport: true,
-    monthlyDigest: true,
-    marketingEmails: false,
-    dataCollection: true,
-    analyticsTracking: true,
-    twoFactorAuth: false,
-    sessionTimeout: '30',
-    backupFrequency: 'weekly',
-  });
+  const [appSettings, setAppSettings] = useState<AppSettings>(() => ({
+    ...DEFAULT_APP_SETTINGS,
+    ...readStoredSettings().app,
+  }));
 
   const [successMessage, setSuccessMessage] = useState('');
   const [activeTab, setActiveTab] = useState<SettingsTab>(() => getSettingsTab(searchParams.get('tab')));
@@ -66,19 +104,30 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name as keyof ProfileSettings]: value
     }));
   };
 
-  const handleAppSettingChange = (key: string, value: boolean | string) => {
+  const handleAppSettingChange = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
     setAppSettings(prev => ({
       ...prev,
       [key]: value
     }));
   };
 
+  useEffect(() => {
+    persistStoredSettings({
+      ...readStoredSettings(),
+      app: appSettings,
+    });
+  }, [appSettings]);
+
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    persistStoredSettings({
+      ...readStoredSettings(),
+      profile: formData,
+    });
     setSuccessMessage('Profile updated successfully!');
     setTimeout(() => setSuccessMessage(''), 3000);
   };
