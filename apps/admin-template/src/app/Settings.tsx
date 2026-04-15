@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import AdminActionConfirm from './AdminActionConfirm';
 
 interface SettingsProps {
   isDarkMode?: boolean;
@@ -81,6 +82,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
   }));
 
   const [successMessage, setSuccessMessage] = useState('');
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<SettingsTab>(() => getSettingsTab(searchParams.get('tab')));
 
   useEffect(() => {
@@ -135,6 +137,18 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMessage('Settings saved successfully!');
+    setTimeout(() => setSuccessMessage(''), 3000);
+  };
+
+  const handleResetSettings = () => {
+    setFormData(DEFAULT_PROFILE_SETTINGS);
+    setAppSettings(DEFAULT_APP_SETTINGS);
+    persistStoredSettings({
+      profile: DEFAULT_PROFILE_SETTINGS,
+      app: DEFAULT_APP_SETTINGS,
+    });
+    setIsResetConfirmOpen(false);
+    setSuccessMessage('Settings reset to defaults.');
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
@@ -622,14 +636,33 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
           <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-red-900 dark:text-red-200 mb-2">Danger Zone</h3>
             <p className="text-sm text-red-700 dark:text-red-300 mb-4">These actions cannot be undone</p>
-            <button
-              className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 dark:hover:bg-red-500 transition-colors"
-            >
-              Delete Account
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setIsResetConfirmOpen(true)}
+                className="px-6 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 dark:hover:bg-amber-500 transition-colors"
+              >
+                Reset Settings
+              </button>
+              <button
+                className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 dark:hover:bg-red-500 transition-colors"
+              >
+                Delete Account
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      <AdminActionConfirm
+        isOpen={isResetConfirmOpen}
+        title="Reset Settings"
+        message="Reset profile details, notification settings, security options, and preferences back to their defaults?"
+        confirmLabel="Reset Settings"
+        confirmClassName="bg-amber-600 text-white"
+        isDarkMode={isDarkMode}
+        onCancel={() => setIsResetConfirmOpen(false)}
+        onConfirm={handleResetSettings}
+      />
     </div>
   );
 };

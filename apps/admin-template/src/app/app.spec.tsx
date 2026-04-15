@@ -199,4 +199,44 @@ describe('App', () => {
 
     expect(screen.getByRole<HTMLSelectElement>('combobox').value).toBe('daily');
   });
+
+  it('resets stored settings back to defaults after confirmation', async () => {
+    window.history.pushState({}, '', '/settings?tab=preferences');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'demo@example.com', loginAt: '2026-03-22T00:00:00.000Z' })
+    );
+    localStorage.setItem(
+      'admin-template.settings',
+      JSON.stringify({
+        profile: { firstName: 'Jane' },
+        app: { backupFrequency: 'daily', analyticsTracking: false },
+      })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByRole<HTMLSelectElement>('combobox').value).toBe('daily');
+
+    fireEvent.click(screen.getByRole('button', { name: /reset settings/i }));
+    const resetButtons = screen.getAllByRole('button', { name: /reset settings/i });
+    fireEvent.click(resetButtons[resetButtons.length - 1]);
+
+    expect(screen.getByText(/settings reset to defaults/i)).toBeTruthy();
+    expect(screen.getByRole<HTMLSelectElement>('combobox').value).toBe('weekly');
+
+    cleanup();
+    window.history.pushState({}, '', '/settings');
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByDisplayValue('John')).toBeTruthy();
+  });
 });
