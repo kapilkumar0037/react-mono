@@ -200,6 +200,35 @@ describe('App', () => {
     expect(screen.getByRole<HTMLSelectElement>('combobox').value).toBe('daily');
   });
 
+  it('persists organization workspace settings when changed', async () => {
+    window.history.pushState({}, '', '/settings?tab=organization');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'demo@example.com', loginAt: '2026-03-22T00:00:00.000Z' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.change(screen.getByDisplayValue('Tech Corp'), { target: { value: 'Northwind Labs' } });
+    fireEvent.change(screen.getByDisplayValue('tech-corp'), { target: { value: 'Northwind Labs' } });
+
+    cleanup();
+    window.history.pushState({}, '', '/settings?tab=organization');
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByDisplayValue('Northwind Labs')).toBeTruthy();
+    expect(screen.getByDisplayValue('northwind-labs')).toBeTruthy();
+    expect(screen.getByText(/northwind-labs.admin.local/i)).toBeTruthy();
+  });
+
   it('resets stored settings back to defaults after confirmation', async () => {
     window.history.pushState({}, '', '/settings?tab=preferences');
     localStorage.setItem(

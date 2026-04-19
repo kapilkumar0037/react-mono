@@ -6,9 +6,9 @@ interface SettingsProps {
   isDarkMode?: boolean;
 }
 
-type SettingsTab = 'profile' | 'notifications' | 'security' | 'preferences';
+type SettingsTab = 'profile' | 'organization' | 'notifications' | 'security' | 'preferences';
 
-const SETTINGS_TABS: SettingsTab[] = ['profile', 'notifications', 'security', 'preferences'];
+const SETTINGS_TABS: SettingsTab[] = ['profile', 'organization', 'notifications', 'security', 'preferences'];
 const SETTINGS_STORAGE_KEY = 'admin-template.settings';
 
 const DEFAULT_PROFILE_SETTINGS = {
@@ -38,12 +38,29 @@ const DEFAULT_APP_SETTINGS = {
   backupFrequency: 'weekly',
 };
 
+const DEFAULT_ORGANIZATION_SETTINGS = {
+  organizationName: 'Tech Corp',
+  workspaceSlug: 'tech-corp',
+  industry: 'SaaS',
+  employeeRange: '51-200',
+  defaultCurrency: 'USD',
+  fiscalYearStart: 'January',
+  billingEmail: 'billing@techcorp.example',
+  supportEmail: 'support@techcorp.example',
+  auditRetention: '180',
+  releaseChannel: 'stable',
+  customerPortal: true,
+  autoInvite: false,
+};
+
 type ProfileSettings = typeof DEFAULT_PROFILE_SETTINGS;
 type AppSettings = typeof DEFAULT_APP_SETTINGS;
+type OrganizationSettings = typeof DEFAULT_ORGANIZATION_SETTINGS;
 
 interface StoredSettings {
   profile?: Partial<ProfileSettings>;
   app?: Partial<AppSettings>;
+  organization?: Partial<OrganizationSettings>;
 }
 
 function getSettingsTab(value: string | null): SettingsTab {
@@ -79,6 +96,11 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
   const [appSettings, setAppSettings] = useState<AppSettings>(() => ({
     ...DEFAULT_APP_SETTINGS,
     ...readStoredSettings().app,
+  }));
+
+  const [organizationSettings, setOrganizationSettings] = useState<OrganizationSettings>(() => ({
+    ...DEFAULT_ORGANIZATION_SETTINGS,
+    ...readStoredSettings().organization,
   }));
 
   const [successMessage, setSuccessMessage] = useState('');
@@ -117,12 +139,29 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
     }));
   };
 
+  const handleOrganizationSettingChange = <K extends keyof OrganizationSettings>(
+    key: K,
+    value: OrganizationSettings[K]
+  ) => {
+    setOrganizationSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
   useEffect(() => {
     persistStoredSettings({
       ...readStoredSettings(),
       app: appSettings,
     });
   }, [appSettings]);
+
+  useEffect(() => {
+    persistStoredSettings({
+      ...readStoredSettings(),
+      organization: organizationSettings,
+    });
+  }, [organizationSettings]);
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,9 +182,11 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
   const handleResetSettings = () => {
     setFormData(DEFAULT_PROFILE_SETTINGS);
     setAppSettings(DEFAULT_APP_SETTINGS);
+    setOrganizationSettings(DEFAULT_ORGANIZATION_SETTINGS);
     persistStoredSettings({
       profile: DEFAULT_PROFILE_SETTINGS,
       app: DEFAULT_APP_SETTINGS,
+      organization: DEFAULT_ORGANIZATION_SETTINGS,
     });
     setIsResetConfirmOpen(false);
     setSuccessMessage('Settings reset to defaults.');
@@ -178,6 +219,16 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
           }`}
         >
           Profile
+        </button>
+        <button
+          onClick={() => handleTabChange('organization')}
+          className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+            activeTab === 'organization'
+              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
+          }`}
+        >
+          Organization
         </button>
         <button
           onClick={() => handleTabChange('notifications')}
@@ -358,6 +409,211 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
                 >
                   Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Organization Tab */}
+      {activeTab === 'organization' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2">Workspace</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {organizationSettings.organizationName}
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  {organizationSettings.workspaceSlug}.admin.local
+                </p>
+
+                <div className="mt-6 space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Plan readiness</span>
+                    <span className="font-semibold text-green-600 dark:text-green-400">92%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                    <div className="h-2 w-[92%] rounded-full bg-green-500" />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Billing contacts, audit retention, and portal controls are configured.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <form className="lg:col-span-2" onSubmit={handleSaveSettings}>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Organization Profile</h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Organization Name</label>
+                    <input
+                      type="text"
+                      value={organizationSettings.organizationName}
+                      onChange={(e) => handleOrganizationSettingChange('organizationName', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Workspace Slug</label>
+                    <input
+                      type="text"
+                      value={organizationSettings.workspaceSlug}
+                      onChange={(e) => handleOrganizationSettingChange('workspaceSlug', e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Industry</label>
+                    <select
+                      value={organizationSettings.industry}
+                      onChange={(e) => handleOrganizationSettingChange('industry', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="SaaS">SaaS</option>
+                      <option value="Retail">Retail</option>
+                      <option value="Healthcare">Healthcare</option>
+                      <option value="Finance">Finance</option>
+                      <option value="Education">Education</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Company Size</label>
+                    <select
+                      value={organizationSettings.employeeRange}
+                      onChange={(e) => handleOrganizationSettingChange('employeeRange', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="1-10">1-10</option>
+                      <option value="11-50">11-50</option>
+                      <option value="51-200">51-200</option>
+                      <option value="201-1000">201-1000</option>
+                      <option value="1000+">1000+</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Default Currency</label>
+                    <select
+                      value={organizationSettings.defaultCurrency}
+                      onChange={(e) => handleOrganizationSettingChange('defaultCurrency', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="GBP">GBP</option>
+                      <option value="INR">INR</option>
+                      <option value="JPY">JPY</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Fiscal Year Starts</label>
+                    <select
+                      value={organizationSettings.fiscalYearStart}
+                      onChange={(e) => handleOrganizationSettingChange('fiscalYearStart', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {['January', 'April', 'July', 'October'].map((month) => (
+                        <option key={month} value={month}>{month}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Operations</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Billing Email</label>
+                    <input
+                      type="email"
+                      value={organizationSettings.billingEmail}
+                      onChange={(e) => handleOrganizationSettingChange('billingEmail', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Support Email</label>
+                    <input
+                      type="email"
+                      value={organizationSettings.supportEmail}
+                      onChange={(e) => handleOrganizationSettingChange('supportEmail', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Audit Retention</label>
+                    <select
+                      value={organizationSettings.auditRetention}
+                      onChange={(e) => handleOrganizationSettingChange('auditRetention', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="90">90 days</option>
+                      <option value="180">180 days</option>
+                      <option value="365">1 year</option>
+                      <option value="730">2 years</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Release Channel</label>
+                    <select
+                      value={organizationSettings.releaseChannel}
+                      onChange={(e) => handleOrganizationSettingChange('releaseChannel', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="stable">Stable</option>
+                      <option value="early">Early access</option>
+                      <option value="beta">Beta</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Customer Portal</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Let customers manage invoices, orders, and support requests.</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={organizationSettings.customerPortal}
+                      onChange={(e) => handleOrganizationSettingChange('customerPortal', e.target.checked)}
+                      className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Auto-Invite New Users</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Send workspace invitations when teammates are added.</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={organizationSettings.autoInvite}
+                      onChange={(e) => handleOrganizationSettingChange('autoInvite', e.target.checked)}
+                      className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
+                >
+                  Save Organization
                 </button>
               </div>
             </form>
@@ -656,7 +912,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
       <AdminActionConfirm
         isOpen={isResetConfirmOpen}
         title="Reset Settings"
-        message="Reset profile details, notification settings, security options, and preferences back to their defaults?"
+        message="Reset profile details, organization settings, notification settings, security options, and preferences back to their defaults?"
         confirmLabel="Reset Settings"
         confirmClassName="bg-amber-600 text-white"
         isDarkMode={isDarkMode}
