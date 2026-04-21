@@ -16,11 +16,13 @@ import NotificationsCenter from './NotificationsCenter';
 import SystemHealth from './SystemHealth';
 import BackupRecovery from './BackupRecovery';
 import ApiKeyManagement from './ApiKeyManagement';
+import AccessControl from './AccessControl';
 import Login from './Login';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 import ProtectedRoute from './ProtectedRoute';
+import PermissionGuard from './PermissionGuard';
 import { ToastProvider } from '@react-mono/ui-controls';
 import {
   AuthSession,
@@ -32,16 +34,19 @@ import {
   readStoredSession,
   readStoredTheme,
 } from './authStorage';
+import { AppPermission, AppRole, DEFAULT_ROLE_DEFINITIONS } from './rbac';
 
 function ProtectedLayout({
   isDarkMode,
   onToggleDarkMode,
   userEmail,
+  currentRole,
   onLogout,
 }: {
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   userEmail?: string;
+  currentRole: AppRole;
   onLogout: () => void;
 }) {
   const location = useLocation();
@@ -87,6 +92,8 @@ function ProtectedLayout({
         <AdminSidebar
           collapsed={sidebarCollapsed}
           isDarkMode={isDarkMode}
+          currentRole={currentRole}
+          definitions={DEFAULT_ROLE_DEFINITIONS}
           mobileOpen={isMobileSidebarOpen}
           onRequestClose={() => setIsMobileSidebarOpen(false)}
         />
@@ -97,6 +104,7 @@ function ProtectedLayout({
             isDarkMode={isDarkMode}
             onToggleDarkMode={onToggleDarkMode}
             userEmail={userEmail}
+            currentRole={currentRole}
             onLogout={onLogout}
           />
 
@@ -120,10 +128,11 @@ export function App() {
     persistTheme(isDarkMode);
   }, [isDarkMode]);
 
-  const handleLogin = (credentials: { email: string; password: string; rememberMe: boolean }) => {
+  const handleLogin = (credentials: { email: string; password: string; rememberMe: boolean; role: AppRole }) => {
     const nextSession: AuthSession = {
       email: credentials.email,
       loginAt: new Date().toISOString(),
+      role: credentials.role,
     };
 
     persistSession(nextSession, credentials.rememberMe);
@@ -145,6 +154,22 @@ export function App() {
   if (isLoading) {
     return null;
   }
+
+  const currentRole = session?.role ?? 'Owner';
+
+  const renderProtectedPage = (
+    permission: AppPermission,
+    element: React.ReactNode
+  ) => (
+    <PermissionGuard
+      currentRole={currentRole}
+      permission={permission}
+      definitions={DEFAULT_ROLE_DEFINITIONS}
+      isDarkMode={isDarkMode}
+    >
+      <ErrorBoundary>{element}</ErrorBoundary>
+    </PermissionGuard>
+  );
 
   return (
     <ToastProvider>
@@ -170,89 +195,76 @@ export function App() {
                     isDarkMode={isDarkMode}
                     onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
                     userEmail={session?.email}
+                    currentRole={currentRole}
                     onLogout={handleLogout}
                   />
                 }
               >
                 <Route path="/" element={
-                  <ErrorBoundary>
-                    <Dashboard isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('dashboard.view', <Dashboard isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/users" element={
-                  <ErrorBoundary>
-                    <Users isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage(
+                    'users.view',
+                    <Users
+                      isDarkMode={isDarkMode}
+                      currentRole={currentRole}
+                      currentUserEmail={session?.email}
+                      definitions={DEFAULT_ROLE_DEFINITIONS}
+                    />
+                  )
                 } />
                 <Route path="/orders" element={
-                  <ErrorBoundary>
-                    <Orders isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('orders.view', <Orders isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/inventory" element={
-                  <ErrorBoundary>
-                    <InventoryManagement isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('inventory.view', <InventoryManagement isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/billing-subscriptions" element={
-                  <ErrorBoundary>
-                    <BillingSubscriptions isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('billing.view', <BillingSubscriptions isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/integrations" element={
-                  <ErrorBoundary>
-                    <IntegrationsHub isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('integrations.view', <IntegrationsHub isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/customers" element={
-                  <ErrorBoundary>
-                    <Customers isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('customers.view', <Customers isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/returns-refunds" element={
-                  <ErrorBoundary>
-                    <ReturnsRefunds isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('returns.view', <ReturnsRefunds isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/support-tickets" element={
-                  <ErrorBoundary>
-                    <SupportTickets isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('support.view', <SupportTickets isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/settings" element={
-                  <ErrorBoundary>
-                    <Settings isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('settings.view', <Settings isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/reports" element={
-                  <ErrorBoundary>
-                    <Reports isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('reports.view', <Reports isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/activity" element={
-                  <ErrorBoundary>
-                    <ActivityLog isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('activity.view', <ActivityLog isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/notifications" element={
-                  <ErrorBoundary>
-                    <NotificationsCenter isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('notifications.view', <NotificationsCenter isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/system-health" element={
-                  <ErrorBoundary>
-                    <SystemHealth isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('system.view', <SystemHealth isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/backup-recovery" element={
-                  <ErrorBoundary>
-                    <BackupRecovery isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('backup.manage', <BackupRecovery isDarkMode={isDarkMode} />)
                 } />
                 <Route path="/api-keys" element={
-                  <ErrorBoundary>
-                    <ApiKeyManagement isDarkMode={isDarkMode} />
-                  </ErrorBoundary>
+                  renderProtectedPage('apiKeys.manage', <ApiKeyManagement isDarkMode={isDarkMode} />)
+                } />
+                <Route path="/access-control" element={
+                  renderProtectedPage(
+                    'rbac.manage',
+                    <AccessControl
+                      isDarkMode={isDarkMode}
+                      currentRole={currentRole}
+                      currentUserEmail={session?.email}
+                    />
+                  )
                 } />
               </Route>
             </Route>

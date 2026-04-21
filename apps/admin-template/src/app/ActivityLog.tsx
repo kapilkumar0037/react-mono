@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import { readStoredAuditEntries } from './rbacStorage';
 
 interface ActivityLog {
   id: number;
@@ -134,8 +135,11 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ isDarkMode = false }) => {
     },
   ];
 
+  const dynamicAuditEntries = readStoredAuditEntries();
+  const allActivities = [...dynamicAuditEntries, ...activities];
+
   // Filter and search
-  const filtered = activities.filter((activity) => {
+  const filtered = allActivities.filter((activity) => {
     const categoryMatch = filteredCategory === 'all' || activity.category === filteredCategory;
     const statusMatch = filteredStatus === 'all' || activity.status === filteredStatus;
     const searchMatch =

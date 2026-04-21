@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
+import { APP_ROLES, AppRole, getDefaultRoleForEmail } from './rbac';
 
 interface LoginProps {
   isDarkMode?: boolean;
-  onLogin?: (credentials: { email: string; password: string; rememberMe: boolean }) => void;
+  onLogin?: (credentials: { email: string; password: string; rememberMe: boolean; role: AppRole }) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [role, setRole] = useState<AppRole>('Owner');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +34,7 @@ const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
       }
 
       // Simulate successful login
-      onLogin?.({ email, password, rememberMe });
+      onLogin?.({ email, password, rememberMe, role });
       setLoading(false);
     }, 500);
   };
@@ -77,7 +79,11 @@ const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    const nextEmail = e.target.value;
+                    setEmail(nextEmail);
+                    setRole(getDefaultRoleForEmail(nextEmail));
+                  }}
                   className={`mt-2 w-full px-4 py-2 rounded-lg border ${
                     isDarkMode
                       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500'
@@ -109,6 +115,28 @@ const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
                   } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   placeholder="••••••••"
                 />
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="role" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Demo Role
+                </label>
+                <select
+                  id="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as AppRole)}
+                  className={`mt-2 w-full px-4 py-2 rounded-lg border ${
+                    isDarkMode
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                >
+                  {APP_ROLES.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Remember Me */}

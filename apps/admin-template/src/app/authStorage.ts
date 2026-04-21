@@ -1,6 +1,9 @@
+import { AppRole, getDefaultRoleForEmail, isAppRole } from './rbac';
+
 export interface AuthSession {
   email: string;
   loginAt: string;
+  role: AppRole;
 }
 
 const SESSION_STORAGE_KEY = 'admin-template.session';
@@ -24,6 +27,7 @@ function parseSession(value: string | null): AuthSession | null {
     return {
       email: parsed.email,
       loginAt: parsed.loginAt,
+      role: isAppRole(parsed.role ?? '') ? parsed.role : getDefaultRoleForEmail(parsed.email),
     };
   } catch {
     return null;

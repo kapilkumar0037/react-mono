@@ -4,12 +4,15 @@ import {
   NavbarSection,
 } from '@react-mono/ui-controls';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { AppRole, DEFAULT_ROLE_DEFINITIONS, RoleDefinition, getRoleBadgeClass, hasPermission } from './rbac';
 
 interface AdminNavbarProps {
   onToggleSidebar?: () => void;
   isDarkMode?: boolean;
   onToggleDarkMode?: () => void;
   userEmail?: string;
+  currentRole: AppRole;
+  definitions?: Record<AppRole, RoleDefinition>;
   onLogout?: () => void;
 }
 
@@ -18,6 +21,8 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
   isDarkMode,
   onToggleDarkMode,
   userEmail,
+  currentRole,
+  definitions = DEFAULT_ROLE_DEFINITIONS,
   onLogout,
 }) => {
   const location = useLocation();
@@ -224,6 +229,9 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             <span>{userEmail ?? 'Admin User'}</span>
+            <span className={`hidden rounded-md px-2 py-0.5 text-xs font-semibold md:inline-flex ${getRoleBadgeClass(currentRole)}`}>
+              {currentRole}
+            </span>
           </button>
 
           {isDropdownOpen && (
@@ -246,6 +254,17 @@ const AdminNavbar: React.FC<AdminNavbarProps> = ({
               >
                 Settings
               </button>
+              {hasPermission(currentRole, 'rbac.manage', definitions) && (
+                <button
+                  onClick={() => {
+                    navigate('/access-control');
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Access Control
+                </button>
+              )}
               <button
                 onClick={() => {
                   onLogout?.();

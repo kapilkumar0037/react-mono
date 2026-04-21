@@ -147,6 +147,41 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: /backup frequency/i })).toBeTruthy();
   });
 
+  it('shows the access control page for an owner session', async () => {
+    window.history.pushState({}, '', '/access-control');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByRole('heading', { name: /access control/i })).toBeTruthy();
+    expect(screen.getByText(/save access policies/i)).toBeTruthy();
+  });
+
+  it('blocks restricted routes and hides sensitive navigation for support users', async () => {
+    window.history.pushState({}, '', '/api-keys');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'support@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Support' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByRole('heading', { name: /access denied/i })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: /api keys/i })).toBeNull();
+    expect(screen.queryByRole('link', { name: /access control/i })).toBeNull();
+  });
+
   it('persists profile settings after saving changes', async () => {
     window.history.pushState({}, '', '/settings');
     localStorage.setItem(

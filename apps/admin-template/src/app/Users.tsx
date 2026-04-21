@@ -1,4 +1,4 @@
-import React, { useState, useMemo, ChangeEvent } from 'react';
+import React, { useEffect, useMemo, useState, ChangeEvent } from 'react';
 import {
   Modal,
   Button,
@@ -10,28 +10,36 @@ import {
   useToast,
 } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: 'Active' | 'Inactive' | 'Suspended';
-  joinDate: string;
-}
+import {
+  APP_ROLES,
+  AppRole,
+  DEFAULT_ROLE_DEFINITIONS,
+  RoleDefinition,
+  getRoleBadgeClass,
+  hasPermission,
+} from './rbac';
+import { appendAuditEntry, DirectoryUser, persistUsers, readStoredUsers } from './rbacStorage';
 
 interface FormData {
   name: string;
   email: string;
-  role: string;
+  role: AppRole;
   status: 'Active' | 'Inactive' | 'Suspended';
 }
 
 interface UsersProps {
   isDarkMode?: boolean;
+  currentRole: AppRole;
+  currentUserEmail?: string;
+  definitions?: Record<AppRole, RoleDefinition>;
 }
 
-const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
+const Users: React.FC<UsersProps> = ({
+  isDarkMode = false,
+  currentRole,
+  currentUserEmail,
+  definitions = DEFAULT_ROLE_DEFINITIONS,
+}) => {
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [filterRole, setFilterRole] = useState<string>('all');
@@ -40,33 +48,23 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
-  const [userPendingDelete, setUserPendingDelete] = useState<User | null>(null);
+  const [userPendingDelete, setUserPendingDelete] = useState<DirectoryUser | null>(null);
+  const [users, setUsers] = useState<DirectoryUser[]>(() => readStoredUsers());
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
-    role: 'User',
+    role: 'Support',
     status: 'Active',
   });
 
-  // Mock user data
-  const [users, setUsers] = useState<User[]>([
-    { id: 1, name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin', status: 'Active', joinDate: '2024-01-15' },
-    { id: 2, name: 'Bob Smith', email: 'bob@example.com', role: 'User', status: 'Active', joinDate: '2024-02-20' },
-    { id: 3, name: 'Carol Williams', email: 'carol@example.com', role: 'Moderator', status: 'Active', joinDate: '2024-03-10' },
-    { id: 4, name: 'David Brown', email: 'david@example.com', role: 'User', status: 'Inactive', joinDate: '2024-04-05' },
-    { id: 5, name: 'Emma Davis', email: 'emma@example.com', role: 'User', status: 'Active', joinDate: '2024-05-12' },
-    { id: 6, name: 'Frank Miller', email: 'frank@example.com', role: 'Admin', status: 'Active', joinDate: '2024-06-18' },
-    { id: 7, name: 'Grace Lee', email: 'grace@example.com', role: 'Moderator', status: 'Suspended', joinDate: '2024-07-22' },
-    { id: 8, name: 'Henry Taylor', email: 'henry@example.com', role: 'User', status: 'Active', joinDate: '2024-08-09' },
-    { id: 9, name: 'Ivy Martinez', email: 'ivy@example.com', role: 'User', status: 'Inactive', joinDate: '2024-09-14' },
-    { id: 10, name: 'Jack Anderson', email: 'jack@example.com', role: 'User', status: 'Active', joinDate: '2024-10-21' },
-    { id: 11, name: 'Kelly White', email: 'kelly@example.com', role: 'User', status: 'Active', joinDate: '2024-11-03' },
-    { id: 12, name: 'Leo Harris', email: 'leo@example.com', role: 'Admin', status: 'Active', joinDate: '2024-12-11' },
-  ]);
-
   const itemsPerPage = 8;
+  const canManageUsers = hasPermission(currentRole, 'users.manage', definitions);
+  const canManageRoles = hasPermission(currentRole, 'rbac.manage', definitions);
 
-  // Filter and search users
+  useEffect(() => {
+    persistUsers(users);
+  }, [users]);
+
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const matchesSearch =
@@ -78,7 +76,6 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
     });
   }, [users, searchQuery, filterRole, filterStatus]);
 
-  // Pagination
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -86,13 +83,21 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
   }, [filteredUsers, currentPage]);
 
   const handleOpenAddModal = () => {
+    if (!canManageUsers) {
+      return;
+    }
+
     setIsEditMode(false);
     setEditingUserId(null);
-    setFormData({ name: '', email: '', role: 'User', status: 'Active' });
+    setFormData({ name: '', email: '', role: 'Support', status: 'Active' });
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (user: User) => {
+  const handleOpenEditModal = (user: DirectoryUser) => {
+    if (!canManageUsers) {
+      return;
+    }
+
     setIsEditMode(true);
     setEditingUserId(user.id);
     setFormData({
@@ -106,10 +111,18 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setFormData({ name: '', email: '', role: 'User', status: 'Active' });
+    setFormData({ name: '', email: '', role: 'Support', status: 'Active' });
   };
 
   const handleSaveUser = () => {
+    if (!canManageUsers) {
+      showToast({
+        message: 'Your role cannot change the user directory.',
+        variant: 'warning',
+      });
+      return;
+    }
+
     if (!formData.name || !formData.email) {
       showToast({
         message: 'Please fill in all fields before saving the user.',
@@ -119,7 +132,9 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
     }
 
     if (isEditMode && editingUserId !== null) {
-      // Edit existing user
+      const existingUser = users.find((user) => user.id === editingUserId);
+      const roleChanged = existingUser && existingUser.role !== formData.role;
+
       setUsers(
         users.map((user) =>
           user.id === editingUserId
@@ -127,27 +142,47 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
                 ...user,
                 name: formData.name,
                 email: formData.email,
-                role: formData.role,
+                role: canManageRoles ? formData.role : user.role,
                 status: formData.status,
               }
             : user
         )
       );
+
+      if (roleChanged && canManageRoles) {
+        appendAuditEntry({
+          user: currentUserEmail ?? 'Workspace admin',
+          action: 'User Role Changed',
+          description: `${formData.name} was reassigned to the ${formData.role} role.`,
+          timestamp: 'Just now',
+          category: 'user',
+          status: 'success',
+        });
+      }
+
       showToast({
         message: `${formData.name} was updated successfully.`,
         variant: 'success',
       });
     } else {
-      // Add new user
-      const newUser: User = {
+      const newUser: DirectoryUser = {
         id: Math.max(...users.map((u) => u.id), 0) + 1,
         name: formData.name,
         email: formData.email,
-        role: formData.role,
+        role: canManageRoles ? formData.role : 'Support',
         status: formData.status,
         joinDate: new Date().toISOString().split('T')[0],
       };
+
       setUsers([...users, newUser]);
+      appendAuditEntry({
+        user: currentUserEmail ?? 'Workspace admin',
+        action: 'User Created',
+        description: `${newUser.name} joined as ${newUser.role}.`,
+        timestamp: 'Just now',
+        category: 'user',
+        status: 'success',
+      });
       showToast({
         message: `${newUser.name} was added to the user directory.`,
         variant: 'success',
@@ -157,16 +192,28 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
     handleCloseModal();
   };
 
-  const handleDeleteUser = (user: User) => {
+  const handleDeleteUser = (user: DirectoryUser) => {
+    if (!canManageUsers) {
+      return;
+    }
+
     setUserPendingDelete(user);
   };
 
   const confirmDeleteUser = () => {
-    if (!userPendingDelete) {
+    if (!userPendingDelete || !canManageUsers) {
       return;
     }
 
     setUsers(users.filter((user) => user.id !== userPendingDelete.id));
+    appendAuditEntry({
+      user: currentUserEmail ?? 'Workspace admin',
+      action: 'User Deleted',
+      description: `${userPendingDelete.name} was removed from the user directory.`,
+      timestamp: 'Just now',
+      category: 'user',
+      status: 'success',
+    });
     showToast({
       message: `${userPendingDelete.name} was removed from the user directory.`,
       variant: 'info',
@@ -189,17 +236,25 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto w-full">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-        <p className="mt-2 text-gray-600">Manage and view all users in your system</p>
+      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Users</h1>
+          <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Assign roles, review statuses, and manage workspace membership.
+          </p>
+        </div>
+        <div className={`rounded-lg border p-4 ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Your access</p>
+          <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            {canManageUsers ? 'Can manage users' : 'Read-only access'}
+            {canManageRoles ? ' and role assignments.' : '.'}
+          </p>
+        </div>
       </div>
 
-      {/* Filters and Actions */}
       <Card className="mb-6">
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {/* Search */}
             <InputGroup>
               <InputGroupInput
                 placeholder="Search by name or email..."
@@ -211,7 +266,6 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
               />
             </InputGroup>
 
-            {/* Role Filter */}
             <select
               value={filterRole}
               onChange={(e) => {
@@ -221,12 +275,13 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Roles</option>
-              <option value="Admin">Admin</option>
-              <option value="Moderator">Moderator</option>
-              <option value="User">User</option>
+              {APP_ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
             </select>
 
-            {/* Status Filter */}
             <select
               value={filterStatus}
               onChange={(e) => {
@@ -241,20 +296,28 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
               <option value="Suspended">Suspended</option>
             </select>
 
-            {/* Add User Button */}
-            <Button onClick={handleOpenAddModal} className="bg-blue-600 text-white">
+            <Button
+              onClick={handleOpenAddModal}
+              disabled={!canManageUsers}
+              className="bg-blue-600 text-white disabled:bg-gray-400"
+            >
               + Add User
             </Button>
           </div>
 
-          {/* Results Count */}
-          <div className="text-sm text-gray-600">
-            Showing {paginatedUsers.length} of {filteredUsers.length} users
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="text-sm text-gray-600">
+              Showing {paginatedUsers.length} of {filteredUsers.length} users
+            </div>
+            {!canManageUsers && (
+              <div className="text-sm text-amber-700 dark:text-amber-300">
+                Your role can review users but cannot add, edit, or delete them.
+              </div>
+            )}
           </div>
         </div>
       </Card>
 
-      {/* Users Table */}
       <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -274,7 +337,11 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
                   <tr key={user.id} className="border-b transition-colors border-gray-200 hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{user.role}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${getRoleBadgeClass(user.role)}`}>
+                        {user.role}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-sm">
                       <Badge variant={getStatusColor(user.status)} className="inline-block">
                         {user.status}
@@ -285,13 +352,15 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
                       <div className="flex gap-2">
                         <Button
                           onClick={() => handleOpenEditModal(user)}
-                          className="bg-blue-500 text-white text-xs px-3 py-1"
+                          disabled={!canManageUsers}
+                          className="bg-blue-500 text-white text-xs px-3 py-1 disabled:bg-gray-400"
                         >
                           Edit
                         </Button>
                         <Button
                           onClick={() => handleDeleteUser(user)}
-                          className="bg-red-500 text-white text-xs px-3 py-1"
+                          disabled={!canManageUsers}
+                          className="bg-red-500 text-white text-xs px-3 py-1 disabled:bg-gray-400"
                         >
                           Delete
                         </Button>
@@ -310,7 +379,6 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
           </table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="p-6 border-t">
             <Pagination
@@ -323,7 +391,6 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
         )}
       </Card>
 
-      {/* User Modal */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={isEditMode ? 'Edit User' : 'Add New User'}>
         <div className="space-y-4">
           <div>
@@ -357,13 +424,19 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false }) => {
             <label className="block text-sm font-medium mb-2">Role</label>
             <select
               value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={!canManageRoles}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value as AppRole })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
             >
-              <option value="User">User</option>
-              <option value="Moderator">Moderator</option>
-              <option value="Admin">Admin</option>
+              {APP_ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
             </select>
+            {!canManageRoles && (
+              <p className="mt-2 text-xs text-gray-500">Only owners can change role assignments.</p>
+            )}
           </div>
 
           <div>
