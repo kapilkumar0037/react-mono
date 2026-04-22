@@ -164,6 +164,48 @@ describe('App', () => {
     expect(screen.getByText(/save access policies/i)).toBeTruthy();
   });
 
+  it('opens the command palette from the keyboard shortcut and navigates to settings', async () => {
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    expect(screen.getByRole('dialog', { name: /command palette/i })).toBeTruthy();
+
+    fireEvent.change(screen.getByPlaceholderText(/search pages, actions, and shortcuts/i), {
+      target: { value: 'organization settings' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /open organization settings/i }));
+
+    expect(screen.getByRole('heading', { name: /settings/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /organization profile/i })).toBeTruthy();
+  });
+
+  it('filters command palette items by role permissions', async () => {
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'support@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Support' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.click(screen.getAllByRole('button', { name: /open command palette/i })[0]);
+    expect(screen.getByRole('dialog', { name: /command palette/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /open access control/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /open support tickets/i })).toBeTruthy();
+  });
+
   it('blocks restricted routes and hides sensitive navigation for support users', async () => {
     window.history.pushState({}, '', '/api-keys');
     localStorage.setItem(

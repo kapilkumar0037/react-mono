@@ -17,6 +17,7 @@ import SystemHealth from './SystemHealth';
 import BackupRecovery from './BackupRecovery';
 import ApiKeyManagement from './ApiKeyManagement';
 import AccessControl from './AccessControl';
+import CommandPalette from './CommandPalette';
 import Login from './Login';
 import ErrorBoundary from './ErrorBoundary';
 import AdminSidebar from './AdminSidebar';
@@ -52,6 +53,7 @@ function ProtectedLayout({
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => readStoredSidebarCollapsed());
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   useEffect(() => {
     persistSidebarCollapsed(sidebarCollapsed);
@@ -59,6 +61,7 @@ function ProtectedLayout({
 
   useEffect(() => {
     setIsMobileSidebarOpen(false);
+    setIsCommandPaletteOpen(false);
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -76,6 +79,18 @@ function ProtectedLayout({
 
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isMobileSidebarOpen]);
+
+  useEffect(() => {
+    const handleCommandShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setIsCommandPaletteOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleCommandShortcut);
+    return () => window.removeEventListener('keydown', handleCommandShortcut);
+  }, []);
 
   const handleSidebarToggle = () => {
     if (window.matchMedia('(max-width: 767px)').matches) {
@@ -101,6 +116,7 @@ function ProtectedLayout({
         <div className="flex-1 flex flex-col overflow-hidden">
           <AdminNavbar
             onToggleSidebar={handleSidebarToggle}
+            onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
             isDarkMode={isDarkMode}
             onToggleDarkMode={onToggleDarkMode}
             userEmail={userEmail}
@@ -113,6 +129,15 @@ function ProtectedLayout({
           </main>
         </div>
       </div>
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        isDarkMode={isDarkMode}
+        currentRole={currentRole}
+        definitions={DEFAULT_ROLE_DEFINITIONS}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onToggleDarkMode={onToggleDarkMode}
+        onLogout={onLogout}
+      />
     </div>
   );
 }
