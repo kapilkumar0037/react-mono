@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Modal, useToast } from '@react-mono/ui-controls';
+import { usePageAction } from './usePageAction';
 
 interface Backup {
   id: number;
@@ -136,6 +137,28 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
   const [selectedBackup, setSelectedBackup] = useState<Backup | null>(null);
   const [backupPendingDelete, setBackupPendingDelete] = useState<Backup | null>(null);
 
+  const createBackup = () => {
+    const nextBackup: Backup = {
+      id: Math.max(...backups.map((backup) => backup.id), 0) + 1,
+      name: `Full Backup ${new Date().toISOString().split('T')[0]}`,
+      type: 'full',
+      status: 'in-progress',
+      size: 'Pending',
+      date: new Date().toISOString().split('T')[0],
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      duration: 'Starting',
+      retentionDays: 30,
+    };
+
+    setBackups((currentBackups) => [nextBackup, ...currentBackups]);
+    showToast({
+      message: 'Manual backup started. The new backup has been added to history.',
+      variant: 'success',
+    });
+  };
+
+  usePageAction('create-backup', createBackup);
+
   const backupStats = [
     { label: 'Total Backups', value: backups.length.toString(), color: 'blue' },
     { label: 'Successful', value: backups.filter(b => b.status === 'completed').length.toString(), color: 'green' },
@@ -210,12 +233,7 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
             </p>
           </div>
           <button
-            onClick={() =>
-              showToast({
-                message: 'Manual backup started. A new backup entry will appear once processing completes.',
-                variant: 'success',
-              })
-            }
+            onClick={createBackup}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
             + Create Backup

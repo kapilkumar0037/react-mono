@@ -19,6 +19,7 @@ import {
   hasPermission,
 } from './rbac';
 import { appendAuditEntry, DirectoryUser, persistUsers, readStoredUsers } from './rbacStorage';
+import { usePageAction } from './usePageAction';
 
 interface FormData {
   name: string;
@@ -108,6 +109,12 @@ const Users: React.FC<UsersProps> = ({
     });
     setIsModalOpen(true);
   };
+
+  usePageAction('add-user', () => {
+    if (canManageUsers) {
+      handleOpenAddModal();
+    }
+  });
 
   const handleCloseModal = () => {
     setIsModalOpen(false);

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Badge, useToast } from '@react-mono/ui-controls';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useSearchParams } from 'react-router-dom';
+import { usePageAction } from './usePageAction';
 
 interface ReportsProps {
   isDarkMode?: boolean;
@@ -8,7 +10,8 @@ interface ReportsProps {
 
 const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState('sales');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') ?? 'sales');
   const [dateRange, setDateRange] = useState({ start: '2024-01-01', end: '2024-12-31' });
 
   // Mock data for different reports
@@ -62,6 +65,31 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
     });
   };
 
+  const generateReport = () => {
+    showToast({
+      message: `Generated ${activeTab} report for ${dateRange.start} to ${dateRange.end}.`,
+      variant: 'success',
+    });
+  };
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('tab', tabId);
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  usePageAction('generate-report', generateReport);
+  usePageAction('export-csv', () => exportReport('csv'));
+
+  useEffect(() => {
+    const requestedTab = searchParams.get('tab');
+
+    if (requestedTab && requestedTab !== activeTab) {
+      setActiveTab(requestedTab);
+    }
+  }, [activeTab, searchParams]);
+
   return (
     <div className={`flex-1 p-6 overflow-y-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto">
@@ -105,12 +133,7 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
                 Export PDF
               </button>
               <button
-                onClick={() =>
-                  showToast({
-                    message: `Generated ${activeTab} report for ${dateRange.start} to ${dateRange.end}.`,
-                    variant: 'success',
-                  })
-                }
+                onClick={generateReport}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Generate Report
@@ -129,7 +152,7 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`px-4 py-3 font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-blue-600 text-blue-600'

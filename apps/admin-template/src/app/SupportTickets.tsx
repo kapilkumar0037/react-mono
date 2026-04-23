@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import { usePageAction } from './usePageAction';
 
 type TicketStatus = 'Open' | 'In Progress' | 'Waiting on Customer' | 'Resolved' | 'Escalated';
 type TicketPriority = 'High' | 'Medium' | 'Low';
@@ -14,6 +15,16 @@ interface Ticket {
   orderId: string;
   createdAt: string;
   status: TicketStatus;
+  priority: TicketPriority;
+  channel: TicketChannel;
+  assignee: string;
+}
+
+interface TicketFormState {
+  subject: string;
+  customer: string;
+  email: string;
+  orderId: string;
   priority: TicketPriority;
   channel: TicketChannel;
   assignee: string;
@@ -94,6 +105,16 @@ const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) =
   const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'all'>('all');
   const [channelFilter, setChannelFilter] = useState<TicketChannel | 'all'>('all');
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [ticketForm, setTicketForm] = useState<TicketFormState>({
+    subject: '',
+    customer: '',
+    email: '',
+    orderId: '',
+    priority: 'Medium',
+    channel: 'Email',
+    assignee: 'Maya Singh',
+  });
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
@@ -179,6 +200,59 @@ const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) =
     });
   };
 
+  const resetTicketForm = () => {
+    setTicketForm({
+      subject: '',
+      customer: '',
+      email: '',
+      orderId: '',
+      priority: 'Medium',
+      channel: 'Email',
+      assignee: 'Maya Singh',
+    });
+  };
+
+  const createTicket = () => {
+    if (!ticketForm.subject || !ticketForm.customer || !ticketForm.email) {
+      showToast({
+        message: 'Add a subject, customer, and email before creating the ticket.',
+        variant: 'warning',
+      });
+      return;
+    }
+
+    const nextTicketNumber =
+      tickets.length > 0
+        ? Math.max(...tickets.map((ticket) => Number.parseInt(ticket.id.replace('TCK-', ''), 10))) + 1
+        : 4300;
+
+    const nextTicket: Ticket = {
+      id: `TCK-${nextTicketNumber}`,
+      subject: ticketForm.subject,
+      customer: ticketForm.customer,
+      email: ticketForm.email,
+      orderId: ticketForm.orderId || 'ORD-PENDING',
+      createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      status: 'Open',
+      priority: ticketForm.priority,
+      channel: ticketForm.channel,
+      assignee: ticketForm.assignee,
+    };
+
+    setTickets((currentTickets) => [nextTicket, ...currentTickets]);
+    setIsCreateModalOpen(false);
+    resetTicketForm();
+    setSelectedTicket(nextTicket);
+    showToast({
+      message: `${nextTicket.id} created and assigned to ${nextTicket.assignee}.`,
+      variant: 'success',
+    });
+  };
+
+  usePageAction('create-ticket', () => {
+    setIsCreateModalOpen(true);
+  });
+
   return (
     <div className={`flex-1 p-6 overflow-y-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -190,6 +264,12 @@ const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) =
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-blue-600 text-white"
+            >
+              + New Ticket
+            </Button>
             <Button
               onClick={() =>
                 showToast({
@@ -454,6 +534,114 @@ const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) =
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          resetTicketForm();
+        }}
+        title="Create Support Ticket"
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Customer</label>
+              <input
+                type="text"
+                value={ticketForm.customer}
+                onChange={(event) => setTicketForm((current) => ({ ...current, customer: event.target.value }))}
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Email</label>
+              <input
+                type="email"
+                value={ticketForm.email}
+                onChange={(event) => setTicketForm((current) => ({ ...current, email: event.target.value }))}
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Subject</label>
+            <input
+              type="text"
+              value={ticketForm.subject}
+              onChange={(event) => setTicketForm((current) => ({ ...current, subject: event.target.value }))}
+              className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Order ID</label>
+              <input
+                type="text"
+                value={ticketForm.orderId}
+                onChange={(event) => setTicketForm((current) => ({ ...current, orderId: event.target.value }))}
+                placeholder="Optional"
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Assignee</label>
+              <input
+                type="text"
+                value={ticketForm.assignee}
+                onChange={(event) => setTicketForm((current) => ({ ...current, assignee: event.target.value }))}
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Priority</label>
+              <select
+                value={ticketForm.priority}
+                onChange={(event) => setTicketForm((current) => ({ ...current, priority: event.target.value as TicketPriority }))}
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              >
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Channel</label>
+              <select
+                value={ticketForm.channel}
+                onChange={(event) => setTicketForm((current) => ({ ...current, channel: event.target.value as TicketChannel }))}
+                className={`w-full px-3 py-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              >
+                <option value="Email">Email</option>
+                <option value="Chat">Chat</option>
+                <option value="Phone">Phone</option>
+                <option value="Marketplace">Marketplace</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button
+              onClick={() => {
+                setIsCreateModalOpen(false);
+                resetTicketForm();
+              }}
+              className="bg-gray-600 text-white"
+            >
+              Cancel
+            </Button>
+            <Button onClick={createTicket} className="bg-blue-600 text-white">
+              Create Ticket
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

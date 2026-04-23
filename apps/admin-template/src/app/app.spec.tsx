@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 
 import App from './app';
 
@@ -204,6 +204,51 @@ describe('App', () => {
     expect(screen.getByRole('dialog', { name: /command palette/i })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /open access control/i })).toBeNull();
     expect(screen.getByRole('button', { name: /open support tickets/i })).toBeTruthy();
+  });
+
+  it('opens the add user workflow from the command palette', async () => {
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    fireEvent.change(screen.getByPlaceholderText(/search pages, actions, and shortcuts/i), {
+      target: { value: 'add user' },
+    });
+    fireEvent.click(within(screen.getByRole('dialog', { name: /command palette/i })).getByRole('button', { name: /add user/i }));
+
+    expect(screen.getByRole('heading', { name: /add new user/i })).toBeTruthy();
+    expect(screen.getByPlaceholderText(/enter full name/i)).toBeTruthy();
+  });
+
+  it('starts a backup workflow from the command palette', async () => {
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    fireEvent.change(screen.getByPlaceholderText(/search pages, actions, and shortcuts/i), {
+      target: { value: 'create backup' },
+    });
+    fireEvent.click(within(screen.getByRole('dialog', { name: /command palette/i })).getByRole('button', { name: /create backup/i }));
+
+    expect(screen.getByRole('heading', { name: /backup & recovery/i })).toBeTruthy();
+    expect(screen.getByText(/manual backup started/i)).toBeTruthy();
+    expect(screen.getByText(/in-progress/i)).toBeTruthy();
   });
 
   it('blocks restricted routes and hides sensitive navigation for support users', async () => {
