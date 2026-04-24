@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { useSearchParams } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import { usePageAction } from './usePageAction';
+import { createSavedView, persistSavedViews, readSavedViews, SavedView } from './savedViews';
 
 type TicketStatus = 'Open' | 'In Progress' | 'Waiting on Customer' | 'Resolved' | 'Escalated';
 type TicketPriority = 'High' | 'Medium' | 'Low';
@@ -32,6 +34,13 @@ interface TicketFormState {
 
 interface SupportTicketsProps {
   isDarkMode?: boolean;
+}
+
+interface TicketViewFilters {
+  q: string;
+  status: TicketStatus | 'all';
+  priority: TicketPriority | 'all';
+  channel: TicketChannel | 'all';
 }
 
 const initialTickets: Ticket[] = [
@@ -99,13 +108,16 @@ const initialTickets: Ticket[] = [
 
 const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) => {
   const { showToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
-  const [statusFilter, setStatusFilter] = useState<TicketStatus | 'all'>('all');
-  const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'all'>('all');
-  const [channelFilter, setChannelFilter] = useState<TicketChannel | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<TicketStatus | 'all'>(() => (searchParams.get('status') as TicketStatus | 'all') ?? 'all');
+  const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'all'>(() => (searchParams.get('priority') as TicketPriority | 'all') ?? 'all');
+  const [channelFilter, setChannelFilter] = useState<TicketChannel | 'all'>(() => (searchParams.get('channel') as TicketChannel | 'all') ?? 'all');
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [savedViews, setSavedViews] = useState<SavedView<TicketViewFilters>[]>(() => readSavedViews<TicketViewFilters>('support-tickets'));
+  const [viewName, setViewName] = useState('');
   const [ticketForm, setTicketForm] = useState<TicketFormState>({
     subject: '',
     customer: '',
@@ -115,6 +127,30 @@ const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) =
     channel: 'Email',
     assignee: 'Maya Singh',
   });
+
+  React.useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (statusFilter !== 'all') {
+      nextParams.set('status', statusFilter);
+    } else {
+      nextParams.delete('status');
+    }
+
+    if (priorityFilter !== 'all') {
+      nextParams.set('priority', priorityFilter);
+    } else {
+      nextParams.delete('priority');
+    }
+
+    if (channelFilter !== 'all') {
+      nextParams.set('channel', channelFilter);
+    } else {
+      nextParams.delete('channel');
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  }, [channelFilter, priorityFilter, searchParams, setSearchParams, statusFilter]);
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
@@ -253,6 +289,45 @@ const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) =
     setIsCreateModalOpen(true);
   });
 
+  const getCurrentFilters = (): TicketViewFilters => ({
+    q: searchQuery,
+    status: statusFilter,
+    priority: priorityFilter,
+    channel: channelFilter,
+  });
+
+  const applySavedView = (filters: TicketViewFilters) => {
+    setSearchQuery(filters.q);
+    setStatusFilter(filters.status);
+    setPriorityFilter(filters.priority);
+    setChannelFilter(filters.channel);
+  };
+
+  const handleSaveView = () => {
+    if (!viewName.trim()) {
+      showToast({
+        message: 'Name the queue view before saving it.',
+        variant: 'warning',
+      });
+      return;
+    }
+
+    const nextViews = [...savedViews, createSavedView(viewName.trim(), getCurrentFilters())];
+    setSavedViews(nextViews);
+    persistSavedViews('support-tickets', nextViews);
+    setViewName('');
+    showToast({
+      message: 'Saved support queue view ready to share.',
+      variant: 'success',
+    });
+  };
+
+  const handleDeleteView = (viewId: string) => {
+    const nextViews = savedViews.filter((view) => view.id !== viewId);
+    setSavedViews(nextViews);
+    persistSavedViews('support-tickets', nextViews);
+  };
+
   return (
     <div className={`flex-1 p-6 overflow-y-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -312,6 +387,40 @@ const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) =
         </div>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+          <div className="mb-4 flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Saved Queue Views</p>
+              <p className="mt-1 text-sm text-gray-600">Store the current queue filters and reuse the URL anywhere.</p>
+            </div>
+            <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:justify-end">
+              <input
+                type="text"
+                value={viewName}
+                onChange={(event) => setViewName(event.target.value)}
+                placeholder="Name this queue"
+                className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <Button onClick={handleSaveView} className="bg-gray-900 text-white">
+                Save View
+              </Button>
+            </div>
+          </div>
+
+          {savedViews.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {savedViews.map((view) => (
+                <div key={view.id} className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2 py-1">
+                  <button type="button" onClick={() => applySavedView(view.filters)} className="text-sm font-medium text-gray-700">
+                    {view.name}
+                  </button>
+                  <button type="button" onClick={() => handleDeleteView(view.id)} className="px-1 text-xs text-gray-500" aria-label={`Delete ${view.name}`}>
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
             <div className="xl:col-span-2">
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Search</label>

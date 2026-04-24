@@ -251,6 +251,51 @@ describe('App', () => {
     expect(screen.getByText(/in-progress/i)).toBeTruthy();
   });
 
+  it('saves and reapplies a user view', async () => {
+    window.history.pushState({}, '', '/users');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.change(screen.getByPlaceholderText(/search by name or email/i), { target: { value: 'alice' } });
+    fireEvent.change(screen.getByDisplayValue('All Roles'), { target: { value: 'Admin' } });
+    fireEvent.change(screen.getByPlaceholderText(/name this view/i), { target: { value: 'Admins named Alice' } });
+    fireEvent.click(screen.getByRole('button', { name: /save view/i }));
+
+    fireEvent.change(screen.getByPlaceholderText(/search by name or email/i), { target: { value: '' } });
+    fireEvent.change(screen.getByDisplayValue('Admin'), { target: { value: 'all' } });
+    fireEvent.click(screen.getAllByRole('button', { name: /admins named alice/i })[0]);
+
+    expect(screen.getByDisplayValue('alice')).toBeTruthy();
+    expect(screen.getByDisplayValue('Admin')).toBeTruthy();
+  });
+
+  it('restores report views from shareable url filters', async () => {
+    window.history.pushState({}, '', '/reports?tab=products&start=2024-03-01&end=2024-03-31');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(screen.getByRole('button', { name: /product performance/i })).toBeTruthy();
+    expect(screen.getByDisplayValue('2024-03-01')).toBeTruthy();
+    expect(screen.getByDisplayValue('2024-03-31')).toBeTruthy();
+    expect(screen.getByText(/wireless earbuds/i)).toBeTruthy();
+  });
+
   it('blocks restricted routes and hides sensitive navigation for support users', async () => {
     window.history.pushState({}, '', '/api-keys');
     localStorage.setItem(

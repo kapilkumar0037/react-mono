@@ -9,6 +9,7 @@ import {
   Pagination,
   useToast,
 } from '@react-mono/ui-controls';
+import { useSearchParams } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import {
   APP_ROLES,
@@ -20,6 +21,7 @@ import {
 } from './rbac';
 import { appendAuditEntry, DirectoryUser, persistUsers, readStoredUsers } from './rbacStorage';
 import { usePageAction } from './usePageAction';
+import { createSavedView, persistSavedViews, readSavedViews, SavedView } from './savedViews';
 
 interface FormData {
   name: string;
@@ -35,6 +37,12 @@ interface UsersProps {
   definitions?: Record<AppRole, RoleDefinition>;
 }
 
+interface UserViewFilters {
+  q: string;
+  role: string;
+  status: string;
+}
+
 const Users: React.FC<UsersProps> = ({
   isDarkMode = false,
   currentRole,
@@ -42,15 +50,18 @@ const Users: React.FC<UsersProps> = ({
   definitions = DEFAULT_ROLE_DEFINITIONS,
 }) => {
   const { showToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
-  const [filterRole, setFilterRole] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterRole, setFilterRole] = useState<string>(() => searchParams.get('role') ?? 'all');
+  const [filterStatus, setFilterStatus] = useState<string>(() => searchParams.get('status') ?? 'all');
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [userPendingDelete, setUserPendingDelete] = useState<DirectoryUser | null>(null);
   const [users, setUsers] = useState<DirectoryUser[]>(() => readStoredUsers());
+  const [savedViews, setSavedViews] = useState<SavedView<UserViewFilters>[]>(() => readSavedViews<UserViewFilters>('users'));
+  const [viewName, setViewName] = useState('');
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -65,6 +76,24 @@ const Users: React.FC<UsersProps> = ({
   useEffect(() => {
     persistUsers(users);
   }, [users]);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (filterRole !== 'all') {
+      nextParams.set('role', filterRole);
+    } else {
+      nextParams.delete('role');
+    }
+
+    if (filterStatus !== 'all') {
+      nextParams.set('status', filterStatus);
+    } else {
+      nextParams.delete('status');
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  }, [filterRole, filterStatus, searchParams, setSearchParams]);
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -241,6 +270,44 @@ const Users: React.FC<UsersProps> = ({
     }
   };
 
+  const getCurrentFilters = (): UserViewFilters => ({
+    q: searchQuery,
+    role: filterRole,
+    status: filterStatus,
+  });
+
+  const applySavedView = (filters: UserViewFilters) => {
+    setSearchQuery(filters.q);
+    setFilterRole(filters.role);
+    setFilterStatus(filters.status);
+    setCurrentPage(1);
+  };
+
+  const handleSaveView = () => {
+    if (!viewName.trim()) {
+      showToast({
+        message: 'Name the view before saving it.',
+        variant: 'warning',
+      });
+      return;
+    }
+
+    const nextViews = [...savedViews, createSavedView(viewName.trim(), getCurrentFilters())];
+    setSavedViews(nextViews);
+    persistSavedViews('users', nextViews);
+    setViewName('');
+    showToast({
+      message: 'Saved user view ready to share.',
+      variant: 'success',
+    });
+  };
+
+  const handleDeleteView = (viewId: string) => {
+    const nextViews = savedViews.filter((view) => view.id !== viewId);
+    setSavedViews(nextViews);
+    persistSavedViews('users', nextViews);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto w-full">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -261,6 +328,49 @@ const Users: React.FC<UsersProps> = ({
 
       <Card className="mb-6">
         <div className="p-6">
+          <div className="mb-6 flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-gray-900">Saved Views</p>
+              <p className="mt-1 text-sm text-gray-600">Save filters and reuse the current URL as a shareable view.</p>
+            </div>
+            <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:justify-end">
+              <input
+                type="text"
+                value={viewName}
+                onChange={(event) => setViewName(event.target.value)}
+                placeholder="Name this view"
+                className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <Button onClick={handleSaveView} className="bg-gray-900 text-white">
+                Save View
+              </Button>
+            </div>
+          </div>
+
+          {savedViews.length > 0 && (
+            <div className="mb-6 flex flex-wrap gap-2">
+              {savedViews.map((view) => (
+                <div key={view.id} className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2 py-1">
+                  <button
+                    type="button"
+                    onClick={() => applySavedView(view.filters)}
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    {view.name}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteView(view.id)}
+                    className="px-1 text-xs text-gray-500"
+                    aria-label={`Delete ${view.name}`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <InputGroup>
               <InputGroupInput

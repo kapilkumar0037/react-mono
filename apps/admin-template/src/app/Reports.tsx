@@ -3,16 +3,28 @@ import { Card, Badge, useToast } from '@react-mono/ui-controls';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useSearchParams } from 'react-router-dom';
 import { usePageAction } from './usePageAction';
+import { createSavedView, persistSavedViews, readSavedViews, SavedView } from './savedViews';
 
 interface ReportsProps {
   isDarkMode?: boolean;
+}
+
+interface ReportViewFilters {
+  tab: string;
+  start: string;
+  end: string;
 }
 
 const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
   const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') ?? 'sales');
-  const [dateRange, setDateRange] = useState({ start: '2024-01-01', end: '2024-12-31' });
+  const [dateRange, setDateRange] = useState({
+    start: searchParams.get('start') ?? '2024-01-01',
+    end: searchParams.get('end') ?? '2024-12-31',
+  });
+  const [savedViews, setSavedViews] = useState<SavedView<ReportViewFilters>[]>(() => readSavedViews<ReportViewFilters>('reports'));
+  const [viewName, setViewName] = useState('');
 
   // Mock data for different reports
   const salesData = [
@@ -84,11 +96,65 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
 
   useEffect(() => {
     const requestedTab = searchParams.get('tab');
+    const requestedStart = searchParams.get('start');
+    const requestedEnd = searchParams.get('end');
 
     if (requestedTab && requestedTab !== activeTab) {
       setActiveTab(requestedTab);
     }
-  }, [activeTab, searchParams]);
+
+    if (
+      requestedStart &&
+      requestedEnd &&
+      (requestedStart !== dateRange.start || requestedEnd !== dateRange.end)
+    ) {
+      setDateRange({ start: requestedStart, end: requestedEnd });
+    }
+  }, [activeTab, dateRange.end, dateRange.start, searchParams]);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('tab', activeTab);
+    nextParams.set('start', dateRange.start);
+    nextParams.set('end', dateRange.end);
+    setSearchParams(nextParams, { replace: true });
+  }, [activeTab, dateRange.end, dateRange.start, searchParams, setSearchParams]);
+
+  const getCurrentFilters = (): ReportViewFilters => ({
+    tab: activeTab,
+    start: dateRange.start,
+    end: dateRange.end,
+  });
+
+  const applySavedView = (filters: ReportViewFilters) => {
+    setActiveTab(filters.tab);
+    setDateRange({ start: filters.start, end: filters.end });
+  };
+
+  const handleSaveView = () => {
+    if (!viewName.trim()) {
+      showToast({
+        message: 'Name the report view before saving it.',
+        variant: 'warning',
+      });
+      return;
+    }
+
+    const nextViews = [...savedViews, createSavedView(viewName.trim(), getCurrentFilters())];
+    setSavedViews(nextViews);
+    persistSavedViews('reports', nextViews);
+    setViewName('');
+    showToast({
+      message: 'Saved report view ready to share.',
+      variant: 'success',
+    });
+  };
+
+  const handleDeleteView = (viewId: string) => {
+    const nextViews = savedViews.filter((view) => view.id !== viewId);
+    setSavedViews(nextViews);
+    persistSavedViews('reports', nextViews);
+  };
 
   return (
     <div className={`flex-1 p-6 overflow-y-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -105,6 +171,40 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
 
         {/* Date Range & Export */}
         <div className={`mb-6 p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          <div className="mb-4 flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Saved Report Views</p>
+              <p className="mt-1 text-sm text-gray-600">Capture the current tab and date window as a reusable report view.</p>
+            </div>
+            <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:justify-end">
+              <input
+                type="text"
+                value={viewName}
+                onChange={(event) => setViewName(event.target.value)}
+                placeholder="Name this report view"
+                className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button onClick={handleSaveView} className="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800">
+                Save View
+              </button>
+            </div>
+          </div>
+
+          {savedViews.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {savedViews.map((view) => (
+                <div key={view.id} className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2 py-1">
+                  <button type="button" onClick={() => applySavedView(view.filters)} className="text-sm font-medium text-gray-700">
+                    {view.name}
+                  </button>
+                  <button type="button" onClick={() => handleDeleteView(view.id)} className="px-1 text-xs text-gray-500" aria-label={`Delete ${view.name}`}>
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1">
               <label className={`block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
