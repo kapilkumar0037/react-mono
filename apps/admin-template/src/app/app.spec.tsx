@@ -273,8 +273,8 @@ describe('App', () => {
     fireEvent.change(screen.getByDisplayValue('Admin'), { target: { value: 'all' } });
     fireEvent.click(screen.getAllByRole('button', { name: /admins named alice/i })[0]);
 
-    expect(screen.getByDisplayValue('alice')).toBeTruthy();
-    expect(screen.getByDisplayValue('Admin')).toBeTruthy();
+    expect(window.location.search).toContain('q=alice');
+    expect(window.location.search).toContain('role=Admin');
   });
 
   it('restores report views from shareable url filters', async () => {
