@@ -296,6 +296,50 @@ describe('App', () => {
     expect(screen.getByText(/wireless earbuds/i)).toBeTruthy();
   });
 
+  it('runs bulk order actions from the orders table', async () => {
+    window.history.pushState({}, '', '/orders');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /select ord-10482/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /select ord-10475/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /^process$/i })[0]);
+    fireEvent.click(screen.getByRole('button', { name: /move to processing/i }));
+
+    expect(screen.getByText(/2 orders moved into processing/i)).toBeTruthy();
+    expect(screen.getAllByText('Processing').length).toBeGreaterThan(1);
+  });
+
+  it('runs bulk ticket escalation from the support queue', async () => {
+    window.history.pushState({}, '', '/support-tickets');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /select tck-4302/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /select tck-4300/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /^escalate$/i })[0]);
+    fireEvent.click(screen.getByRole('button', { name: /escalate tickets/i }));
+
+    expect(screen.getByText(/2 tickets escalated to the operations queue/i)).toBeTruthy();
+    expect(screen.getAllByText('Escalated').length).toBeGreaterThan(1);
+  });
+
   it('blocks restricted routes and hides sensitive navigation for support users', async () => {
     window.history.pushState({}, '', '/api-keys');
     localStorage.setItem(
