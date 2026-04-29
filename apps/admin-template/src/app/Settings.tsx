@@ -11,6 +11,7 @@ type SettingsTab = 'profile' | 'organization' | 'notifications' | 'security' | '
 const SETTINGS_TABS: SettingsTab[] = ['profile', 'organization', 'notifications', 'security', 'preferences'];
 const SETTINGS_STORAGE_KEY = 'admin-template.settings';
 
+
 const DEFAULT_PROFILE_SETTINGS = {
   firstName: 'John',
   lastName: 'Doe',
