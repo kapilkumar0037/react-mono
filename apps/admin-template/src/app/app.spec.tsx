@@ -340,6 +340,49 @@ describe('App', () => {
     expect(screen.getAllByText('Escalated').length).toBeGreaterThan(1);
   });
 
+  it('exports selected orders from the bulk action bar', async () => {
+    window.history.pushState({}, '', '/orders');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /select ord-10482/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /select ord-10481/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^export$/i }));
+
+    expect(screen.getByText(/export package prepared for 2 selected orders/i)).toBeTruthy();
+  });
+
+  it('reassigns selected tickets from the bulk action bar', async () => {
+    window.history.pushState({}, '', '/support-tickets');
+    localStorage.setItem(
+      'admin-template.persisted-session',
+      JSON.stringify({ email: 'owner@example.com', loginAt: '2026-03-22T00:00:00.000Z', role: 'Owner' })
+    );
+
+    render(<App />);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /select tck-4302/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /bulk assignee/i }), {
+      target: { value: 'Customer Success Pod' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /^assign$/i }));
+
+    expect(screen.getByText(/1 ticket assigned to customer success pod/i)).toBeTruthy();
+    expect(screen.getByText('Customer Success Pod')).toBeTruthy();
+  });
+
   it('blocks restricted routes and hides sensitive navigation for support users', async () => {
     window.history.pushState({}, '', '/api-keys');
     localStorage.setItem(

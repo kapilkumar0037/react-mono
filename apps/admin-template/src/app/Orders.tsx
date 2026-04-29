@@ -145,6 +145,10 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
     const filteredIds = filteredOrders.map((order) => order.id);
     setSelectedOrderIds((ids) => (filteredIds.every((id) => ids.includes(id)) ? ids.filter((id) => !filteredIds.includes(id)) : Array.from(new Set([...ids, ...filteredIds]))));
   };
+  const exportSelectedOrders = () => {
+    if (selectedOrders.length === 0) return;
+    showToast({ message: `Export package prepared for ${selectedOrders.length} selected order${selectedOrders.length === 1 ? '' : 's'}.`, variant: 'info' });
+  };
 
   return (
     <div className={`flex-1 overflow-y-auto p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -204,6 +208,7 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
                 <div className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{selectedOrderIds.length} order{selectedOrderIds.length === 1 ? '' : 's'} selected</div>
                 <div className="flex flex-wrap gap-2">
                   <Button onClick={() => setSelectedOrderIds([])} className="bg-gray-600 px-3 py-1.5 text-xs text-white">Clear</Button>
+                  <Button onClick={exportSelectedOrders} className="bg-gray-700 px-3 py-1.5 text-xs text-white">Export</Button>
                   <Button onClick={() => setPendingAction({ title: 'Move Orders to Processing', message: 'Move the selected orders into processing?', confirmLabel: 'Move to Processing', confirmClassName: 'bg-blue-600 text-white', run: () => runBulkStatusUpdate('Processing', ['Pending'], (count) => `${count} order${count === 1 ? '' : 's'} moved into processing.`) })} className="bg-blue-600 px-3 py-1.5 text-xs text-white">Process</Button>
                   <Button onClick={() => setPendingAction({ title: 'Mark Orders as Shipped', message: 'Mark the selected orders as shipped?', confirmLabel: 'Mark Shipped', confirmClassName: 'bg-indigo-600 text-white', run: () => runBulkStatusUpdate('Shipped', ['Processing'], (count) => `${count} order${count === 1 ? '' : 's'} marked as shipped.`) })} className="bg-indigo-600 px-3 py-1.5 text-xs text-white">Ship</Button>
                   <Button onClick={() => setPendingAction({ title: 'Cancel Orders', message: 'Cancel the selected orders and remove them from the active fulfillment queue?', confirmLabel: 'Cancel Orders', confirmClassName: 'bg-red-600 text-white', run: () => runBulkStatusUpdate('Cancelled', ['Pending', 'Processing', 'Shipped'], (count) => `${count} order${count === 1 ? '' : 's'} cancelled.`) })} className="bg-red-600 px-3 py-1.5 text-xs text-white">Cancel</Button>
