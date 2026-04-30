@@ -36,6 +36,8 @@ import {
   readStoredTheme,
 } from './authStorage';
 import { AppPermission, AppRole, DEFAULT_ROLE_DEFINITIONS } from './rbac';
+import { GlobalToastProvider } from './providers/GlobalToastProvider';
+import { GlobalToastContainer } from './components/GlobalToastContainer';
 
 function ProtectedLayout({
   isDarkMode,
@@ -138,6 +140,7 @@ function ProtectedLayout({
         onToggleDarkMode={onToggleDarkMode}
         onLogout={onLogout}
       />
+      <GlobalToastContainer isDarkMode={isDarkMode} position="bottom-right" />
     </div>
   );
 }
@@ -198,8 +201,9 @@ export function App() {
 
   return (
     <ToastProvider>
-      <Router>
-        <div className={`${isDarkMode ? 'dark' : ''}`}>
+      <GlobalToastProvider>
+        <Router>
+          <div className={`${isDarkMode ? 'dark' : ''}`}>
           <Routes>
             {/* Login Route */}
             <Route path="/login" element={
@@ -299,6 +303,7 @@ export function App() {
           </Routes>
         </div>
       </Router>
+      </GlobalToastProvider>
     </ToastProvider>
   );
 }

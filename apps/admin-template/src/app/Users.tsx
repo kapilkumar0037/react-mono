@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { Modal, Button, InputGroup, InputGroupInput, Card, Badge, Pagination, useToast } from '@react-mono/ui-controls';
+import { Modal, Button, InputGroup, InputGroupInput, Card, Badge, Pagination } from '@react-mono/ui-controls';
 import { useSearchParams } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import { APP_ROLES, AppRole, DEFAULT_ROLE_DEFINITIONS, RoleDefinition, getRoleBadgeClass, hasPermission } from './rbac';
@@ -7,6 +7,9 @@ import { appendAuditEntry, DirectoryUser, persistUsers, readStoredUsers } from '
 import { usePageAction } from './usePageAction';
 import { createSavedView, persistSavedViews, readSavedViews, SavedView } from './savedViews';
 import AdminActionConfirm from './AdminActionConfirm';
+import { useGlobalToast } from './hooks/useGlobalToast';
+import { useUpdateAction, useCreateAction, useDeleteAction, useExportAction } from './hooks/useActionFeedback';
+import { useConfirmDialog, ConfirmDialog } from './components/ConfirmDialog';
 
 interface FormData {
   name: string;
@@ -29,7 +32,14 @@ interface UserViewFilters {
 }
 
 const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentUserEmail, definitions = DEFAULT_ROLE_DEFINITIONS }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
+  const createUserAction = useCreateAction('User');
+  const updateUserAction = useUpdateAction('User');
+  const deleteUserAction = useDeleteAction('User');
+  const exportAction = useExportAction('User Directory');
+  const deleteConfirm = useConfirmDialog();
+  const bulkDeleteConfirm = useConfirmDialog();
+  
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [filterRole, setFilterRole] = useState<string>(() => searchParams.get('role') ?? 'all');
@@ -38,12 +48,10 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
-  const [userPendingDelete, setUserPendingDelete] = useState<DirectoryUser | null>(null);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [users, setUsers] = useState<DirectoryUser[]>(() => readStoredUsers());
   const [savedViews, setSavedViews] = useState<SavedView<UserViewFilters>[]>(() => readSavedViews<UserViewFilters>('users'));
   const [viewName, setViewName] = useState('');
-  const [pendingBulkDelete, setPendingBulkDelete] = useState(false);
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', role: 'Support', status: 'Active' });
 
   const itemsPerPage = 8;
@@ -96,67 +104,177 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
     setIsModalOpen(true);
   };
 
+  const selectedUsers = users.filter((user) => selectedUserIds.includes(user.id));
+  const allFilteredSelected = filteredUsers.length > 0 && filteredUsers.every((user) => selectedUserIds.includes(user.id));
+
   const handleSaveUser = () => {
     if (!canManageUsers) {
-      showToast({ message: 'Your role cannot change the user directory.', variant: 'warning' });
+      addToast({ 
+        type: 'warning', 
+        message: 'Your role cannot change the user directory.' 
+      });
       return;
     }
     if (!formData.name || !formData.email) {
-      showToast({ message: 'Please fill in all fields before saving the user.', variant: 'warning' });
+      addToast({ 
+        type: 'warning', 
+        message: 'Please fill in all fields before saving the user.' 
+      });
       return;
     }
+    
     if (isEditMode && editingUserId !== null) {
       const existingUser = users.find((user) => user.id === editingUserId);
       const roleChanged = existingUser && existingUser.role !== formData.role;
-      setUsers(users.map((user) => (user.id === editingUserId ? { ...user, name: formData.name, email: formData.email, role: canManageRoles ? formData.role : user.role, status: formData.status } : user)));
+      
+      setUsers(users.map((user) => 
+        user.id === editingUserId 
+          ? { ...user, name: formData.name, email: formData.email, role: canManageRoles ? formData.role : user.role, status: formData.status } 
+          : user
+      ));
+      
       if (roleChanged && canManageRoles) {
-        appendAuditEntry({ user: currentUserEmail ?? 'Workspace admin', action: 'User Role Changed', description: `${formData.name} was reassigned to the ${formData.role} role.`, timestamp: 'Just now', category: 'user', status: 'success' });
+        appendAuditEntry({ 
+          user: currentUserEmail ?? 'Workspace admin', 
+          action: 'User Role Changed', 
+          description: `${formData.name} was reassigned to the ${formData.role} role.`, 
+          timestamp: 'Just now', 
+          category: 'user', 
+          status: 'success' 
+        });
       }
-      showToast({ message: `${formData.name} was updated successfully.`, variant: 'success' });
+      
+      addToast({ 
+        type: 'success', 
+        message: `${formData.name} updated successfully` 
+      });
     } else {
-      const newUser: DirectoryUser = { id: Math.max(...users.map((u) => u.id), 0) + 1, name: formData.name, email: formData.email, role: canManageRoles ? formData.role : 'Support', status: formData.status, joinDate: new Date().toISOString().split('T')[0] };
+      const newUser: DirectoryUser = { 
+        id: Math.max(...users.map((u) => u.id), 0) + 1, 
+        name: formData.name, 
+        email: formData.email, 
+        role: canManageRoles ? formData.role : 'Support', 
+        status: formData.status, 
+        joinDate: new Date().toISOString().split('T')[0] 
+      };
+      
       setUsers([...users, newUser]);
-      appendAuditEntry({ user: currentUserEmail ?? 'Workspace admin', action: 'User Created', description: `${newUser.name} joined as ${newUser.role}.`, timestamp: 'Just now', category: 'user', status: 'success' });
-      showToast({ message: `${newUser.name} was added to the user directory.`, variant: 'success' });
+      appendAuditEntry({ 
+        user: currentUserEmail ?? 'Workspace admin', 
+        action: 'User Created', 
+        description: `${newUser.name} joined as ${newUser.role}.`, 
+        timestamp: 'Just now', 
+        category: 'user', 
+        status: 'success' 
+      });
+      
+      addToast({ 
+        type: 'success', 
+        message: `${newUser.name} added to the directory` 
+      });
     }
     handleCloseModal();
   };
 
-  const confirmDeleteUser = () => {
-    if (!userPendingDelete || !canManageUsers) return;
-    setUsers(users.filter((user) => user.id !== userPendingDelete.id));
-    appendAuditEntry({ user: currentUserEmail ?? 'Workspace admin', action: 'User Deleted', description: `${userPendingDelete.name} was removed from the user directory.`, timestamp: 'Just now', category: 'user', status: 'success' });
-    showToast({ message: `${userPendingDelete.name} was removed from the user directory.`, variant: 'info' });
-    setUserPendingDelete(null);
+  const confirmDeleteUser = (user: DirectoryUser) => {
+    deleteConfirm.open({
+      title: 'Delete User',
+      message: `Are you sure you want to delete ${user.name}? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      isDangerous: true,
+      onConfirm: async () => {
+        setUsers(users.filter((u) => u.id !== user.id));
+        appendAuditEntry({ 
+          user: currentUserEmail ?? 'Workspace admin', 
+          action: 'User Deleted', 
+          description: `${user.name} was removed from the user directory.`, 
+          timestamp: 'Just now', 
+          category: 'user', 
+          status: 'success' 
+        });
+        addToast({ 
+          type: 'info', 
+          message: `${user.name} has been deleted` 
+        });
+      },
+    });
   };
 
   const applyBulkStatus = (status: DirectoryUser['status']) => {
-    if (!canManageUsers || selectedUsers.length === 0) return;
-    setUsers((currentUsers) => currentUsers.map((user) => (selectedUserIds.includes(user.id) ? { ...user, status } : user)));
-    appendAuditEntry({ user: currentUserEmail ?? 'Workspace admin', action: 'Users Updated', description: `${selectedUsers.length} user${selectedUsers.length === 1 ? '' : 's'} marked ${status.toLowerCase()}.`, timestamp: 'Just now', category: 'user', status: 'success' });
+    if (!canManageUsers || selectedUserIds.length === 0) return;
+    setUsers((currentUsers) => 
+      currentUsers.map((user) => 
+        selectedUserIds.includes(user.id) ? { ...user, status } : user
+      )
+    );
+    appendAuditEntry({ 
+      user: currentUserEmail ?? 'Workspace admin', 
+      action: 'Users Updated', 
+      description: `${selectedUserIds.length} user${selectedUserIds.length === 1 ? '' : 's'} marked ${status.toLowerCase()}.`, 
+      timestamp: 'Just now', 
+      category: 'user', 
+      status: 'success' 
+    });
     setSelectedUserIds([]);
-    showToast({ message: `${selectedUsers.length} user${selectedUsers.length === 1 ? '' : 's'} marked ${status.toLowerCase()}.`, variant: 'success' });
+    addToast({ 
+      type: 'success', 
+      message: `${selectedUserIds.length} user${selectedUserIds.length === 1 ? '' : 's'} marked ${status.toLowerCase()}` 
+    });
   };
 
   const confirmBulkDelete = () => {
-    if (!canManageUsers || selectedUsers.length === 0) return;
-    setUsers((currentUsers) => currentUsers.filter((user) => !selectedUserIds.includes(user.id)));
-    appendAuditEntry({ user: currentUserEmail ?? 'Workspace admin', action: 'Users Deleted', description: `${selectedUsers.length} user${selectedUsers.length === 1 ? '' : 's'} removed from the directory.`, timestamp: 'Just now', category: 'user', status: 'success' });
-    showToast({ message: `${selectedUsers.length} user${selectedUsers.length === 1 ? '' : 's'} removed from the directory.`, variant: 'info' });
-    setSelectedUserIds([]);
-    setPendingBulkDelete(false);
+    bulkDeleteConfirm.open({
+      title: 'Delete Selected Users',
+      message: `Remove ${selectedUserIds.length} selected user${selectedUserIds.length === 1 ? '' : 's'} from the directory? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      isDangerous: true,
+      onConfirm: async () => {
+        setUsers((currentUsers) => 
+          currentUsers.filter((user) => !selectedUserIds.includes(user.id))
+        );
+        appendAuditEntry({ 
+          user: currentUserEmail ?? 'Workspace admin', 
+          action: 'Users Deleted', 
+          description: `${selectedUserIds.length} user${selectedUserIds.length === 1 ? '' : 's'} removed from the directory.`, 
+          timestamp: 'Just now', 
+          category: 'user', 
+          status: 'success' 
+        });
+        addToast({ 
+          type: 'info', 
+          message: `${selectedUserIds.length} user${selectedUserIds.length === 1 ? '' : 's'} deleted` 
+        });
+        setSelectedUserIds([]);
+      },
+    });
   };
-  const exportSelectedUsers = () => {
-    if (selectedUsers.length === 0) return;
-    showToast({ message: `Directory export prepared for ${selectedUsers.length} selected user${selectedUsers.length === 1 ? '' : 's'}.`, variant: 'info' });
+  
+  const exportSelectedUsers = async () => {
+    if (selectedUserIds.length === 0) return;
+    await exportAction.execute(
+      () => new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        successMessage: `Directory export prepared for ${selectedUserIds.length} selected user${selectedUserIds.length === 1 ? '' : 's'}`,
+      }
+    );
   };
 
-  const getStatusColor = (status: string) => (status === 'Active' ? 'success' : status === 'Inactive' ? 'warning' : status === 'Suspended' ? 'danger' : 'secondary');
-  const applySavedView = (filters: UserViewFilters) => { setSearchQuery(filters.q); setFilterRole(filters.role); setFilterStatus(filters.status); setCurrentPage(1); };
   const handleSaveView = () => {
-    if (!viewName.trim()) { showToast({ message: 'Name the view before saving it.', variant: 'warning' }); return; }
+    if (!viewName.trim()) { 
+      addToast({ 
+        type: 'warning', 
+        message: 'Name the view before saving it.' 
+      });
+      return;
+    }
     const nextViews = [...savedViews, createSavedView(viewName.trim(), { q: searchQuery, role: filterRole, status: filterStatus })];
-    setSavedViews(nextViews); persistSavedViews('users', nextViews); setViewName(''); showToast({ message: 'Saved user view ready to share.', variant: 'success' });
+    setSavedViews(nextViews); 
+    persistSavedViews('users', nextViews); 
+    setViewName(''); 
+    addToast({ 
+      type: 'success', 
+      message: 'Saved view created' 
+    });
   };
 
   return (
@@ -184,12 +302,12 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
       </Card>
 
       <Card>
-        {selectedUserIds.length > 0 && <div className="border-b border-gray-200 bg-gray-50 px-6 py-3"><div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div className="text-sm font-medium text-gray-700">{selectedUserIds.length} user{selectedUserIds.length === 1 ? '' : 's'} selected</div><div className="flex flex-wrap gap-2"><Button onClick={() => setSelectedUserIds([])} className="bg-gray-600 px-3 py-1.5 text-xs text-white">Clear</Button><Button onClick={exportSelectedUsers} className="bg-gray-700 px-3 py-1.5 text-xs text-white">Export</Button><Button onClick={() => applyBulkStatus('Active')} disabled={!canManageUsers} className="bg-green-600 px-3 py-1.5 text-xs text-white disabled:bg-gray-400">Activate</Button><Button onClick={() => applyBulkStatus('Suspended')} disabled={!canManageUsers} className="bg-amber-600 px-3 py-1.5 text-xs text-white disabled:bg-gray-400">Suspend</Button><Button onClick={() => setPendingBulkDelete(true)} disabled={!canManageUsers} className="bg-red-600 px-3 py-1.5 text-xs text-white disabled:bg-gray-400">Delete</Button></div></div></div>}
+        {selectedUserIds.length > 0 && <div className="border-b border-gray-200 bg-gray-50 px-6 py-3"><div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div className="text-sm font-medium text-gray-700">{selectedUserIds.length} user{selectedUserIds.length === 1 ? '' : 's'} selected</div><div className="flex flex-wrap gap-2"><Button onClick={() => setSelectedUserIds([])} className="bg-gray-600 px-3 py-1.5 text-xs text-white">Clear</Button><Button onClick={exportSelectedUsers} className="bg-gray-700 px-3 py-1.5 text-xs text-white">Export</Button><Button onClick={() => applyBulkStatus('Active')} disabled={!canManageUsers} className="bg-green-600 px-3 py-1.5 text-xs text-white disabled:bg-gray-400">Activate</Button><Button onClick={() => applyBulkStatus('Suspended')} disabled={!canManageUsers} className="bg-amber-600 px-3 py-1.5 text-xs text-white disabled:bg-gray-400">Suspend</Button><Button onClick={confirmBulkDelete} disabled={!canManageUsers} className="bg-red-600 px-3 py-1.5 text-xs text-white disabled:bg-gray-400">Delete</Button></div></div></div>}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead><tr className="border-b border-gray-200 bg-gray-50"><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900"><input type="checkbox" checked={allFilteredSelected} onChange={() => { const filteredIds = filteredUsers.map((user) => user.id); setSelectedUserIds((ids) => (filteredIds.every((id) => ids.includes(id)) ? ids.filter((id) => !filteredIds.includes(id)) : Array.from(new Set([...ids, ...filteredIds])))); }} className="h-4 w-4 rounded" aria-label="Select all filtered users" /></th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Email</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Role</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Join Date</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th></tr></thead>
             <tbody>
-              {paginatedUsers.length > 0 ? paginatedUsers.map((user) => <tr key={user.id} className="border-b border-gray-200 transition-colors hover:bg-gray-50"><td className="px-6 py-4 text-sm"><input type="checkbox" checked={selectedUserIds.includes(user.id)} onChange={() => setSelectedUserIds((ids) => (ids.includes(user.id) ? ids.filter((id) => id !== user.id) : [...ids, user.id]))} className="h-4 w-4 rounded" aria-label={`Select ${user.name}`} /></td><td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td><td className="px-6 py-4 text-sm text-gray-600">{user.email}</td><td className="px-6 py-4 text-sm"><span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${getRoleBadgeClass(user.role)}`}>{user.role}</span></td><td className="px-6 py-4 text-sm"><Badge variant={getStatusColor(user.status)} className="inline-block">{user.status}</Badge></td><td className="px-6 py-4 text-sm text-gray-600">{user.joinDate}</td><td className="px-6 py-4 text-sm"><div className="flex gap-2"><Button onClick={() => handleOpenEditModal(user)} disabled={!canManageUsers} className="bg-blue-500 px-3 py-1 text-xs text-white disabled:bg-gray-400">Edit</Button><Button onClick={() => canManageUsers && setUserPendingDelete(user)} disabled={!canManageUsers} className="bg-red-500 px-3 py-1 text-xs text-white disabled:bg-gray-400">Delete</Button></div></td></tr>) : <tr><td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-600">No users found</td></tr>}
+              {paginatedUsers.length > 0 ? paginatedUsers.map((user) => <tr key={user.id} className="border-b border-gray-200 transition-colors hover:bg-gray-50"><td className="px-6 py-4 text-sm"><input type="checkbox" checked={selectedUserIds.includes(user.id)} onChange={() => setSelectedUserIds((ids) => (ids.includes(user.id) ? ids.filter((id) => id !== user.id) : [...ids, user.id]))} className="h-4 w-4 rounded" aria-label={`Select ${user.name}`} /></td><td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td><td className="px-6 py-4 text-sm text-gray-600">{user.email}</td><td className="px-6 py-4 text-sm"><span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${getRoleBadgeClass(user.role)}`}>{user.role}</span></td><td className="px-6 py-4 text-sm"><Badge variant={getStatusColor(user.status)} className="inline-block">{user.status}</Badge></td><td className="px-6 py-4 text-sm text-gray-600">{user.joinDate}</td><td className="px-6 py-4 text-sm"><div className="flex gap-2"><Button onClick={() => handleOpenEditModal(user)} disabled={!canManageUsers} className="bg-blue-500 px-3 py-1 text-xs text-white disabled:bg-gray-400">Edit</Button><Button onClick={() => canManageUsers && confirmDeleteUser(user)} disabled={!canManageUsers} className="bg-red-500 px-3 py-1 text-xs text-white disabled:bg-gray-400">Delete</Button></div></td></tr>) : <tr><td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-600">No users found</td></tr>}
             </tbody>
           </table>
         </div>
@@ -206,8 +324,31 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
         <div className="mt-6 flex justify-end gap-2"><Button onClick={handleCloseModal} className="bg-gray-500 text-white">Cancel</Button><Button onClick={handleSaveUser} className="bg-blue-600 text-white">{isEditMode ? 'Update' : 'Add'} User</Button></div>
       </Modal>
 
-      <Modal isOpen={userPendingDelete !== null} onClose={() => setUserPendingDelete(null)} title="Delete User" size="sm"><div className="space-y-4"><p className="text-sm text-gray-600">{userPendingDelete ? `Are you sure you want to delete ${userPendingDelete.name}? This mock action removes them from the current session.` : 'Are you sure you want to delete this user?'}</p><div className="flex justify-end gap-2"><Button onClick={() => setUserPendingDelete(null)} className="bg-gray-500 text-white">Cancel</Button><Button onClick={confirmDeleteUser} className="bg-red-600 text-white">Delete User</Button></div></div></Modal>
-      <AdminActionConfirm isOpen={pendingBulkDelete} title="Delete Selected Users" message={`Remove ${selectedUsers.length} selected user${selectedUsers.length === 1 ? '' : 's'} from the directory?`} confirmLabel="Delete Users" confirmClassName="bg-red-600 text-white" isDarkMode={isDarkMode} onClose={() => setPendingBulkDelete(false)} onConfirm={confirmBulkDelete} />
+      <ConfirmDialog 
+        isOpen={deleteConfirm.isOpen}
+        isDarkMode={isDarkMode}
+        title={deleteConfirm.options?.title || 'Confirm'}
+        message={deleteConfirm.options?.message || ''}
+        confirmLabel={deleteConfirm.options?.confirmLabel}
+        cancelLabel={deleteConfirm.options?.cancelLabel}
+        isDangerous={deleteConfirm.options?.isDangerous}
+        isLoading={deleteConfirm.isLoading}
+        onConfirm={deleteConfirm.options?.onConfirm || (() => {})}
+        onCancel={deleteConfirm.close}
+      />
+
+      <ConfirmDialog 
+        isOpen={bulkDeleteConfirm.isOpen}
+        isDarkMode={isDarkMode}
+        title={bulkDeleteConfirm.options?.title || 'Confirm'}
+        message={bulkDeleteConfirm.options?.message || ''}
+        confirmLabel={bulkDeleteConfirm.options?.confirmLabel}
+        cancelLabel={bulkDeleteConfirm.options?.cancelLabel}
+        isDangerous={bulkDeleteConfirm.options?.isDangerous}
+        isLoading={bulkDeleteConfirm.isLoading}
+        onConfirm={bulkDeleteConfirm.options?.onConfirm || (() => {})}
+        onCancel={bulkDeleteConfirm.close}
+      />
     </div>
   );
 };
