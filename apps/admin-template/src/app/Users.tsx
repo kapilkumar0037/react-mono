@@ -104,9 +104,6 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
     setIsModalOpen(true);
   };
 
-  const selectedUsers = users.filter((user) => selectedUserIds.includes(user.id));
-  const allFilteredSelected = filteredUsers.length > 0 && filteredUsers.every((user) => selectedUserIds.includes(user.id));
-
   const handleSaveUser = () => {
     if (!canManageUsers) {
       addToast({ 
