@@ -94,7 +94,7 @@ const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
               </div>
 
               {/* Password Field */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <div className="flex items-center justify-between">
                   <label htmlFor="password" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     Password
@@ -117,7 +117,7 @@ const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
                 />
               </div>
 
-              <div className="mb-6">
+              <div className="mb-4">
                 <label htmlFor="role" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Demo Role
                 </label>
@@ -140,7 +140,7 @@ const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
               </div>
 
               {/* Remember Me */}
-              <div className="flex items-center mb-6">
+              <div className="flex items-center mb-4">
                 <input
                   id="remember-me"
                   type="checkbox"

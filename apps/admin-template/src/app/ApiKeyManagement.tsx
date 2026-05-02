@@ -197,7 +197,7 @@ const ApiKeyManagement: React.FC<ApiKeyManagementProps> = ({ isDarkMode = false 
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
           {stats.map((stat, idx) => (
             <Card key={idx} className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} ${getStatColor(stat.color)}`}>
               <div>
@@ -447,7 +447,7 @@ const ApiKeyManagement: React.FC<ApiKeyManagementProps> = ({ isDarkMode = false 
                   </button>
                 </div>
 
-                <div className="space-y-3 mb-6">
+                <div className="space-y-2 mb-4">
                   <div>
                     <p className={`text-xs uppercase tracking-wider mb-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                       Full Key

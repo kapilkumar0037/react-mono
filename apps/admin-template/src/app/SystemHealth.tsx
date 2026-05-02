@@ -115,7 +115,7 @@ const SystemHealth: React.FC<SystemHealthProps> = ({ isDarkMode = false }) => {
         </div>
 
         {/* System Metrics KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
           {systemMetrics.map((metric, idx) => (
             <Card key={idx} className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
               <div>
@@ -134,7 +134,7 @@ const SystemHealth: React.FC<SystemHealthProps> = ({ isDarkMode = false }) => {
         </div>
 
         {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           {/* CPU Usage */}
           <Card title="CPU Usage (%)" className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
             <ResponsiveContainer width="100%" height={250}>

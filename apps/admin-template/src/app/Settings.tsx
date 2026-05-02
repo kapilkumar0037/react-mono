@@ -195,25 +195,25 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto w-full">
+    <div className="p-4 max-w-6xl mx-auto w-full">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Manage your profile, notifications, and application preferences</p>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your profile, notifications, and application preferences</p>
       </div>
 
       {/* Success Message */}
       {successMessage && (
-        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg">
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg">
           <p className="text-green-800 dark:text-green-200 font-medium">{successMessage}</p>
         </div>
       )}
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => handleTabChange('profile')}
-          className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+          className={`px-3 py-2 font-medium text-xs border-b-2 transition-colors ${
             activeTab === 'profile'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
@@ -223,7 +223,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
         </button>
         <button
           onClick={() => handleTabChange('organization')}
-          className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+          className={`px-3 py-2 font-medium text-xs border-b-2 transition-colors ${
             activeTab === 'organization'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
@@ -233,7 +233,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
         </button>
         <button
           onClick={() => handleTabChange('notifications')}
-          className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+          className={`px-3 py-2 font-medium text-xs border-b-2 transition-colors ${
             activeTab === 'notifications'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
@@ -243,7 +243,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
         </button>
         <button
           onClick={() => handleTabChange('security')}
-          className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+          className={`px-3 py-2 font-medium text-xs border-b-2 transition-colors ${
             activeTab === 'security'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
@@ -253,7 +253,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
         </button>
         <button
           onClick={() => handleTabChange('preferences')}
-          className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+          className={`px-3 py-2 font-medium text-xs border-b-2 transition-colors ${
             activeTab === 'preferences'
               ? 'border-blue-600 text-blue-600 dark:text-blue-400'
               : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
@@ -265,19 +265,19 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
 
       {/* Profile Tab */}
       {activeTab === 'profile' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Profile Avatar */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <div className="text-center">
-                <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                <div className="w-20 h-20 mx-auto mb-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
                   {formData.firstName.charAt(0)}{formData.lastName.charAt(0)}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                   {formData.firstName} {formData.lastName}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{formData.email}</p>
-                <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{formData.email}</p>
+                <button className="mt-3 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors">
                   Change Avatar
                 </button>
               </div>
@@ -287,12 +287,12 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
           {/* Profile Form */}
           <div className="lg:col-span-2">
             <form onSubmit={handleSaveProfile}>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Personal Information</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-3">Personal Information</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">First Name</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">First Name</label>
                     <input
                       type="text"
                       name="firstName"
@@ -302,7 +302,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Last Name</label>
                     <input
                       type="text"
                       name="lastName"
@@ -313,8 +313,8 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                <div className="mb-3">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
                   <input
                     type="email"
                     name="email"
@@ -324,8 +324,8 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   />
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone</label>
+                <div className="mb-3">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
                   <input
                     type="tel"
                     name="phone"
@@ -335,8 +335,8 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   />
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Company</label>
+                <div className="mb-3">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Company</label>
                   <input
                     type="text"
                     name="company"
@@ -346,10 +346,10 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   />
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-6">Address</h3>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 mt-3">Address</h3>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Street Address</label>
+                <div className="mb-3">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Street Address</label>
                   <input
                     type="text"
                     name="address"
@@ -359,9 +359,9 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">City</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">City</label>
                     <input
                       type="text"
                       name="city"
@@ -371,7 +371,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">State/Province</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">State/Province</label>
                     <input
                       type="text"
                       name="state"
@@ -382,9 +382,9 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">ZIP/Postal Code</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">ZIP/Postal Code</label>
                     <input
                       type="text"
                       name="zipCode"
@@ -394,7 +394,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Country</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Country</label>
                     <input
                       type="text"
                       name="country"
@@ -407,7 +407,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
 
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
+                  className="px-4 py-1.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
                 >
                   Save Changes
                 </button>
@@ -419,10 +419,10 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
 
       {/* Organization Tab */}
       {activeTab === 'organization' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-1">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                 <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2">Workspace</p>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {organizationSettings.organizationName}
@@ -447,12 +447,12 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
             </div>
 
             <form className="lg:col-span-2" onSubmit={handleSaveSettings}>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Organization Profile</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-3">Organization Profile</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Organization Name</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Organization Name</label>
                     <input
                       type="text"
                       value={organizationSettings.organizationName}
@@ -461,7 +461,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Workspace Slug</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Workspace Slug</label>
                     <input
                       type="text"
                       value={organizationSettings.workspaceSlug}
@@ -471,9 +471,9 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Industry</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Industry</label>
                     <select
                       value={organizationSettings.industry}
                       onChange={(e) => handleOrganizationSettingChange('industry', e.target.value)}
@@ -487,7 +487,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Company Size</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Company Size</label>
                     <select
                       value={organizationSettings.employeeRange}
                       onChange={(e) => handleOrganizationSettingChange('employeeRange', e.target.value)}
@@ -502,9 +502,9 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Default Currency</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Default Currency</label>
                     <select
                       value={organizationSettings.defaultCurrency}
                       onChange={(e) => handleOrganizationSettingChange('defaultCurrency', e.target.value)}
@@ -518,7 +518,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Fiscal Year Starts</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Fiscal Year Starts</label>
                     <select
                       value={organizationSettings.fiscalYearStart}
                       onChange={(e) => handleOrganizationSettingChange('fiscalYearStart', e.target.value)}
@@ -531,11 +531,11 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   </div>
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Operations</h3>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 mt-3">Operations</h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Billing Email</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Billing Email</label>
                     <input
                       type="email"
                       value={organizationSettings.billingEmail}
@@ -544,7 +544,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Support Email</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Support Email</label>
                     <input
                       type="email"
                       value={organizationSettings.supportEmail}
@@ -554,9 +554,9 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Audit Retention</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Audit Retention</label>
                     <select
                       value={organizationSettings.auditRetention}
                       onChange={(e) => handleOrganizationSettingChange('auditRetention', e.target.value)}
@@ -569,7 +569,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Release Channel</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Release Channel</label>
                     <select
                       value={organizationSettings.releaseChannel}
                       onChange={(e) => handleOrganizationSettingChange('releaseChannel', e.target.value)}
@@ -582,11 +582,11 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   </div>
                 </div>
 
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Customer Portal</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Let customers manage invoices, orders, and support requests.</p>
+                      <h3 className="text-base font-semibold text-gray-900 dark:text-white">Customer Portal</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Let customers manage invoices, orders, and support requests.</p>
                     </div>
                     <input
                       type="checkbox"
@@ -648,11 +648,11 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
               </div>
 
               {/* Push Notifications */}
-              <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Push Notifications</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Receive browser push notifications</p>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">Push Notifications</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Receive browser push notifications</p>
                   </div>
                   <label className="flex items-center cursor-pointer">
                     <input
@@ -666,11 +666,11 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
               </div>
 
               {/* SMS Alerts */}
-              <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">SMS Alerts</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Receive critical alerts via SMS</p>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">SMS Alerts</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Receive critical alerts via SMS</p>
                   </div>
                   <label className="flex items-center cursor-pointer">
                     <input
@@ -684,11 +684,11 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
               </div>
 
               {/* Weekly Report */}
-              <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Report</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Receive weekly summary reports every Monday</p>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">Weekly Report</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Receive weekly summary reports every Monday</p>
                   </div>
                   <label className="flex items-center cursor-pointer">
                     <input
@@ -797,10 +797,18 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
 
           {/* Password */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Change Password</h3>
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">Change Password</h3>
             <form onSubmit={(e) => { e.preventDefault(); handleSaveSettings(e); }}>
-              <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Current Password</label>
+              <div className="mb-3">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Current Password</label>
+                <input
+                  type="password"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="••••••••"
+                />
+              </div>
+              <div className="mb-3">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">New Password</label>
                 <input
                   type="password"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -808,15 +816,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">New Password</label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="••••••••"
-                />
-              </div>
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Confirm Password</label>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Confirm Password</label>
                 <input
                   type="password"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -825,7 +825,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
               </div>
               <button
                 type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
+                className="px-4 py-1.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
               >
                 Update Password
               </button>
@@ -836,13 +836,13 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
 
       {/* Preferences Tab */}
       {activeTab === 'preferences' && (
-        <div className="space-y-6">
+        <div className="space-y-3">
           {/* Data Collection */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Data Collection</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Allow us to collect usage data to improve the app</p>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Data Collection</h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Allow us to collect usage data to improve the app</p>
               </div>
               <label className="flex items-center cursor-pointer">
                 <input
@@ -856,11 +856,11 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
           </div>
 
           {/* Analytics Tracking */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Analytics Tracking</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Allow analytics services to track your usage</p>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Analytics Tracking</h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Allow analytics services to track your usage</p>
               </div>
               <label className="flex items-center cursor-pointer">
                 <input
@@ -874,9 +874,9 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
           </div>
 
           {/* Backup Frequency */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Backup Frequency</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">How often should we back up your data?</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">Backup Frequency</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">How often should we back up your data?</p>
             <select
               value={appSettings.backupFrequency}
               onChange={(e) => handleAppSettingChange('backupFrequency', e.target.value)}
@@ -890,18 +890,18 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-red-900 dark:text-red-200 mb-2">Danger Zone</h3>
-            <p className="text-sm text-red-700 dark:text-red-300 mb-4">These actions cannot be undone</p>
-            <div className="flex flex-wrap gap-3">
+          <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4">
+            <h3 className="text-base font-semibold text-red-900 dark:text-red-200 mb-1.5">Danger Zone</h3>
+            <p className="text-xs text-red-700 dark:text-red-300 mb-3">These actions cannot be undone</p>
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setIsResetConfirmOpen(true)}
-                className="px-6 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 dark:hover:bg-amber-500 transition-colors"
+                className="px-4 py-1.5 bg-amber-600 text-white rounded-lg font-medium text-sm hover:bg-amber-700 dark:hover:bg-amber-500 transition-colors"
               >
                 Reset Settings
               </button>
               <button
-                className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 dark:hover:bg-red-500 transition-colors"
+                className="px-4 py-1.5 bg-red-600 text-white rounded-lg font-medium text-sm hover:bg-red-700 dark:hover:bg-red-500 transition-colors"
               >
                 Delete Account
               </button>

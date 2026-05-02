@@ -78,7 +78,7 @@ const AccessControl: React.FC<AccessControlProps> = ({
   const totalProtectedAreas = Object.keys(PERMISSION_LABELS).length;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
+    <div className="p-4 max-w-7xl mx-auto w-full space-y-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">Security</p>

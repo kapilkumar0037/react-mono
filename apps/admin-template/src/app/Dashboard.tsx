@@ -362,16 +362,16 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
   const productsTotalPages = getTotalPages(filteredProductsAdvanced.length);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto w-full">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 max-w-7xl mx-auto w-full">
+      <div className="flex justify-between items-center mb-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-sm text-gray-600 mt-1">Filter: <span className="font-semibold text-gray-900 capitalize">{selectedDateFilter}</span>{searchQuery && ` • Search: "${searchQuery}"`}</p>
         </div>
       </div>
 
       {/* Quick Date Filters */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
             <button
               onClick={() => setSelectedDateFilter('today')}
               className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'today' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}

@@ -241,7 +241,7 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
         </div>
 
         {/* Backup Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
           {backupStats.map((stat, idx) => (
             <Card key={idx} className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'} ${getStatColor(stat.color)}`}>
               <div>
@@ -257,7 +257,7 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
         </div>
 
         {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           {/* Backup Schedules */}
           <Card title="Backup Schedules" className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
             <div className="space-y-3">

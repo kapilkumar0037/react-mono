@@ -308,7 +308,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
             </tbody>
           </table>
         </div>
-        {totalPages > 1 && <div className="border-t p-6"><Pagination currentPage={currentPage} totalItems={filteredUsers.length} pageSize={itemsPerPage} onPageChange={setCurrentPage} /></div>}
+        {totalPages > 1 && <div className="border-t p-4"><Pagination currentPage={currentPage} totalItems={filteredUsers.length} pageSize={itemsPerPage} onPageChange={setCurrentPage} /></div>}
       </Card>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={isEditMode ? 'Edit User' : 'Add New User'}>
