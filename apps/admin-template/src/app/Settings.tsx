@@ -199,7 +199,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
       {/* Header */}
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your profile, notifications, and application preferences</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5 leading-tight">Manage your profile, notifications, and application preferences</p>
       </div>
 
       {/* Success Message */}
@@ -599,7 +599,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Auto-Invite New Users</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Send workspace invitations when teammates are added.</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Send workspace invitations when teammates are added.</p>
                     </div>
                     <input
                       type="checkbox"
@@ -634,7 +634,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Email Notifications</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Receive email updates about your account</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Receive email updates about your account</p>
                   </div>
                   <label className="flex items-center cursor-pointer">
                     <input
@@ -706,7 +706,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Monthly Digest</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Receive monthly digest emails</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Receive monthly digest emails</p>
                   </div>
                   <label className="flex items-center cursor-pointer">
                     <input
@@ -724,7 +724,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Marketing Emails</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Receive promotional and marketing emails</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Receive promotional and marketing emails</p>
                   </div>
                   <label className="flex items-center cursor-pointer">
                     <input
@@ -756,7 +756,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Two-Factor Authentication</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Add an extra layer of security to your account</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Add an extra layer of security to your account</p>
               </div>
               <label className="flex items-center cursor-pointer">
                 <input

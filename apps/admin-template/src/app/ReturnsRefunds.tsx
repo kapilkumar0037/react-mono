@@ -217,7 +217,7 @@ const ReturnsRefunds: React.FC<ReturnsRefundsProps> = ({ isDarkMode = false }) =
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Returns & Refunds</h1>
-            <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`mt-0.5 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} leading-tight`}>
               Track return approvals, warehouse receipts, and refund outcomes from one operational queue.
             </p>
           </div>

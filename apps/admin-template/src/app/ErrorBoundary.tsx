@@ -24,7 +24,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, Error
     if (this.state.hasError) {
       return (
         <div className="p-8 text-red-600">
-          <h2 className="text-2xl font-bold mb-2">Something went wrong.</h2>
+          <h2 className="text-2xl font-bold mb-1.5">Something went wrong.</h2>
           <pre>{this.state.error?.toString()}</pre>
         </div>
       );

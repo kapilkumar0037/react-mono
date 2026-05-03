@@ -366,7 +366,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-600 mt-1">Filter: <span className="font-semibold text-gray-900 capitalize">{selectedDateFilter}</span>{searchQuery && ` • Search: "${searchQuery}"`}</p>
+          <p className="text-sm text-gray-600 mt-0.5 leading-tight">Filter: <span className="font-semibold text-gray-900 capitalize">{selectedDateFilter}</span>{searchQuery && ` • Search: "${searchQuery}"`}</p>
         </div>
       </div>
 

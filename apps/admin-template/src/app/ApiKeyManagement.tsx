@@ -181,7 +181,7 @@ const ApiKeyManagement: React.FC<ApiKeyManagementProps> = ({ isDarkMode = false 
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <h1 className={`text-2xl font-bold mb-1.5 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
               API Key Management
             </h1>
             <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>

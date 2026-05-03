@@ -397,7 +397,7 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Integrations Hub</h1>
-            <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`mt-0.5 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} leading-tight`}>
               Monitor external systems, connection health, and operational sync risk across your stack.
             </p>
           </div>

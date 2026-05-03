@@ -397,7 +397,7 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Billing & Subscriptions</h1>
-            <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`mt-0.5 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} leading-tight`}>
               Manage recurring revenue, subscription health, invoice risk, and account upgrades in one place.
             </p>
           </div>

@@ -266,7 +266,7 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Customers CRM</h1>
-            <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`mt-0.5 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} leading-tight`}>
               Track account health, customer value, and relationship ownership across your commerce base.
             </p>
           </div>

@@ -392,7 +392,7 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
             <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Inventory Management</h1>
-            <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`mt-0.5 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} leading-tight`}>
               Monitor stock health, warehouse coverage, and replenishment risk across active SKUs.
             </p>
           </div>

@@ -174,7 +174,7 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
           <div className="mb-3 flex flex-col gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-900">Saved Report Views</p>
-              <p className="mt-1 text-sm text-gray-600">Capture the current tab and date window as a reusable report view.</p>
+              <p className="text-xs text-gray-600 mt-0.5">Capture the current tab and date window as a reusable report view.</p>
             </div>
             <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:justify-end">
               <input
