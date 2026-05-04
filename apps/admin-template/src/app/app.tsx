@@ -38,6 +38,7 @@ import {
 import { AppPermission, AppRole, DEFAULT_ROLE_DEFINITIONS } from './rbac';
 import { GlobalToastProvider } from './providers/GlobalToastProvider';
 import { GlobalToastContainer } from './components/GlobalToastContainer';
+import { clearUserPreferences } from './services/userPreferencesService';
 
 function ProtectedLayout({
   isDarkMode,
@@ -168,7 +169,12 @@ export function App() {
   };
 
   const handleLogout = () => {
+    // Clear session and user preferences
+    const currentEmail = session?.email;
     clearStoredSession();
+    if (currentEmail) {
+      clearUserPreferences(currentEmail);
+    }
     setSession(null);
   };
 
