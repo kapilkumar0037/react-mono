@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Card } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import { readStoredAuditEntries } from './rbacStorage';
+import { useGlobalToast } from './hooks/useGlobalToast';
+import { useDeleteAction } from './hooks/useActionFeedback';
+import { EmptyState } from './components/EmptyState';
 
 interface ActivityLog {
   id: number;
@@ -18,6 +21,8 @@ interface ActivityLogProps {
 }
 
 const ActivityLog: React.FC<ActivityLogProps> = ({ isDarkMode = false }) => {
+  const { addToast } = useGlobalToast();
+  const deleteAction = useDeleteAction('Activity');
   const [filteredCategory, setFilteredCategory] = useState('all');
   const [filteredStatus, setFilteredStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
@@ -290,33 +295,40 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ isDarkMode = false }) => {
 
         {/* Activity Table */}
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                  <th className={`px-2 py-2 text-left text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    User
-                  </th>
-                  <th className={`px-2 py-2 text-left text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Action
-                  </th>
-                  <th className={`px-2 py-2 text-left text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Description
-                  </th>
-                  <th className={`px-2 py-2 text-left text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Category
-                  </th>
-                  <th className={`px-2 py-2 text-center text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Status
-                  </th>
-                  <th className={`px-2 py-2 text-right text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Time
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedData.length > 0 ? (
-                  paginatedData.map((activity) => (
+          {paginatedData.length === 0 ? (
+            <EmptyState
+              icon="📋"
+              title="No activities found"
+              description="No activities match your filters. Try adjusting your search or date range."
+              isDarkMode={isDarkMode}
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <th className={`px-2 py-2 text-left text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      User
+                    </th>
+                    <th className={`px-2 py-2 text-left text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Action
+                    </th>
+                    <th className={`px-2 py-2 text-left text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Description
+                    </th>
+                    <th className={`px-2 py-2 text-left text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Category
+                    </th>
+                    <th className={`px-2 py-2 text-center text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Status
+                    </th>
+                    <th className={`px-2 py-2 text-right text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Time
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedData.map((activity) => (
                     <tr
                       key={activity.id}
                       className={`border-b text-sm ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'} transition-colors`}
@@ -346,17 +358,11 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ isDarkMode = false }) => {
                         {activity.timestamp}
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className={`px-2 py-4 text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                      No activities found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (

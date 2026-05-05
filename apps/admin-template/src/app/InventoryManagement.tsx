@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { Badge, Button, Card, Modal } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import AdminActionConfirm from './AdminActionConfirm';
 import AdminTableSortHeader from './AdminTableSortHeader';
+import { useGlobalToast } from './hooks/useGlobalToast';
 import {
   AdminEmptyState,
   AdminFilterFooter,
@@ -130,7 +131,7 @@ const initialInventory: InventoryItem[] = [
 ];
 
 const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = false }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [inventory, setInventory] = useState<InventoryItem[]>(initialInventory);
@@ -268,9 +269,9 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
     setSelectedItem((currentItem) =>
       currentItem && currentItem.id === itemId ? updater(currentItem) : currentItem
     );
-    showToast({
+    addToast({
       message,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -348,9 +349,9 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
       )
     );
     setSelectedItemIds([]);
-    showToast({
+    addToast({
       message: `${selectedItems.length} inventory item${selectedItems.length === 1 ? '' : 's'} queued for expedited restock.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -367,9 +368,9 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
       )
     );
     setSelectedItemIds([]);
-    showToast({
+    addToast({
       message: `${selectedItems.length} inventory item${selectedItems.length === 1 ? '' : 's'} received stock transfers.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -380,9 +381,9 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
       )
     );
     setSelectedItemIds([]);
-    showToast({
+    addToast({
       message: `${selectedItems.length} inventory item${selectedItems.length === 1 ? '' : 's'} marked as reviewed.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 

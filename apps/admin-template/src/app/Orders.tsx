@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { Badge, Button, Card, Modal } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import AdminActionConfirm from './AdminActionConfirm';
+import { useGlobalToast } from './hooks/useGlobalToast';
+import { useExportAction } from './hooks/useActionFeedback';
+import { EmptyState } from './components/EmptyState';
 
 type OrderStatus =
   | 'Pending'
@@ -45,7 +48,8 @@ const initialOrders: Order[] = [
 ];
 
 const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
+  const exportAction = useExportAction('Orders');
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
@@ -125,19 +129,19 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
   const updateOrderStatus = (orderId: string, status: OrderStatus, message: string) => {
     setOrders((currentOrders) => currentOrders.map((order) => (order.id === orderId ? { ...order, status } : order)));
     setSelectedOrder((currentOrder) => (currentOrder && currentOrder.id === orderId ? { ...currentOrder, status } : currentOrder));
-    showToast({ message, variant: 'success' });
+    addToast({ type: 'success', message });
   };
 
   const runBulkStatusUpdate = (nextStatus: OrderStatus, eligibleStatuses: OrderStatus[], message: (count: number) => string) => {
     const eligibleIds = selectedOrders.filter((order) => eligibleStatuses.includes(order.status)).map((order) => order.id);
     if (eligibleIds.length === 0) {
-      showToast({ message: 'The selected orders are already in a final state for that action.', variant: 'warning' });
+      addToast({ type: 'warning', message: 'The selected orders are already in a final state for that action.' });
       return;
     }
     setOrders((currentOrders) => currentOrders.map((order) => (eligibleIds.includes(order.id) ? { ...order, status: nextStatus } : order)));
     setSelectedOrder((currentOrder) => (currentOrder && eligibleIds.includes(currentOrder.id) ? { ...currentOrder, status: nextStatus } : currentOrder));
     setSelectedOrderIds([]);
-    showToast({ message: message(eligibleIds.length), variant: 'success' });
+    addToast({ type: 'success', message: message(eligibleIds.length) });
   };
 
   const toggleOrderSelection = (orderId: string) => setSelectedOrderIds((ids) => (ids.includes(orderId) ? ids.filter((id) => id !== orderId) : [...ids, orderId]));
@@ -145,9 +149,14 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
     const filteredIds = filteredOrders.map((order) => order.id);
     setSelectedOrderIds((ids) => (filteredIds.every((id) => ids.includes(id)) ? ids.filter((id) => !filteredIds.includes(id)) : Array.from(new Set([...ids, ...filteredIds]))));
   };
-  const exportSelectedOrders = () => {
+  const exportSelectedOrders = async () => {
     if (selectedOrders.length === 0) return;
-    showToast({ message: `Export package prepared for ${selectedOrders.length} selected order${selectedOrders.length === 1 ? '' : 's'}.`, variant: 'info' });
+    await exportAction.execute(
+      () => new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        successMessage: `Export package prepared for ${selectedOrders.length} selected order${selectedOrders.length === 1 ? '' : 's'}`,
+      }
+    );
   };
 
   return (
@@ -159,8 +168,8 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
             <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Review fulfillment, payment health, and shipping progress across all active orders.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => showToast({ message: 'Order export has started for the current filtered view.', variant: 'info' })} className="bg-gray-700 text-white">Export Orders</Button>
-            <Button onClick={() => showToast({ message: 'Manual fulfillment sync queued successfully.', variant: 'success' })} className="bg-blue-600 text-white">Sync Fulfillment</Button>
+            <Button onClick={() => addToast({ type: 'info', message: 'Order export has started for the current filtered view.' })} className="bg-gray-700 text-white">Export Orders</Button>
+            <Button onClick={() => addToast({ type: 'success', message: 'Manual fulfillment sync queued successfully.' })} className="bg-blue-600 text-white">Sync Fulfillment</Button>
           </div>
         </div>
 
@@ -216,39 +225,47 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
               </div>
             </div>
           )}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                  <th className="px-4 py-3 text-left"><input type="checkbox" checked={allFilteredSelected} onChange={toggleSelectAllFiltered} className="h-4 w-4 rounded" aria-label="Select all filtered orders" /></th>
-                  <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Order</th>
-                  <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Customer</th>
-                  <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</th>
-                  <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Payment</th>
-                  <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Priority</th>
-                  <th className={`px-4 py-3 text-right ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Total</th>
-                  <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>ETA</th>
-                  <th className={`px-4 py-3 text-right ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map((order) => (
-                  <tr key={order.id} className={`border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}>
-                    <td className="px-4 py-4 align-top"><input type="checkbox" checked={selectedOrderIds.includes(order.id)} onChange={() => toggleOrderSelection(order.id)} className="h-4 w-4 rounded" aria-label={`Select ${order.id}`} /></td>
-                    <td className="px-4 py-4"><div className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{order.id}</div><div className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{order.channel} | {order.items} items</div></td>
-                    <td className="px-4 py-4"><div className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{order.customer}</div><div className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{order.email}</div></td>
-                    <td className="px-4 py-4"><Badge variant={getStatusBadge(order.status)}>{order.status}</Badge></td>
-                    <td className="px-4 py-4"><span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getPaymentClasses(order.paymentStatus)}`}>{order.paymentStatus}</span></td>
-                    <td className="px-4 py-4"><span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getPriorityClasses(order.priority)}`}>{order.priority}</span></td>
-                    <td className={`px-4 py-4 text-right font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>${order.total.toFixed(2)}</td>
-                    <td className={`px-4 py-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{order.deliveryEta}</td>
-                    <td className="px-4 py-4"><div className="flex justify-end gap-2"><Button onClick={() => setSelectedOrder(order)} className="bg-gray-700 px-3 py-1 text-xs text-white">View</Button>{order.status === 'Pending' && <Button onClick={() => updateOrderStatus(order.id, 'Processing', `${order.id} moved into processing.`)} className="bg-blue-600 px-3 py-1 text-xs text-white">Process</Button>}{order.status === 'Processing' && <Button onClick={() => updateOrderStatus(order.id, 'Shipped', `${order.id} marked as shipped.`)} className="bg-indigo-600 px-3 py-1 text-xs text-white">Ship</Button>}{!['Cancelled', 'Refunded', 'Delivered'].includes(order.status) && <Button onClick={() => updateOrderStatus(order.id, 'Cancelled', `${order.id} was cancelled and removed from fulfillment.`)} className="bg-red-600 px-3 py-1 text-xs text-white">Cancel</Button>}</div></td>
+          {filteredOrders.length === 0 ? (
+            <EmptyState
+              icon="📦"
+              title="No orders found"
+              description="Try adjusting your search or filters to view orders"
+              isDarkMode={isDarkMode}
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <th className="px-4 py-3 text-left"><input type="checkbox" checked={allFilteredSelected} onChange={toggleSelectAllFiltered} className="h-4 w-4 rounded" aria-label="Select all filtered orders" /></th>
+                    <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Order</th>
+                    <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Customer</th>
+                    <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</th>
+                    <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Payment</th>
+                    <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Priority</th>
+                    <th className={`px-4 py-3 text-right ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Total</th>
+                    <th className={`px-4 py-3 text-left ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>ETA</th>
+                    <th className={`px-4 py-3 text-right ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {filteredOrders.length === 0 && <div className={`px-4 py-10 text-center text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>No orders match the current filters. Try clearing one of the status or payment filters.</div>}
+                </thead>
+                <tbody>
+                  {filteredOrders.map((order) => (
+                    <tr key={order.id} className={`border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}>
+                      <td className="px-4 py-4 align-top"><input type="checkbox" checked={selectedOrderIds.includes(order.id)} onChange={() => toggleOrderSelection(order.id)} className="h-4 w-4 rounded" aria-label={`Select ${order.id}`} /></td>
+                      <td className="px-4 py-4"><div className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{order.id}</div><div className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{order.channel} | {order.items} items</div></td>
+                      <td className="px-4 py-4"><div className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{order.customer}</div><div className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{order.email}</div></td>
+                      <td className="px-4 py-4"><Badge variant={getStatusBadge(order.status)}>{order.status}</Badge></td>
+                      <td className="px-4 py-4"><span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getPaymentClasses(order.paymentStatus)}`}>{order.paymentStatus}</span></td>
+                      <td className="px-4 py-4"><span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getPriorityClasses(order.priority)}`}>{order.priority}</span></td>
+                      <td className={`px-4 py-4 text-right font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>${order.total.toFixed(2)}</td>
+                      <td className={`px-4 py-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{order.deliveryEta}</td>
+                      <td className="px-4 py-4"><div className="flex justify-end gap-2"><Button onClick={() => setSelectedOrder(order)} className="bg-gray-700 px-3 py-1 text-xs text-white">View</Button>{order.status === 'Pending' && <Button onClick={() => updateOrderStatus(order.id, 'Processing', `${order.id} moved into processing.`)} className="bg-blue-600 px-3 py-1 text-xs text-white">Process</Button>}{order.status === 'Processing' && <Button onClick={() => updateOrderStatus(order.id, 'Shipped', `${order.id} marked as shipped.`)} className="bg-indigo-600 px-3 py-1 text-xs text-white">Ship</Button>}{!['Cancelled', 'Refunded', 'Delivered'].includes(order.status) && <Button onClick={() => updateOrderStatus(order.id, 'Cancelled', `${order.id} was cancelled and removed from fulfillment.`)} className="bg-red-600 px-3 py-1 text-xs text-white">Cancel</Button>}</div></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
       </div>
 

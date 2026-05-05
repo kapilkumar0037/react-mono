@@ -10,6 +10,7 @@ import AdminActionConfirm from './AdminActionConfirm';
 import { useGlobalToast } from './hooks/useGlobalToast';
 import { useUpdateAction, useCreateAction, useDeleteAction, useExportAction } from './hooks/useActionFeedback';
 import { useConfirmDialog, ConfirmDialog } from './components/ConfirmDialog';
+import { EmptyState } from './components/EmptyState';
 
 interface FormData {
   name: string;
@@ -300,15 +301,27 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
 
       <Card>
         {selectedUserIds.length > 0 && <div className="border-b border-gray-200 bg-gray-50 px-6 py-3"><div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"><div className="text-sm font-medium text-gray-700">{selectedUserIds.length} user{selectedUserIds.length === 1 ? '' : 's'} selected</div><div className="flex flex-wrap gap-2"><Button onClick={() => setSelectedUserIds([])} className="bg-gray-600 px-3 py-1.5 text-xs text-white">Clear</Button><Button onClick={exportSelectedUsers} className="bg-gray-700 px-3 py-1.5 text-xs text-white">Export</Button><Button onClick={() => applyBulkStatus('Active')} disabled={!canManageUsers} className="bg-green-600 px-3 py-1.5 text-xs text-white disabled:bg-gray-400">Activate</Button><Button onClick={() => applyBulkStatus('Suspended')} disabled={!canManageUsers} className="bg-amber-600 px-3 py-1.5 text-xs text-white disabled:bg-gray-400">Suspend</Button><Button onClick={confirmBulkDelete} disabled={!canManageUsers} className="bg-red-600 px-3 py-1.5 text-xs text-white disabled:bg-gray-400">Delete</Button></div></div></div>}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead><tr className="border-b border-gray-200 bg-gray-50"><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900"><input type="checkbox" checked={allFilteredSelected} onChange={() => { const filteredIds = filteredUsers.map((user) => user.id); setSelectedUserIds((ids) => (filteredIds.every((id) => ids.includes(id)) ? ids.filter((id) => !filteredIds.includes(id)) : Array.from(new Set([...ids, ...filteredIds])))); }} className="h-4 w-4 rounded" aria-label="Select all filtered users" /></th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Email</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Role</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Join Date</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th></tr></thead>
-            <tbody>
-              {paginatedUsers.length > 0 ? paginatedUsers.map((user) => <tr key={user.id} className="border-b border-gray-200 transition-colors hover:bg-gray-50"><td className="px-6 py-4 text-sm"><input type="checkbox" checked={selectedUserIds.includes(user.id)} onChange={() => setSelectedUserIds((ids) => (ids.includes(user.id) ? ids.filter((id) => id !== user.id) : [...ids, user.id]))} className="h-4 w-4 rounded" aria-label={`Select ${user.name}`} /></td><td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td><td className="px-6 py-4 text-sm text-gray-600">{user.email}</td><td className="px-6 py-4 text-sm"><span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${getRoleBadgeClass(user.role)}`}>{user.role}</span></td><td className="px-6 py-4 text-sm"><Badge variant={getStatusColor(user.status)} className="inline-block">{user.status}</Badge></td><td className="px-6 py-4 text-sm text-gray-600">{user.joinDate}</td><td className="px-6 py-4 text-sm"><div className="flex gap-2"><Button onClick={() => handleOpenEditModal(user)} disabled={!canManageUsers} className="bg-blue-500 px-3 py-1 text-xs text-white disabled:bg-gray-400">Edit</Button><Button onClick={() => canManageUsers && confirmDeleteUser(user)} disabled={!canManageUsers} className="bg-red-500 px-3 py-1 text-xs text-white disabled:bg-gray-400">Delete</Button></div></td></tr>) : <tr><td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-600">No users found</td></tr>}
-            </tbody>
-          </table>
-        </div>
-        {totalPages > 1 && <div className="border-t p-4"><Pagination currentPage={currentPage} totalItems={filteredUsers.length} pageSize={itemsPerPage} onPageChange={setCurrentPage} /></div>}
+        {filteredUsers.length === 0 ? (
+          <EmptyState
+            icon="👥"
+            title="No users found"
+            description="Try adjusting your search or filters"
+            action={canManageUsers ? { label: '+ Add User', onClick: () => setIsModalOpen(true) } : undefined}
+            isDarkMode={isDarkMode}
+          />
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead><tr className="border-b border-gray-200 bg-gray-50"><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900"><input type="checkbox" checked={allFilteredSelected} onChange={() => { const filteredIds = filteredUsers.map((user) => user.id); setSelectedUserIds((ids) => (filteredIds.every((id) => ids.includes(id)) ? ids.filter((id) => !filteredIds.includes(id)) : Array.from(new Set([...ids, ...filteredIds])))); }} className="h-4 w-4 rounded" aria-label="Select all filtered users" /></th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Email</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Role</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Join Date</th><th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th></tr></thead>
+                <tbody>
+                  {paginatedUsers.map((user) => <tr key={user.id} className="border-b border-gray-200 transition-colors hover:bg-gray-50"><td className="px-6 py-4 text-sm"><input type="checkbox" checked={selectedUserIds.includes(user.id)} onChange={() => setSelectedUserIds((ids) => (ids.includes(user.id) ? ids.filter((id) => id !== user.id) : [...ids, user.id]))} className="h-4 w-4 rounded" aria-label={`Select ${user.name}`} /></td><td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td><td className="px-6 py-4 text-sm text-gray-600">{user.email}</td><td className="px-6 py-4 text-sm"><span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${getRoleBadgeClass(user.role)}`}>{user.role}</span></td><td className="px-6 py-4 text-sm"><Badge variant={getStatusColor(user.status)} className="inline-block">{user.status}</Badge></td><td className="px-6 py-4 text-sm text-gray-600">{user.joinDate}</td><td className="px-6 py-4 text-sm"><div className="flex gap-2"><Button onClick={() => handleOpenEditModal(user)} disabled={!canManageUsers} className="bg-blue-500 px-3 py-1 text-xs text-white disabled:bg-gray-400">Edit</Button><Button onClick={() => canManageUsers && confirmDeleteUser(user)} disabled={!canManageUsers} className="bg-red-500 px-3 py-1 text-xs text-white disabled:bg-gray-400">Delete</Button></div></td></tr>)}
+                </tbody>
+              </table>
+            </div>
+            {totalPages > 1 && <div className="border-t p-4"><Pagination currentPage={currentPage} totalItems={filteredUsers.length} pageSize={itemsPerPage} onPageChange={setCurrentPage} /></div>}
+          </>
+        )}
       </Card>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={isEditMode ? 'Edit User' : 'Add New User'}>

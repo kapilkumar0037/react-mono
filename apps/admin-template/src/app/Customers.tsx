@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { Badge, Button, Card, Modal } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import { useGlobalToast } from './hooks/useGlobalToast';
 import {
   AdminEmptyState,
   AdminFilterFooter,
@@ -127,7 +128,7 @@ const initialCustomers: Customer[] = [
 ];
 
 const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
@@ -230,9 +231,9 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
     setSelectedCustomer((currentCustomer) =>
       currentCustomer && currentCustomer.id === customerId ? updater(currentCustomer) : currentCustomer
     );
-    showToast({
+    addToast({
       message,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -273,9 +274,9 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Customer export started for the current filtered segment.',
-                  variant: 'info',
+                  type: 'info',
                 })
               }
               className="bg-gray-700 text-white"
@@ -284,9 +285,9 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
             </Button>
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Customer health sync queued successfully.',
-                  variant: 'success',
+                  type: 'success',
                 })
               }
               className="bg-blue-600 text-white"
