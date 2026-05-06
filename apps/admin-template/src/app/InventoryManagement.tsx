@@ -400,9 +400,9 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Inventory snapshot export started for the current filtered view.',
-                  variant: 'info',
+                  type: 'info',
                 })
               }
               className="bg-gray-700 text-white"
@@ -411,9 +411,9 @@ const InventoryManagement: React.FC<InventoryManagementProps> = ({ isDarkMode = 
             </Button>
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Supplier sync queued successfully.',
-                  variant: 'success',
+                  type: 'success',
                 })
               }
               className="bg-blue-600 text-white"

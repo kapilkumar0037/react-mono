@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { Badge, Button, Card, Modal } from '@react-mono/ui-controls';
 import { useSearchParams } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import { useGlobalToast } from './hooks/useGlobalToast';
 import { usePageAction } from './usePageAction';
 import { createSavedView, persistSavedViews, readSavedViews, SavedView } from './savedViews';
 import AdminActionConfirm from './AdminActionConfirm';

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Badge, useToast } from '@react-mono/ui-controls';
+import { Card, Badge } from '@react-mono/ui-controls';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useSearchParams } from 'react-router-dom';
 import { usePageAction } from './usePageAction';
 import { createSavedView, persistSavedViews, readSavedViews, SavedView } from './savedViews';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface ReportsProps {
   isDarkMode?: boolean;
@@ -16,7 +17,7 @@ interface ReportViewFilters {
 }
 
 const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') ?? 'sales');
   const [dateRange, setDateRange] = useState({
@@ -71,16 +72,16 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
 
   const exportReport = (format: string) => {
     const reportName = `${activeTab}-report-${new Date().toISOString().split('T')[0]}`;
-    showToast({
+    addToast({
       message: `Exporting ${reportName} as ${format.toUpperCase()}.`,
-      variant: 'info',
+      type: 'info',
     });
   };
 
   const generateReport = () => {
-    showToast({
+    addToast({
       message: `Generated ${activeTab} report for ${dateRange.start} to ${dateRange.end}.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -133,9 +134,9 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
 
   const handleSaveView = () => {
     if (!viewName.trim()) {
-      showToast({
+      addToast({
         message: 'Name the report view before saving it.',
-        variant: 'warning',
+        type: 'warning',
       });
       return;
     }
@@ -144,9 +145,9 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
     setSavedViews(nextViews);
     persistSavedViews('reports', nextViews);
     setViewName('');
-    showToast({
+    addToast({
       message: 'Saved report view ready to share.',
-      variant: 'success',
+      type: 'success',
     });
   };
 
