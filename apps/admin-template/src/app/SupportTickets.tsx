@@ -26,7 +26,7 @@ const initialTickets: Ticket[] = [
 const TICKET_ASSIGNEES = ['Maya Singh', 'Rahul Verma', 'Ops Escalation', 'Customer Success Pod'];
 
 const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
@@ -72,36 +72,36 @@ const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) =
   const updateTicketStatus = (ticketId: string, status: TicketStatus, message: string) => {
     setTickets((currentTickets) => currentTickets.map((ticket) => (ticket.id === ticketId ? { ...ticket, status } : ticket)));
     setSelectedTicket((currentTicket) => (currentTicket && currentTicket.id === ticketId ? { ...currentTicket, status } : currentTicket));
-    showToast({ message, variant: 'success' });
+    addToast({ message, type: 'success' });
   };
 
   const runBulkTicketUpdate = (nextStatus: TicketStatus, eligibleStatuses: TicketStatus[], message: (count: number) => string) => {
     const eligibleIds = selectedTickets.filter((ticket) => eligibleStatuses.includes(ticket.status)).map((ticket) => ticket.id);
-    if (eligibleIds.length === 0) { showToast({ message: 'The selected tickets are already in a final state for that action.', variant: 'warning' }); return; }
+    if (eligibleIds.length === 0) { addToast({ message: 'The selected tickets are already in a final state for that action.', type: 'warning' }); return; }
     setTickets((currentTickets) => currentTickets.map((ticket) => (eligibleIds.includes(ticket.id) ? { ...ticket, status: nextStatus } : ticket)));
     setSelectedTicket((currentTicket) => (currentTicket && eligibleIds.includes(currentTicket.id) ? { ...currentTicket, status: nextStatus } : currentTicket));
     setSelectedTicketIds([]);
-    showToast({ message: message(eligibleIds.length), variant: 'success' });
+    addToast({ message: message(eligibleIds.length), type: 'success' });
   };
   const assignSelectedTickets = () => {
     if (selectedTickets.length === 0) return;
     setTickets((currentTickets) => currentTickets.map((ticket) => (selectedTicketIds.includes(ticket.id) ? { ...ticket, assignee: bulkAssignee, status: ticket.status === 'Open' ? 'In Progress' : ticket.status } : ticket)));
     setSelectedTicket((currentTicket) => (currentTicket && selectedTicketIds.includes(currentTicket.id) ? { ...currentTicket, assignee: bulkAssignee, status: currentTicket.status === 'Open' ? 'In Progress' : currentTicket.status } : currentTicket));
     setSelectedTicketIds([]);
-    showToast({ message: `${selectedTickets.length} ticket${selectedTickets.length === 1 ? '' : 's'} assigned to ${bulkAssignee}.`, variant: 'success' });
+    addToast({ message: `${selectedTickets.length} ticket${selectedTickets.length === 1 ? '' : 's'} assigned to ${bulkAssignee}.`, type: 'success' });
   };
   const exportSelectedTickets = () => {
     if (selectedTickets.length === 0) return;
-    showToast({ message: `Queue export prepared for ${selectedTickets.length} selected ticket${selectedTickets.length === 1 ? '' : 's'}.`, variant: 'info' });
+    addToast({ message: `Queue export prepared for ${selectedTickets.length} selected ticket${selectedTickets.length === 1 ? '' : 's'}.`, type: 'info' });
   };
 
   usePageAction('create-ticket', () => setIsCreateModalOpen(true));
 
   const createTicket = () => {
-    if (!ticketForm.subject || !ticketForm.customer || !ticketForm.email) { showToast({ message: 'Add a subject, customer, and email before creating the ticket.', variant: 'warning' }); return; }
+    if (!ticketForm.subject || !ticketForm.customer || !ticketForm.email) { addToast({ message: 'Add a subject, customer, and email before creating the ticket.', type: 'warning' }); return; }
     const nextTicketNumber = tickets.length > 0 ? Math.max(...tickets.map((ticket) => Number.parseInt(ticket.id.replace('TCK-', ''), 10))) + 1 : 4300;
     const nextTicket: Ticket = { id: `TCK-${nextTicketNumber}`, subject: ticketForm.subject, customer: ticketForm.customer, email: ticketForm.email, orderId: ticketForm.orderId || 'ORD-PENDING', createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '), status: 'Open', priority: ticketForm.priority, channel: ticketForm.channel, assignee: ticketForm.assignee };
-    setTickets((currentTickets) => [nextTicket, ...currentTickets]); setIsCreateModalOpen(false); setTicketForm({ subject: '', customer: '', email: '', orderId: '', priority: 'Medium', channel: 'Email', assignee: 'Maya Singh' }); setSelectedTicket(nextTicket); showToast({ message: `${nextTicket.id} created and assigned to ${nextTicket.assignee}.`, variant: 'success' });
+    setTickets((currentTickets) => [nextTicket, ...currentTickets]); setIsCreateModalOpen(false); setTicketForm({ subject: '', customer: '', email: '', orderId: '', priority: 'Medium', channel: 'Email', assignee: 'Maya Singh' }); setSelectedTicket(nextTicket); addToast({ message: `${nextTicket.id} created and assigned to ${nextTicket.assignee}.`, type: 'success' });
   };
 
   return (
@@ -109,14 +109,14 @@ const SupportTickets: React.FC<SupportTicketsProps> = ({ isDarkMode = false }) =
       <div className="mx-auto max-w-7xl space-y-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div><h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Support Tickets</h1><p className={`mt-0.5 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} leading-tight`}>Triage customer issues, route escalations, and keep order-related support work moving.</p></div>
-          <div className="flex flex-wrap gap-2"><Button onClick={() => setIsCreateModalOpen(true)} className="bg-blue-600 text-white">+ New Ticket</Button><Button onClick={() => showToast({ message: 'Ticket export started for the current queue.', variant: 'info' })} className="bg-gray-700 text-white">Export Queue</Button><Button onClick={() => showToast({ message: 'Support assignment sync queued successfully.', variant: 'success' })} className="bg-blue-600 text-white">Sync Assignments</Button></div>
+          <div className="flex flex-wrap gap-2"><Button onClick={() => setIsCreateModalOpen(true)} className="bg-blue-600 text-white">+ New Ticket</Button><Button onClick={() => addToast({ message: 'Ticket export started for the current queue.', type: 'info' })} className="bg-gray-700 text-white">Export Queue</Button><Button onClick={() => addToast({ message: 'Support assignment sync queued successfully.', type: 'success' })} className="bg-blue-600 text-white">Sync Assignments</Button></div>
         </div>
         <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">{stats.map((stat) => <div key={stat.label} className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg border-l-4 ${stat.tone} p-3 shadow`}><div className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-xs font-medium`}>{stat.label}</div><div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{stat.value}</div></div>)}</div>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
           <div className="mb-4 flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
             <div><p className="text-sm font-semibold text-gray-900">Saved Queue Views</p><p className="mt-1 text-sm text-gray-600">Store the current queue filters and reuse the URL anywhere.</p></div>
-            <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:justify-end"><input type="text" value={viewName} onChange={(event) => setViewName(event.target.value)} placeholder="Name this queue" className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><Button onClick={() => { if (!viewName.trim()) { showToast({ message: 'Name the queue view before saving it.', variant: 'warning' }); return; } const nextViews = [...savedViews, createSavedView(viewName.trim(), { q: searchQuery, status: statusFilter, priority: priorityFilter, channel: channelFilter })]; setSavedViews(nextViews); persistSavedViews('support-tickets', nextViews); setViewName(''); showToast({ message: 'Saved support queue view ready to share.', variant: 'success' }); }} className="bg-gray-900 text-white">Save View</Button></div>
+            <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:justify-end"><input type="text" value={viewName} onChange={(event) => setViewName(event.target.value)} placeholder="Name this queue" className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><Button onClick={() => { if (!viewName.trim()) { addToast({ message: 'Name the queue view before saving it.', type: 'warning' }); return; } const nextViews = [...savedViews, createSavedView(viewName.trim(), { q: searchQuery, status: statusFilter, priority: priorityFilter, channel: channelFilter })]; setSavedViews(nextViews); persistSavedViews('support-tickets', nextViews); setViewName(''); addToast({ message: 'Saved support queue view ready to share.', type: 'success' }); }} className="bg-gray-900 text-white">Save View</Button></div>
           </div>
           {savedViews.length > 0 && <div className="mb-4 flex flex-wrap gap-2">{savedViews.map((view) => <div key={view.id} className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-2 py-1"><button type="button" onClick={() => { setSearchQuery(view.filters.q); setStatusFilter(view.filters.status); setPriorityFilter(view.filters.priority); setChannelFilter(view.filters.channel); }} className="text-sm font-medium text-gray-700">{view.name}</button><button type="button" onClick={() => { const nextViews = savedViews.filter((savedView) => savedView.id !== view.id); setSavedViews(nextViews); persistSavedViews('support-tickets', nextViews); }} className="px-1 text-xs text-gray-500" aria-label={`Delete ${view.name}`}>x</button></div>)}</div>}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
