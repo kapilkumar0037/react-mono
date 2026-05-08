@@ -24,7 +24,6 @@ import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 import ProtectedRoute from './ProtectedRoute';
 import PermissionGuard from './PermissionGuard';
-import { ToastProvider } from '@react-mono/ui-controls';
 import {
   AuthSession,
   clearStoredSession,
@@ -141,7 +140,6 @@ function ProtectedLayout({
         onToggleDarkMode={onToggleDarkMode}
         onLogout={onLogout}
       />
-      <GlobalToastContainer isDarkMode={isDarkMode} position="bottom-right" />
     </div>
   );
 }
@@ -206,8 +204,7 @@ export function App() {
   );
 
   return (
-    <ToastProvider>
-      <GlobalToastProvider>
+    <GlobalToastProvider>
         <Router>
           <div className={`${isDarkMode ? 'dark' : ''}`}>
           <Routes>
@@ -307,10 +304,10 @@ export function App() {
             {/* Fallback */}
             <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
           </Routes>
+          <GlobalToastContainer isDarkMode={isDarkMode} position="bottom-right" />
         </div>
       </Router>
-      </GlobalToastProvider>
-    </ToastProvider>
+    </GlobalToastProvider>
   );
 }
 

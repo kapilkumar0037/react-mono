@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import AdminActionConfirm from './AdminActionConfirm';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface SettingsProps {
   isDarkMode?: boolean;
@@ -88,6 +89,7 @@ function persistStoredSettings(settings: StoredSettings): void {
 }
 
 const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
+  const { addToast } = useGlobalToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [formData, setFormData] = useState<ProfileSettings>(() => ({
     ...DEFAULT_PROFILE_SETTINGS,
@@ -171,12 +173,14 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
       profile: formData,
     });
     setSuccessMessage('Profile updated successfully!');
+    addToast({ type: 'success', message: 'Profile updated successfully.' });
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMessage('Settings saved successfully!');
+    addToast({ type: 'success', message: 'Settings saved successfully.' });
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
@@ -191,6 +195,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
     });
     setIsResetConfirmOpen(false);
     setSuccessMessage('Settings reset to defaults.');
+    addToast({ type: 'warning', message: 'Settings reset to defaults.' });
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
@@ -277,7 +282,11 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                   {formData.firstName} {formData.lastName}
                 </h3>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{formData.email}</p>
-                <button className="mt-3 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => addToast({ type: 'info', message: 'Avatar upload is ready to connect to your media service.' })}
+                  className="mt-3 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
+                >
                   Change Avatar
                 </button>
               </div>
@@ -901,6 +910,8 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
                 Reset Settings
               </button>
               <button
+                type="button"
+                onClick={() => addToast({ type: 'error', message: 'Account deletion is disabled in the template preview.' })}
                 className="px-4 py-1.5 bg-red-600 text-white rounded-lg font-medium text-sm hover:bg-red-700 dark:hover:bg-red-500 transition-colors"
               >
                 Delete Account

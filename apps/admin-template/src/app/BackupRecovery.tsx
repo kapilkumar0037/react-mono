@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Card, Modal, useToast } from '@react-mono/ui-controls';
+import { Card, Modal } from '@react-mono/ui-controls';
 import { usePageAction } from './usePageAction';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface Backup {
   id: number;
@@ -30,7 +31,7 @@ interface BackupRecoveryProps {
 }
 
 const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
   const [backups, setBackups] = useState<Backup[]>([
     {
       id: 1,
@@ -151,9 +152,9 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
     };
 
     setBackups((currentBackups) => [nextBackup, ...currentBackups]);
-    showToast({
+    addToast({
       message: 'Manual backup started. The new backup has been added to history.',
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -212,9 +213,9 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
     setBackups(backups.filter(b => b.id !== id));
 
     if (backupToDelete) {
-      showToast({
+      addToast({
         message: `${backupToDelete.name} was deleted from backup history.`,
-        variant: 'info',
+        type: 'info',
       });
     }
   };
@@ -476,9 +477,9 @@ const BackupRecovery: React.FC<BackupRecoveryProps> = ({ isDarkMode = false }) =
               <button
                 onClick={() => {
                   if (selectedBackup) {
-                    showToast({
+                    addToast({
                       message: `Restore started from ${selectedBackup.name}.`,
-                      variant: 'warning',
+                      type: 'warning',
                     });
                   }
                   setSelectedBackup(null);

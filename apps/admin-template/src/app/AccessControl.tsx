@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { useToast } from '@react-mono/ui-controls';
 import {
   AppRole,
   DEFAULT_ROLE_DEFINITIONS,
@@ -9,6 +8,7 @@ import {
   getRoleBadgeClass,
 } from './rbac';
 import { appendAuditEntry, persistRolePolicies, readStoredRolePolicies, RolePolicy } from './rbacStorage';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface AccessControlProps {
   isDarkMode?: boolean;
@@ -35,7 +35,7 @@ const AccessControl: React.FC<AccessControlProps> = ({
   currentRole,
   currentUserEmail,
 }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
   const [policies, setPolicies] = useState<RolePolicy[]>(() => readStoredRolePolicies());
 
   const roleDefinitions = useMemo(() => toDefinitionMap(policies), [policies]);
@@ -69,9 +69,9 @@ const AccessControl: React.FC<AccessControlProps> = ({
       category: 'system',
       status: 'success',
     });
-    showToast({
+    addToast({
       message: 'Access policies updated successfully.',
-      variant: 'success',
+      type: 'success',
     });
   };
 

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Card } from '@react-mono/ui-controls';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface SystemHealthProps {
   isDarkMode?: boolean;
 }
 
 const SystemHealth: React.FC<SystemHealthProps> = ({ isDarkMode = false }) => {
+  const { addToast } = useGlobalToast();
   const [timeRange, setTimeRange] = useState('24h');
 
   // Mock system health data
@@ -104,7 +106,10 @@ const SystemHealth: React.FC<SystemHealthProps> = ({ isDarkMode = false }) => {
           </div>
           <select
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
+            onChange={(e) => {
+              setTimeRange(e.target.value);
+              addToast({ type: 'info', message: `System health range changed to ${e.target.options[e.target.selectedIndex].text}.` });
+            }}
             className={`px-4 py-2 rounded border ${isDarkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
           >
             <option value="1h">Last 1 hour</option>

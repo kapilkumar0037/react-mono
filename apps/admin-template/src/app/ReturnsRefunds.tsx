@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { Badge, Button, Card, Modal } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 type ReturnStatus =
   | 'Requested'
@@ -120,7 +121,7 @@ const initialCases: ReturnCase[] = [
 ];
 
 const ReturnsRefunds: React.FC<ReturnsRefundsProps> = ({ isDarkMode = false }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [cases, setCases] = useState<ReturnCase[]>(initialCases);
   const [statusFilter, setStatusFilter] = useState<ReturnStatus | 'all'>('all');
@@ -205,9 +206,9 @@ const ReturnsRefunds: React.FC<ReturnsRefundsProps> = ({ isDarkMode = false }) =
     setSelectedCase((currentCase) =>
       currentCase && currentCase.id === caseId ? { ...currentCase, status } : currentCase
     );
-    showToast({
+    addToast({
       message,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -224,9 +225,9 @@ const ReturnsRefunds: React.FC<ReturnsRefundsProps> = ({ isDarkMode = false }) =
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Return export started for the current filtered view.',
-                  variant: 'info',
+                  type: 'info',
                 })
               }
               className="bg-gray-700 text-white"
@@ -235,9 +236,9 @@ const ReturnsRefunds: React.FC<ReturnsRefundsProps> = ({ isDarkMode = false }) =
             </Button>
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Refund reconciliation sync queued successfully.',
-                  variant: 'success',
+                  type: 'success',
                 })
               }
               className="bg-blue-600 text-white"

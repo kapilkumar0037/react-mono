@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { APP_ROLES, AppRole, getDefaultRoleForEmail } from './rbac';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface LoginProps {
   isDarkMode?: boolean;
@@ -7,6 +8,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
+  const { addToast } = useGlobalToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -23,18 +25,21 @@ const Login: React.FC<LoginProps> = ({ isDarkMode = false, onLogin }) => {
     setTimeout(() => {
       if (!email || !password) {
         setError('Please fill in all fields');
+        addToast({ type: 'warning', message: 'Please fill in all fields.' });
         setLoading(false);
         return;
       }
 
       if (!email.includes('@')) {
         setError('Please enter a valid email address');
+        addToast({ type: 'error', message: 'Please enter a valid email address.' });
         setLoading(false);
         return;
       }
 
       // Simulate successful login
       onLogin?.({ email, password, rememberMe, role });
+      addToast({ type: 'success', message: `Signed in as ${email}.` });
       setLoading(false);
     }, 500);
   };

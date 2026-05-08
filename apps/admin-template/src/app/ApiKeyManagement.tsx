@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card } from '@react-mono/ui-controls';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface ApiKey {
   id: string;
@@ -25,6 +26,7 @@ interface ApiKeyManagementProps {
 }
 
 const ApiKeyManagement: React.FC<ApiKeyManagementProps> = ({ isDarkMode = false }) => {
+  const { addToast } = useGlobalToast();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([
     {
       id: 'key_1',
@@ -140,39 +142,54 @@ const ApiKeyManagement: React.FC<ApiKeyManagementProps> = ({ isDarkMode = false 
   };
 
   const copyToClipboard = (key: string, keyId: string) => {
-    navigator.clipboard.writeText(key);
-    setShowCopyNotification(keyId);
-    setTimeout(() => setShowCopyNotification(null), 2000);
+    navigator.clipboard
+      .writeText(key)
+      .then(() => {
+        setShowCopyNotification(keyId);
+        addToast({ type: 'success', message: 'API key copied to clipboard.' });
+        setTimeout(() => setShowCopyNotification(null), 2000);
+      })
+      .catch(() => {
+        addToast({ type: 'error', message: 'Could not copy API key. Try selecting it manually.' });
+      });
   };
 
   const handleCreateKey = () => {
-    if (formData.name.trim()) {
-      const newKey: ApiKey = {
-        id: `key_${Date.now()}`,
-        name: formData.name,
-        key: `sk_test_${Math.random().toString(36).substring(2)}`,
-        displayKey: `sk_test_...${Math.random().toString(36).substring(2, 6)}`,
-        created: new Date().toISOString().split('T')[0],
-        lastUsed: 'Never',
-        status: 'active',
-        expiresAt: formData.expiresIn === 'never' ? 'Never' : '2025-02-27',
-        permissions: formData.permissions,
-        usageCount: 0,
-      };
-      setApiKeys([newKey, ...apiKeys]);
-      setFormData({ name: '', expiresIn: '1year', permissions: ['read'] });
-      setShowCreateForm(false);
+    if (!formData.name.trim()) {
+      addToast({ type: 'warning', message: 'Add a key name before creating the API key.' });
+      return;
     }
+
+    const newKey: ApiKey = {
+      id: `key_${Date.now()}`,
+      name: formData.name,
+      key: `sk_test_${Math.random().toString(36).substring(2)}`,
+      displayKey: `sk_test_...${Math.random().toString(36).substring(2, 6)}`,
+      created: new Date().toISOString().split('T')[0],
+      lastUsed: 'Never',
+      status: 'active',
+      expiresAt: formData.expiresIn === 'never' ? 'Never' : '2025-02-27',
+      permissions: formData.permissions,
+      usageCount: 0,
+    };
+    setApiKeys([newKey, ...apiKeys]);
+    setFormData({ name: '', expiresIn: '1year', permissions: ['read'] });
+    setShowCreateForm(false);
+    addToast({ type: 'success', message: `${newKey.name} API key created.` });
   };
 
   const revokeKey = (id: string) => {
+    const apiKey = apiKeys.find((key) => key.id === id);
     setApiKeys(apiKeys.map(k => k.id === id ? { ...k, status: 'revoked' as const } : k));
     setSelectedKey(null);
+    addToast({ type: 'warning', message: apiKey ? `${apiKey.name} API key revoked.` : 'API key revoked.' });
   };
 
   const deleteKey = (id: string) => {
+    const apiKey = apiKeys.find((key) => key.id === id);
     setApiKeys(apiKeys.filter(k => k.id !== id));
     setSelectedKey(null);
+    addToast({ type: 'info', message: apiKey ? `${apiKey.name} API key deleted.` : 'API key deleted.' });
   };
 
   return (

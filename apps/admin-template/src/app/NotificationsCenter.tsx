@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface Notification {
   id: number;
@@ -17,6 +18,7 @@ interface NotificationsCenterProps {
 }
 
 const NotificationsCenter: React.FC<NotificationsCenterProps> = ({ isDarkMode = false }) => {
+  const { addToast } = useGlobalToast();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [notifications, setNotifications] = useState<Notification[]>([
     {
@@ -128,21 +130,31 @@ const NotificationsCenter: React.FC<NotificationsCenterProps> = ({ isDarkMode = 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const markAsRead = (id: number) => {
+    const notification = notifications.find((item) => item.id === id);
     setNotifications(notifications.map(n => 
       n.id === id ? { ...n, read: true } : n
     ));
+    if (notification && !notification.read) {
+      addToast({ type: 'success', message: `"${notification.title}" marked as read.` });
+    }
   };
 
   const markAllAsRead = () => {
+    const nextUnreadCount = notifications.filter(n => !n.read).length;
     setNotifications(notifications.map(n => ({ ...n, read: true })));
+    addToast({ type: 'success', message: `${nextUnreadCount} notification${nextUnreadCount === 1 ? '' : 's'} marked as read.` });
   };
 
   const deleteNotification = (id: number) => {
+    const notification = notifications.find((item) => item.id === id);
     setNotifications(notifications.filter(n => n.id !== id));
+    addToast({ type: 'info', message: notification ? `"${notification.title}" dismissed.` : 'Notification dismissed.' });
   };
 
   const deleteAll = () => {
+    const deletedCount = notifications.length;
     setNotifications([]);
+    addToast({ type: 'warning', message: `${deletedCount} notification${deletedCount === 1 ? '' : 's'} deleted.` });
   };
 
   const getTypeIcon = (type: string) => {

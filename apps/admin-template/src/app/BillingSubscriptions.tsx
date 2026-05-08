@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { Badge, Button, Card, Modal } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import AdminActionConfirm from './AdminActionConfirm';
@@ -11,6 +11,7 @@ import {
   AdminRelatedLinks,
 } from './AdminPageSections';
 import { useSortableData } from './useSortableData';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 type SubscriptionStatus = 'Active' | 'Trial' | 'Past Due' | 'Cancelled';
 type BillingPlan = 'Starter' | 'Growth' | 'Enterprise';
@@ -123,7 +124,7 @@ const initialAccounts: SubscriptionAccount[] = [
 ];
 
 const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode = false }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [accounts, setAccounts] = useState<SubscriptionAccount[]>(initialAccounts);
@@ -259,9 +260,9 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
     setSelectedAccount((currentAccount) =>
       currentAccount && currentAccount.id === accountId ? updater(currentAccount) : currentAccount
     );
-    showToast({
+    addToast({
       message,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -347,9 +348,9 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
       )
     );
     setSelectedAccountIds([]);
-    showToast({
+    addToast({
       message: `${selectedAccounts.length} subscription${selectedAccounts.length === 1 ? '' : 's'} updated after payment retry.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -366,9 +367,9 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
       )
     );
     setSelectedAccountIds([]);
-    showToast({
+    addToast({
       message: `${selectedAccounts.length} trial subscription${selectedAccounts.length === 1 ? '' : 's'} extended.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -385,9 +386,9 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
       )
     );
     setSelectedAccountIds([]);
-    showToast({
+    addToast({
       message: `${selectedAccounts.length} subscription${selectedAccounts.length === 1 ? '' : 's'} upgraded.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -404,9 +405,9 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Billing export started for the current filtered view.',
-                  variant: 'info',
+                  type: 'info',
                 })
               }
               className="bg-gray-700 text-white"
@@ -415,9 +416,9 @@ const BillingSubscriptions: React.FC<BillingSubscriptionsProps> = ({ isDarkMode 
             </Button>
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Invoice sync queued successfully.',
-                  variant: 'success',
+                  type: 'success',
                 })
               }
               className="bg-blue-600 text-white"

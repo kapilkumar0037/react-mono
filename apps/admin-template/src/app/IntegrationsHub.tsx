@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Badge, Button, Card, Modal, useToast } from '@react-mono/ui-controls';
+import { Badge, Button, Card, Modal } from '@react-mono/ui-controls';
 import { useNavigate } from 'react-router-dom';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import AdminActionConfirm from './AdminActionConfirm';
@@ -11,6 +11,7 @@ import {
   AdminRelatedLinks,
 } from './AdminPageSections';
 import { useSortableData } from './useSortableData';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 type IntegrationStatus = 'Connected' | 'Needs Attention' | 'Disconnected' | 'Syncing';
 type IntegrationCategory = 'Payments' | 'Communication' | 'Commerce' | 'Analytics';
@@ -116,7 +117,7 @@ const initialIntegrations: Integration[] = [
 ];
 
 const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false }) => {
-  const { showToast } = useToast();
+  const { addToast } = useGlobalToast();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [integrations, setIntegrations] = useState<Integration[]>(initialIntegrations);
@@ -261,9 +262,9 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
         ? updater(currentIntegration)
         : currentIntegration
     );
-    showToast({
+    addToast({
       message,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -350,9 +351,9 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
       )
     );
     setSelectedIntegrationIds([]);
-    showToast({
+    addToast({
       message: `${selectedIntegrations.length} integration${selectedIntegrations.length === 1 ? '' : 's'} reconnected.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -370,9 +371,9 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
       )
     );
     setSelectedIntegrationIds([]);
-    showToast({
+    addToast({
       message: `${selectedIntegrations.length} integration${selectedIntegrations.length === 1 ? '' : 's'} moved into syncing.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -385,9 +386,9 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
       )
     );
     setSelectedIntegrationIds([]);
-    showToast({
+    addToast({
       message: `${selectedIntegrations.length} integration${selectedIntegrations.length === 1 ? '' : 's'} paused for review.`,
-      variant: 'success',
+      type: 'success',
     });
   };
 
@@ -404,9 +405,9 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Integration audit export started for the current view.',
-                  variant: 'info',
+                  type: 'info',
                 })
               }
               className="bg-gray-700 text-white"
@@ -415,9 +416,9 @@ const IntegrationsHub: React.FC<IntegrationsHubProps> = ({ isDarkMode = false })
             </Button>
             <Button
               onClick={() =>
-                showToast({
+                addToast({
                   message: 'Global connection test queued successfully.',
-                  variant: 'success',
+                  type: 'success',
                 })
               }
               className="bg-blue-600 text-white"

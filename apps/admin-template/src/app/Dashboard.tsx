@@ -2,12 +2,14 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface DashboardProps {
   isDarkMode?: boolean;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
+  const { addToast } = useGlobalToast();
   const [activeChartTab, setActiveChartTab] = useState<'sales' | 'revenue' | 'customers'>('sales');
   const [selectedDateFilter, setSelectedDateFilter] = useState<'today' | 'week' | 'month' | 'year'>('month');
   const [searchQuery] = useSyncedSearchQuery();
@@ -248,8 +250,13 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
   };
 
   const exportOrdersToCSV = () => {
+    if (filteredOrdersAdvanced.length === 0) {
+      addToast({ type: 'warning', message: 'No orders match the current filters to export.' });
+      return;
+    }
+
     const headers = ['id', 'customer', 'amount', 'status', 'date'];
-    const dataToExport = filteredOrders.map(order => ({
+    const dataToExport = filteredOrdersAdvanced.map(order => ({
       id: order.id,
       customer: order.customer,
       amount: order.amount,
@@ -258,11 +265,17 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
     }));
     const csv = convertToCSV(dataToExport, headers);
     downloadCSV(csv, `orders_${selectedDateFilter}_${new Date().toISOString().split('T')[0]}.csv`);
+    addToast({ type: 'success', message: `${dataToExport.length} order${dataToExport.length === 1 ? '' : 's'} exported.` });
   };
 
   const exportCustomersToCSV = () => {
+    if (filteredCustomersAdvanced.length === 0) {
+      addToast({ type: 'warning', message: 'No customers match the current filters to export.' });
+      return;
+    }
+
     const headers = ['name', 'revenue', 'orders', 'lastOrder', 'status'];
-    const dataToExport = filteredCustomers.map(customer => ({
+    const dataToExport = filteredCustomersAdvanced.map(customer => ({
       name: customer.name,
       revenue: customer.revenue,
       orders: customer.orders,
@@ -271,6 +284,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
     }));
     const csv = convertToCSV(dataToExport, headers);
     downloadCSV(csv, `customers_${new Date().toISOString().split('T')[0]}.csv`);
+    addToast({ type: 'success', message: `${dataToExport.length} customer${dataToExport.length === 1 ? '' : 's'} exported.` });
   };
 
   // Sorting function
