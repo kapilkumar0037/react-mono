@@ -12,7 +12,6 @@ interface GlobalToastContainerProps {
  * Place this at the top level of your app (e.g., in ProtectedLayout)
  */
 export const GlobalToastContainer: React.FC<GlobalToastContainerProps> = ({
-  isDarkMode = false,
   position = 'bottom-right',
 }) => {
   const { toasts, removeToast } = useGlobalToast();
@@ -24,10 +23,10 @@ export const GlobalToastContainer: React.FC<GlobalToastContainerProps> = ({
     'bottom-left': 'bottom-4 left-4',
   };
 
-  const getToastVariant = (type: string): 'success' | 'danger' | 'warning' | 'info' => {
-    const variantMap: Record<string, 'success' | 'danger' | 'warning' | 'info'> = {
+  const getToastVariant = (type: string): 'success' | 'error' | 'warning' | 'info' => {
+    const variantMap: Record<string, 'success' | 'error' | 'warning' | 'info'> = {
       success: 'success',
-      error: 'danger',
+      error: 'error',
       warning: 'warning',
       info: 'info',
     };
@@ -49,32 +48,12 @@ export const GlobalToastContainer: React.FC<GlobalToastContainerProps> = ({
           onClick={() => removeToast(toast.id)}
         >
           <Toast
-            show={true}
+            id={toast.id}
+            message={toast.message}
             variant={getToastVariant(toast.type)}
-            onClose={() => removeToast(toast.id)}
-            isDarkMode={isDarkMode}
-            autohide={true}
-            delay={toast.duration || 5000}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <span>{toast.message}</span>
-              {toast.action && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toast.action!.onClick();
-                  }}
-                  className={`ml-2 px-3 py-1 text-xs font-medium rounded whitespace-nowrap ${
-                    isDarkMode
-                      ? 'bg-white bg-opacity-20 hover:bg-opacity-30 text-white'
-                      : 'bg-black bg-opacity-10 hover:bg-opacity-20 text-gray-900'
-                  }`}
-                >
-                  {toast.action.label}
-                </button>
-              )}
-            </div>
-          </Toast>
+            duration={toast.duration || 5000}
+            onClose={removeToast}
+          />
         </div>
       ))}
     </div>

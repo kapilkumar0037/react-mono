@@ -59,6 +59,19 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const canManageUsers = hasPermission(currentRole, 'users.manage', definitions);
   const canManageRoles = hasPermission(currentRole, 'rbac.manage', definitions);
 
+  const getStatusColor = (status: DirectoryUser['status']) => {
+    switch (status) {
+      case 'Active':
+        return 'success';
+      case 'Suspended':
+        return 'warning';
+      case 'Inactive':
+        return 'secondary';
+      default:
+        return 'secondary';
+    }
+  };
+
   useEffect(() => {
     persistUsers(users);
   }, [users]);
@@ -273,6 +286,13 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
       type: 'success', 
       message: 'Saved view created' 
     });
+  };
+
+  const applySavedView = (filters: UserViewFilters) => {
+    setSearchQuery(filters.q);
+    setFilterRole(filters.role);
+    setFilterStatus(filters.status);
+    setCurrentPage(1);
   };
 
   return (

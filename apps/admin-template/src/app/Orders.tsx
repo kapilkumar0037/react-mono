@@ -3,7 +3,6 @@ import { Badge, Button, Card, Modal } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import AdminActionConfirm from './AdminActionConfirm';
 import { useGlobalToast } from './hooks/useGlobalToast';
-import { useExportAction } from './hooks/useActionFeedback';
 import { EmptyState } from './components/EmptyState';
 
 type OrderStatus =
@@ -49,7 +48,6 @@ const initialOrders: Order[] = [
 
 const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
   const { addToast } = useGlobalToast();
-  const exportAction = useExportAction('Orders');
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
@@ -149,14 +147,12 @@ const Orders: React.FC<OrdersProps> = ({ isDarkMode = false }) => {
     const filteredIds = filteredOrders.map((order) => order.id);
     setSelectedOrderIds((ids) => (filteredIds.every((id) => ids.includes(id)) ? ids.filter((id) => !filteredIds.includes(id)) : Array.from(new Set([...ids, ...filteredIds]))));
   };
-  const exportSelectedOrders = async () => {
+  const exportSelectedOrders = () => {
     if (selectedOrders.length === 0) return;
-    await exportAction.execute(
-      () => new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        successMessage: `Export package prepared for ${selectedOrders.length} selected order${selectedOrders.length === 1 ? '' : 's'}`,
-      }
-    );
+    addToast({
+      type: 'success',
+      message: `Export package prepared for ${selectedOrders.length} selected order${selectedOrders.length === 1 ? '' : 's'}`,
+    });
   };
 
   return (

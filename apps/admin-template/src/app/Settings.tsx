@@ -195,7 +195,7 @@ const Settings: React.FC<SettingsProps> = ({ isDarkMode = false }) => {
     });
     setIsResetConfirmOpen(false);
     setSuccessMessage('Settings reset to defaults.');
-    addToast({ type: 'warning', message: 'Settings reset to defaults.' });
+    addToast({ type: 'warning', message: 'All settings were reset to defaults.' });
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
