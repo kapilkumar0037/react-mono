@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import { useGlobalToast } from './hooks/useGlobalToast';
 
 interface DashboardProps {
@@ -10,932 +8,554 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
   const { addToast } = useGlobalToast();
-  const [activeChartTab, setActiveChartTab] = useState<'sales' | 'revenue' | 'customers'>('sales');
-  const [selectedDateFilter, setSelectedDateFilter] = useState<'today' | 'week' | 'month' | 'year'>('month');
-  const [searchQuery] = useSyncedSearchQuery();
+  const [showAddSchedule, setShowAddSchedule] = useState(false);
 
-  // Pagination state
-  const [ordersPage, setOrdersPage] = useState(1);
-  const [customersPage, setCustomersPage] = useState(1);
-  const [productsPage, setProductsPage] = useState(1);
-  const itemsPerPage = 5;
+  // User profile
+  const userProfile = {
+    name: 'Adrian',
+    role: 'Manager',
+    avatar: '👤',
+  };
 
-  // Sorting state
-  const [ordersSortBy, setOrdersSortBy] = useState<'date' | 'amount'>('date');
-  const [ordersSortDir, setOrdersSortDir] = useState<'asc' | 'desc'>('desc');
-  const [customersSortBy, setCustomersSortBy] = useState<'revenue' | 'orders'>('revenue');
-  const [customersSortDir, setCustomersSortDir] = useState<'asc' | 'desc'>('desc');
-  const [productsSortBy, setProductsSortBy] = useState<'sales' | 'revenue'>('sales');
-  const [productsSortDir, setProductsSortDir] = useState<'asc' | 'desc'>('desc');
+  // Metric cards
+  const metrics = [
+    { label: 'Attendance Overview', value: '120/154', change: '+2.3%', color: 'border-orange-500', bgColor: 'bg-orange-50 dark:bg-orange-900/20' },
+    { label: 'Total H/O Project\'s', value: '90/125', change: '+2.3%', color: 'border-teal-500', bgColor: 'bg-teal-50 dark:bg-teal-900/20' },
+    { label: 'Total No of Clients', value: '89/86', change: '+12.3%', color: 'border-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-900/20' },
+    { label: 'Total No of Tasks', value: '252/28', change: '+41.2%', color: 'border-pink-500', bgColor: 'bg-pink-50 dark:bg-pink-900/20' },
+  ];
 
-  // Advanced filter state
-  const [showOrderFilters, setShowOrderFilters] = useState(false);
-  const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
-  const [orderAmountMin, setOrderAmountMin] = useState('');
-  const [orderAmountMax, setOrderAmountMax] = useState('');
+  // Employees by department
+  const departmentData = [
+    { name: 'HR', value: 45 },
+    { name: 'Development', value: 120 },
+    { name: 'Management', value: 35 },
+    { name: 'Testing', value: 28 },
+    { name: 'Sales', value: 52 },
+  ];
 
-  const [showCustomerFilters, setShowCustomerFilters] = useState(false);
-  const [customerStatusFilter, setCustomerStatusFilter] = useState<string>('all');
-  const [customerRevenueMin, setCustomerRevenueMin] = useState('');
-  const [customerRevenueMax, setCustomerRevenueMax] = useState('');
+  // Employee status
+  const employeeStatus = [
+    { name: 'Present', value: 154, color: '#10b981' },
+    { name: 'Absent', value: 21, color: '#ef4444' },
+    { name: 'Permission', value: 12, color: '#f59e0b' },
+    { name: 'Leave', value: 4, color: '#6b7280' },
+  ];
 
-  const [showProductFilters, setShowProductFilters] = useState(false);
-  const [productSalesMin, setProductSalesMin] = useState('');
-  const [productSalesMax, setProductSalesMax] = useState('');
+  // Clock in/out employees
+  const clockInOutData = [
+    { name: 'Daniel Estella', dept: 'UI/UX Designer', status: '✓ IN', time: '09:30 AM', badge: 'Present' },
+    { name: 'Douglas Marting', dept: 'Tech Developer', status: '✓ IN', time: '08:45 AM', badge: 'Present' },
+    { name: 'Brian Villaobs', dept: 'Tech Developer', status: '✓ IN', time: '08:15 AM', badge: 'Present' },
+    { name: 'Anthony Lewis', dept: 'Finance', status: '✗ OUT', time: '05:30 PM', badge: 'Out', danger: true },
+  ];
 
-  // Mock data for last 12 months
+  // Jobs applicants
+  const jobApplicants = [
+    { name: 'Brian Villaobs', position: 'Exp: 0+ Years • USA', status: 'Interviewed', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
+    { name: 'Anthony Lewis', position: 'Exp: 0+ Years • USA', status: 'Follow-Update', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' },
+    { name: 'Stephen Peorit', position: 'Exp: 0+ Years • USA', status: 'Rejected-Offer', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300' },
+    { name: 'Douglas Marting', position: 'Exp: 0+ Years • USA', status: 'Rejected-Offer', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300' },
+  ];
+
+  // Employees table
+  const employees = [
+    { name: 'Anthony Lewis', dept: 'Finance', status: 'Active' },
+    { name: 'Brian Villaobs', dept: 'Tech Developer', status: 'Active' },
+    { name: 'Stephen Peorit', dept: 'Marketing', status: 'Active' },
+    { name: 'Douglas Marting', dept: 'Manager', status: 'Active' },
+    { name: 'Coronie Walters', dept: 'UI/UX Design', status: 'Active' },
+  ];
+
+  // Todo items
+  const todoItems = [
+    { id: 1, title: 'Add Holidays', completed: false },
+    { id: 2, title: 'Add Meeting to Client', completed: false },
+    { id: 3, title: 'Chat with Adrian', completed: false },
+    { id: 4, title: 'Management Call', completed: false },
+    { id: 5, title: 'Add Payroll', completed: false },
+  ];
+
+  // Sales overview
   const salesData = [
-    { month: 'Jan', sales: 4000, revenue: 2400 },
-    { month: 'Feb', sales: 3000, revenue: 1398 },
-    { month: 'Mar', sales: 2000, revenue: 9800 },
-    { month: 'Apr', sales: 2780, revenue: 3908 },
-    { month: 'May', sales: 1890, revenue: 4800 },
-    { month: 'Jun', sales: 2390, revenue: 3800 },
-    { month: 'Jul', sales: 3490, revenue: 4300 },
-    { month: 'Aug', sales: 4200, revenue: 5100 },
-    { month: 'Sep', sales: 3800, revenue: 4500 },
-    { month: 'Oct', sales: 4100, revenue: 5200 },
-    { month: 'Nov', sales: 4900, revenue: 6100 },
-    { month: 'Dec', sales: 5200, revenue: 6800 },
+    { month: 'Jan', Income: 40000, Expenses: 24000 },
+    { month: 'Feb', Income: 30000, Expenses: 13980 },
+    { month: 'Mar', Income: 20000, Expenses: 9800 },
+    { month: 'Apr', Income: 27800, Expenses: 39080 },
+    { month: 'May', Income: 18900, Expenses: 48000 },
+    { month: 'Jun', Income: 23900, Expenses: 38000 },
+    { month: 'Jul', Income: 34900, Expenses: 43000 },
+    { month: 'Aug', Income: 42000, Expenses: 51000 },
+    { month: 'Sep', Income: 38000, Expenses: 45000 },
+    { month: 'Oct', Income: 41000, Expenses: 52000 },
+    { month: 'Nov', Income: 49000, Expenses: 61000 },
+    { month: 'Dec', Income: 52000, Expenses: 68000 },
   ];
 
-  // Mock data for sales by category
-  const salesByCategory = [
-    { name: 'Electronics', value: 4000 },
-    { name: 'Clothing', value: 3000 },
-    { name: 'Home & Garden', value: 2800 },
-    { name: 'Sports', value: 2200 },
-    { name: 'Books', value: 1800 },
+  // Invoices
+  const invoices = [
+    { id: 'Redesign Website', amount: '$4800', status: 'Unpaid', color: 'text-red-600' },
+    { id: 'Module Completion', amount: '$1875', status: 'Unpaid', color: 'text-red-600' },
+    { id: 'Change on Erp Module', amount: '$2000 + ... LLP', status: 'Unpaid', color: 'text-red-600' },
+    { id: 'Changes on the Board', amount: '$1345', status: 'Unpaid', color: 'text-red-600' },
+    { id: 'Hospital Management', amount: '$6858', status: 'Paid', color: 'text-green-600' },
   ];
 
-  // Colors for pie chart
-  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-
-  // Mock recent orders data
-  const recentOrders = [
-    { id: '#ORD001', customer: 'John Doe', amount: '$1,234.50', status: 'Completed', date: '2025-01-28' },
-    { id: '#ORD002', customer: 'Jane Smith', amount: '$2,345.00', status: 'Pending', date: '2025-01-27' },
-    { id: '#ORD003', customer: 'Mike Johnson', amount: '$890.25', status: 'Shipped', date: '2025-01-26' },
+  // Projects
+  const projects = [
+    { id: 'PRO-001', name: 'Office Management App', team: 3, hours: '120/250 Hrs', deadline: '12/09/2025', status: 'High', color: 'text-red-600' },
+    { id: 'PRO-002', name: 'Clinic Management', team: 3, hours: '250/250 Hrs', deadline: '26/10/2025', status: 'Medium', color: 'text-yellow-600' },
+    { id: 'PRO-003', name: 'Educational Platform', team: 3, hours: '80/120 Hrs', deadline: '18/02/2025', status: 'High', color: 'text-red-600' },
+    { id: 'PRO-004', name: 'Chat & Call Mobile App', team: 3, hours: '40/150 Hrs', deadline: '17/10/2025', status: 'Medium', color: 'text-yellow-600' },
+    { id: 'PRO-005', name: 'Chat & Call Mobile App', team: 3, hours: '100/300 Hrs', deadline: '17/10/2025', status: 'Medium', color: 'text-yellow-600' },
   ];
 
-  // Mock alerts data
-  const alerts = [
-    { id: 1, message: 'High inventory levels in Electronics', type: 'warning', time: '5 min ago' },
-    { id: 2, message: 'New customer milestone: 1000 users reached!', type: 'success', time: '1 hour ago' },
-    { id: 3, message: 'Payment processing delay detected', type: 'error', time: '2 hours ago' },
+  // Tasks statistics
+  const tasksStats = [
+    { name: 'Ongoing', value: 24, color: '#fbbf24' },
+    { name: 'On Hold', value: 10, color: '#3b82f6' },
+    { name: 'Overdue', value: 16, color: '#8b5cf6' },
+    { name: 'Completed', value: 40, color: '#10b981' },
   ];
 
-  // KPI data
-  const kpis = [
-    { label: 'Growth', value: '+12.5%', change: 'up', color: 'text-green-600' },
-    { label: 'Revenue Trend', value: '+$8.2K', change: 'up', color: 'text-green-600' },
-    { label: 'Conversion Rate', value: '3.2%', change: 'down', color: 'text-red-600' },
+  // Schedules
+  const schedules = [
+    { title: 'Slot Booking', date: 'Thu, 16 Feb 2025', time: '09:00 AM - 10:00 AM' },
+    { title: 'Interview Candidates - IOS Developer', date: 'Wed, 26 Feb 2025', time: '10:00 AM - 02:00 AM' },
   ];
 
-  // Mock data for customer growth
-  const customerGrowthData = [
-    { month: 'Jan', customers: 400 },
-    { month: 'Feb', customers: 520 },
-    { month: 'Mar', customers: 680 },
-    { month: 'Apr', customers: 790 },
-    { month: 'May', customers: 950 },
-    { month: 'Jun', customers: 1100 },
-    { month: 'Jul', customers: 1320 },
-    { month: 'Aug', customers: 1580 },
-    { month: 'Sep', customers: 1750 },
-    { month: 'Oct', customers: 1920 },
-    { month: 'Nov', customers: 2100 },
-    { month: 'Dec', customers: 2340 },
+  // Recent activities
+  const recentActivities = [
+    { user: 'Douglas Marting', action: 'Posted New Project HEME Dashboard', time: '06:30 PM' },
+    { user: 'Brian Villaobs', action: 'Commented on Updated Document', time: '06:30 PM' },
+    { user: 'Harvey Smith', action: 'Approved Task for Module Tasks', time: '06:30 PM' },
+    { user: 'Eliot Murray', action: 'Requesting Access for Module Tasks', time: '06:30 PM' },
   ];
 
-  // Mock top products data
-  const topProducts = [
-    { id: 1, name: 'Wireless Headphones', sales: 1250, revenue: '$45,000' },
-    { id: 2, name: 'Smart Watch', sales: 980, revenue: '$38,500' },
-    { id: 3, name: 'USB-C Cable', sales: 2150, revenue: '$12,900' },
-    { id: 4, name: 'Portable Charger', sales: 890, revenue: '$16,410' },
-    { id: 5, name: 'Screen Protector', sales: 3200, revenue: '$9,600' },
+  // Birthdays
+  const birthdays = [
+    { name: 'Andrew Jermia', date: '28 Jun 2025', status: 'Today' },
+    { name: 'Denis Walters', date: '28 Jun 2025', status: 'Tomorrow' },
+    { name: 'Stephen Peorit', date: '28 Jun 2025', status: 'Soon' },
   ];
 
-  // Mock system health data
-  const systemHealth = [
-    { name: 'Server Uptime', status: 'healthy', value: '99.9%', icon: '✓' },
-    { name: 'Database', status: 'healthy', value: 'Online', icon: '✓' },
-    { name: 'API Response', status: 'healthy', value: '45ms', icon: '✓' },
-    { name: 'Storage', status: 'warning', value: '78%', icon: '⚠' },
-  ];
-
-  // Mock footer stats
-  const footerStats = [
-    { label: 'Total Revenue', value: '$892,450', icon: '💰' },
-    { label: 'Total Customers', value: '12,340', icon: '👥' },
-    { label: 'Avg Order Value', value: '$127.50', icon: '💵' },
-    { label: 'Retention Rate', value: '87.5%', icon: '📈' },
-  ];
-
-  // Mock top customers data
-  const topCustomers = [
-    { id: 1, name: 'Acme Corporation', revenue: '$45,230', orders: 12, lastOrder: '2025-01-28', status: 'Active' },
-    { id: 2, name: 'Tech Solutions Inc', revenue: '$38,900', orders: 9, lastOrder: '2025-01-25', status: 'Active' },
-    { id: 3, name: 'Global Trading Ltd', revenue: '$32,450', orders: 8, lastOrder: '2025-01-20', status: 'Active' },
-    { id: 4, name: 'Prime Retail Co', revenue: '$28,600', orders: 7, lastOrder: '2025-01-15', status: 'Inactive' },
-    { id: 5, name: 'NextGen Ventures', revenue: '$22,300', orders: 5, lastOrder: '2025-01-10', status: 'Active' },
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Completed':
-        return 'bg-green-100 text-green-800';
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Shipped':
-        return 'bg-blue-100 text-blue-800';
-      case 'Processing':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const handleTodoToggle = (id: number) => {
+    addToast({ type: 'success', message: 'Todo updated successfully' });
   };
-
-  const getAlertColor = (type: string) => {
-    switch (type) {
-      case 'success':
-        return 'bg-green-50 dark:bg-green-900 border-l-4 border-green-400 dark:border-green-400';
-      case 'warning':
-        return 'bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 dark:border-yellow-400';
-      case 'error':
-        return 'bg-red-50 dark:bg-red-900 border-l-4 border-red-400 dark:border-red-400';
-      default:
-        return 'bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 dark:border-blue-400';
-    }
-  };
-
-
-
-  // Filtering functions
-  const getFilteredData = (data: any[], filterType: string) => {
-    const now = new Date();
-    let startDate = new Date();
-
-    switch (filterType) {
-      case 'today':
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'week':
-        startDate.setDate(now.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(now.getMonth() - 1);
-        break;
-      case 'year':
-        startDate.setFullYear(now.getFullYear() - 1);
-        break;
-      default:
-        return data;
-    }
-
-    return data.filter((item: any) => {
-      const itemDate = new Date(item.date);
-      return itemDate >= startDate && itemDate <= now;
-    });
-  };
-
-  const filteredOrders = getFilteredData(recentOrders, selectedDateFilter).filter((order: any) =>
-    order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredCustomers = topCustomers.filter((customer: any) =>
-    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const getFilteredChartData = () => {
-    if (selectedDateFilter === 'today') {
-      // Show 24 hours
-      return salesData;
-    } else if (selectedDateFilter === 'week') {
-      return salesData.slice(-7);
-    } else if (selectedDateFilter === 'month') {
-      return salesData;
-    } else if (selectedDateFilter === 'year') {
-      return salesData;
-    }
-
-    return salesData;
-  };
-
-  const filteredChartData = getFilteredChartData();
-
-  // CSV Export functions
-  const convertToCSV = (data: any[], headers: string[]) => {
-    const headerRow = headers.join(',');
-    const dataRows = data.map((row) =>
-      headers.map((header) => {
-        const value = row[header];
-        // Escape quotes and wrap in quotes if contains comma
-        return typeof value === 'string' && value.includes(',') ? `"${value.replace(/"/g, '""')}"` : value;
-      }).join(',')
-    );
-    return [headerRow, ...dataRows].join('\n');
-  };
-
-  const downloadCSV = (csvContent: string, filename: string) => {
-    const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
-    element.setAttribute('download', filename);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
-
-  const exportOrdersToCSV = () => {
-    if (filteredOrdersAdvanced.length === 0) {
-      addToast({ type: 'warning', message: 'No orders match the current filters to export.' });
-      return;
-    }
-
-    const headers = ['id', 'customer', 'amount', 'status', 'date'];
-    const dataToExport = filteredOrdersAdvanced.map(order => ({
-      id: order.id,
-      customer: order.customer,
-      amount: order.amount,
-      status: order.status,
-      date: order.date
-    }));
-    const csv = convertToCSV(dataToExport, headers);
-    downloadCSV(csv, `orders_${selectedDateFilter}_${new Date().toISOString().split('T')[0]}.csv`);
-    addToast({ type: 'success', message: `${dataToExport.length} order${dataToExport.length === 1 ? '' : 's'} exported.` });
-  };
-
-  const exportCustomersToCSV = () => {
-    if (filteredCustomersAdvanced.length === 0) {
-      addToast({ type: 'warning', message: 'No customers match the current filters to export.' });
-      return;
-    }
-
-    const headers = ['name', 'revenue', 'orders', 'lastOrder', 'status'];
-    const dataToExport = filteredCustomersAdvanced.map(customer => ({
-      name: customer.name,
-      revenue: customer.revenue,
-      orders: customer.orders,
-      lastOrder: customer.lastOrder,
-      status: customer.status
-    }));
-    const csv = convertToCSV(dataToExport, headers);
-    downloadCSV(csv, `customers_${new Date().toISOString().split('T')[0]}.csv`);
-    addToast({ type: 'success', message: `${dataToExport.length} customer${dataToExport.length === 1 ? '' : 's'} exported.` });
-  };
-
-  // Sorting function
-  const sortData = (data: any[], sortBy: string, sortDir: 'asc' | 'desc') => {
-    return [...data].sort((a, b) => {
-      let aVal = a[sortBy];
-      let bVal = b[sortBy];
-      
-      // Handle numeric strings (e.g., "$1,234.50")
-      if (typeof aVal === 'string' && aVal.includes('$')) {
-        aVal = parseFloat(aVal.replace(/[$,]/g, ''));
-        bVal = parseFloat(bVal.replace(/[$,]/g, ''));
-      }
-      
-      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
-      return 0;
-    });
-  };
-
-  // Pagination function
-  const paginate = (data: any[], page: number, itemsPerPage: number) => {
-    const start = (page - 1) * itemsPerPage;
-    return data.slice(start, start + itemsPerPage);
-  };
-
-  const getTotalPages = (dataLength: number) => Math.ceil(dataLength / itemsPerPage);
-
-  // Advanced filtering functions
-  const applyOrderFilters = (orders: any[]) => {
-    return orders.filter(order => {
-      // Status filter
-      if (orderStatusFilter !== 'all' && order.status !== orderStatusFilter) return false;
-      
-      // Amount range filter
-      if (orderAmountMin || orderAmountMax) {
-        const amount = parseFloat(order.amount.replace(/[$,]/g, ''));
-        if (orderAmountMin && amount < parseFloat(orderAmountMin)) return false;
-        if (orderAmountMax && amount > parseFloat(orderAmountMax)) return false;
-      }
-      
-      return true;
-    });
-  };
-
-  const applyCustomerFilters = (customers: any[]) => {
-    return customers.filter(customer => {
-      // Status filter
-      if (customerStatusFilter !== 'all' && customer.status !== customerStatusFilter) return false;
-      
-      // Revenue range filter
-      if (customerRevenueMin || customerRevenueMax) {
-        const revenue = parseFloat(customer.revenue.replace(/[$,]/g, ''));
-        if (customerRevenueMin && revenue < parseFloat(customerRevenueMin)) return false;
-        if (customerRevenueMax && revenue > parseFloat(customerRevenueMax)) return false;
-      }
-      
-      return true;
-    });
-  };
-
-  const applyProductFilters = (products: any[]) => {
-    return products.filter(product => {
-      // Sales range filter
-      if (productSalesMin || productSalesMax) {
-        const sales = product.sales;
-        if (productSalesMin && sales < parseFloat(productSalesMin)) return false;
-        if (productSalesMax && sales > parseFloat(productSalesMax)) return false;
-      }
-      
-      return true;
-    });
-  };
-
-  // Get sorted and paginated data
-  const sortedOrders = sortData(filteredOrders, ordersSortBy, ordersSortDir);
-  const filteredOrdersAdvanced = applyOrderFilters(sortedOrders);
-  const paginatedOrders = paginate(filteredOrdersAdvanced, ordersPage, itemsPerPage);
-  const ordersTotalPages = getTotalPages(filteredOrdersAdvanced.length);
-
-  const sortedCustomers = sortData(filteredCustomers, customersSortBy, customersSortDir);
-  const filteredCustomersAdvanced = applyCustomerFilters(sortedCustomers);
-  const paginatedCustomers = paginate(filteredCustomersAdvanced, customersPage, itemsPerPage);
-  const customersTotalPages = getTotalPages(filteredCustomersAdvanced.length);
-
-  const sortedProducts = sortData(topProducts, productsSortBy, productsSortDir);
-  const filteredProductsAdvanced = applyProductFilters(sortedProducts);
-  const paginatedProducts = paginate(filteredProductsAdvanced, productsPage, itemsPerPage);
-  const productsTotalPages = getTotalPages(filteredProductsAdvanced.length);
 
   return (
-    <div className="p-4 max-w-7xl mx-auto w-full">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-600 mt-0.5 leading-tight">Filter: <span className="font-semibold text-gray-900 capitalize">{selectedDateFilter}</span>{searchQuery && ` • Search: "${searchQuery}"`}</p>
-        </div>
-      </div>
-
-      {/* Quick Date Filters */}
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-            <button
-              onClick={() => setSelectedDateFilter('today')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'today' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-            >
-              Today
-            </button>
-            <button
-              onClick={() => setSelectedDateFilter('week')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'week' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-            >
-              This Week
-            </button>
-            <button
-              onClick={() => setSelectedDateFilter('month')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'month' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-            >
-              This Month
-            </button>
-            <button
-              onClick={() => setSelectedDateFilter('year')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${selectedDateFilter === 'year' ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-            >
-              This Year
-            </button>
+    <div className={`${isDarkMode ? 'dark' : ''}`}>
+      <div className="min-h-screen bg-white dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Welcome Section */}
+          <div className="mb-8 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+                A
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome Back, {userProfile.name}</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">You have <span className="font-semibold">21 Pending Approvals</span> & <span className="font-semibold">12 Leave Requests</span></p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded text-sm font-semibold">+ Add Schedule</button>
+              <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded text-sm font-semibold">+ Add Requestees</button>
+            </div>
           </div>
 
-          {/* Alerts Section - Compact */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            {alerts.map((alert) => (
-              <div key={alert.id} className={`p-3 rounded-lg ${getAlertColor(alert.type)}`}>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{alert.message}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-300 mt-1">{alert.time}</p>
+          {/* Primary Metrics Cards - 4 Column */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            {metrics.map((metric, idx) => (
+              <div key={idx} className={`rounded-lg border-l-4 p-4 bg-white dark:bg-gray-800 shadow ${metric.color}`}>
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-3">{metric.label}</p>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{metric.value}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+ {metric.change}</p>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Stat Cards - Compact */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-l-4 border-blue-500">
-              <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Users</div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white">1,234</div>
+          {/* Secondary Metrics - 4 Column */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="rounded-lg p-4 bg-purple-100 dark:bg-purple-900/30 border-l-4 border-purple-500 shadow">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Pending</p>
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">$21,645</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+ 18.2%</p>
+              <a href="#" className="text-xs text-orange-600 dark:text-orange-400 font-semibold mt-3 block">View Transactions →</a>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-l-4 border-green-500">
-              <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Sales</div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white">$12.3K</div>
+            <div className="rounded-lg p-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 shadow">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">This Week</p>
+              <p className="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">$5,644</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+ 7.1%</p>
+              <a href="#" className="text-xs text-orange-600 dark:text-orange-400 font-semibold mt-3 block">View Earnings →</a>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-l-4 border-purple-500">
-              <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Active</div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white">567</div>
+            <div className="rounded-lg p-4 bg-green-100 dark:bg-green-900/30 border-l-4 border-green-500 shadow">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">New Applicants</p>
+              <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">98</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+ 4.3%</p>
+              <a href="#" className="text-xs text-orange-600 dark:text-orange-400 font-semibold mt-3 block">View All →</a>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-l-4 border-orange-500">
-              <div className="text-gray-600 dark:text-gray-400 text-xs font-medium">Pending</div>
-              <div className="text-xl font-bold text-gray-900 dark:text-white">89</div>
+            <div className="rounded-lg p-4 bg-gray-800 dark:bg-gray-700 border-l-4 border-gray-600 shadow">
+              <p className="text-sm font-semibold text-white mt-2">New Tasks This month</p>
+              <p className="text-3xl font-bold text-white mt-2">45/98</p>
+              <p className="text-xs text-gray-400 mt-2">- 11.2%</p>
+              <a href="#" className="text-xs text-orange-400 font-semibold mt-3 block">View Candidates →</a>
             </div>
           </div>
 
-          {/* KPI Metrics Row - Compact */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            {kpis.map((kpi, index) => (
-              <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow p-3">
-                <p className="text-gray-600 dark:text-gray-400 text-xs font-medium">{kpi.label}</p>
-                <p className={`text-lg font-bold ${kpi.color}`}>{kpi.value}</p>
+          {/* Top Section - Charts */}
+          <div className="grid grid-cols-3 gap-6 mb-6">
+            {/* Employee Status */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-teal-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Employee Status</h3>
+                <span className="text-xs text-gray-500 dark:text-gray-400">This Week</span>
               </div>
-            ))}
-          </div>
-
-          {/* Charts Row - Tabbed Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-            {/* Chart Tabs */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-blue-500">
-              <div className="flex gap-2 mb-4">
-                <button 
-                  onClick={() => setActiveChartTab('sales')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'sales' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
-                >
-                  Sales
-                </button>
-                <button 
-                  onClick={() => setActiveChartTab('revenue')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'revenue' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
-                >
-                  Revenue Trend
-                </button>
-                <button 
-                  onClick={() => setActiveChartTab('customers')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeChartTab === 'customers' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
-                >
-                  Customer Growth
-                </button>
+              <div className="text-center mb-4">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">154</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total Employee</p>
               </div>
-              
-              {activeChartTab === 'sales' && (
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={filteredChartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 11 }} />
-                    <YAxis stroke="#6b7280" tick={{ fontSize: 11 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.5rem', fontSize: '12px' }} />
-                    <Bar dataKey="sales" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-              
-              {activeChartTab === 'revenue' && (
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={filteredChartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 11 }} />
-                    <YAxis stroke="#6b7280" tick={{ fontSize: 11 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.5rem', fontSize: '12px' }} />
-                    <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-              
-              {activeChartTab === 'customers' && (
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={customerGrowthData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 11 }} />
-                    <YAxis stroke="#6b7280" tick={{ fontSize: 11 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.5rem', fontSize: '12px' }} />
-                    <Line type="monotone" dataKey="customers" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-orange-500 h-2 rounded-full" style={{width: '60%'}}></div>
+                  </div>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Fulltime (54%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{width: '40%'}}></div>
+                  </div>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Contrast (29%)</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">112</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Present (22%)</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">21</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Absent (17%)</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Permission</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">04</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Leave</p>
+                </div>
+              </div>
             </div>
 
-            {/* Pie Chart - Sales by Category */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-green-500">
-              <p className="text-sm font-semibold mb-3 text-gray-900 dark:text-white">Sales by Category</p>
-              <ResponsiveContainer width="100%" height={200}>
+            {/* Attendance Overview */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-teal-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Attendance Overview</h3>
+                <span className="text-xs text-gray-500 dark:text-gray-400">Today</span>
+              </div>
+              <ResponsiveContainer width="100%" height={150}>
                 <PieChart>
-                  <Pie
-                    data={salesByCategory}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ value }) => `$${value}k`}
-                    outerRadius={70}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {salesByCategory.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Pie data={employeeStatus} cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={2} dataKey="value">
+                    {employeeStatus.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
-              <div className="mt-2 flex flex-wrap gap-1">
-                {salesByCategory.map((category, index) => (
-                  <div key={index} className="flex items-center gap-1 text-xs">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                    <span className="text-gray-600 dark:text-gray-400">{category.name}</span>
+              <p className="text-center text-2xl font-bold text-gray-900 dark:text-white mt-2">120</p>
+              <p className="text-center text-xs text-gray-500 dark:text-gray-400">Total Attendance</p>
+              <div className="flex justify-center gap-4 mt-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-600 dark:text-gray-400">Status</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Clock-In/Out */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-teal-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Clock-In/Out</h3>
+                <div className="flex gap-2">
+                  <select className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option>All Departments</option>
+                  </select>
+                  <select className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option>Today</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {clockInOutData.map((emp, idx) => (
+                  <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                      {emp.name.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-white">{emp.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{emp.dept}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`text-xs font-bold ${emp.status.includes('IN') ? 'text-green-600' : 'text-red-600'}`}>{emp.status}</p>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Recent Orders - Compact Table */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-purple-500 mb-4">
-            <div className="flex justify-between items-center mb-3">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">Recent Orders {filteredOrdersAdvanced.length < recentOrders.length && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">({filteredOrdersAdvanced.length})</span>}</p>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setShowOrderFilters(!showOrderFilters)}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1"
-                  title="Advanced Filters"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                  </svg>
-                  Filters
-                </button>
-                <button 
-                  onClick={exportOrdersToCSV}
-                  disabled={filteredOrdersAdvanced.length === 0}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium disabled:text-gray-400 flex items-center gap-1"
-                  title="Export to CSV"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Export
-                </button>
+          {/* Jobs Applicants & Employees */}
+          <div className="grid grid-cols-3 gap-6 mb-6">
+            {/* Jobs Applicants */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-blue-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Jobs Applicants</h3>
+                <a href="#" className="text-xs text-blue-600 dark:text-blue-400">View All</a>
               </div>
-            </div>
-
-            {/* Advanced Filters */}
-            {showOrderFilters && (
-              <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Status</label>
-                    <select 
-                      value={orderStatusFilter} 
-                      onChange={(e) => { setOrderStatusFilter(e.target.value); setOrdersPage(1); }}
-                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="all">All Statuses</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Shipped">Shipped</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Min Amount ($)</label>
-                    <input 
-                      type="number" 
-                      placeholder="0" 
-                      value={orderAmountMin}
-                      onChange={(e) => { setOrderAmountMin(e.target.value); setOrdersPage(1); }}
-                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Max Amount ($)</label>
-                    <input 
-                      type="number" 
-                      placeholder="Unlimited" 
-                      value={orderAmountMax}
-                      onChange={(e) => { setOrderAmountMax(e.target.value); setOrdersPage(1); }}
-                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                </div>
-                <button 
-                  onClick={() => { setOrderStatusFilter('all'); setOrderAmountMin(''); setOrderAmountMax(''); setOrdersPage(1); }}
-                  className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-                >
-                  Clear Filters
-                </button>
+              <div className="flex gap-2 mb-4 border-b border-gray-200 dark:border-gray-700">
+                <button className="px-3 py-2 text-xs font-semibold text-gray-900 dark:text-white border-b-2 border-gray-900 dark:border-white">Openings</button>
+                <button className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">Applicants</button>
               </div>
-            )}
-
-            {filteredOrdersAdvanced.length === 0 ? (
-              <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">No orders found for selected filters</div>
-            ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => setOrdersSortBy(ordersSortBy === 'date' ? 'amount' : 'date')}>
-                      Order {ordersSortBy === 'date' && (ordersSortDir === 'asc' ? '↑' : '↓')}
-                    </th>
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Customer</th>
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (ordersSortBy === 'amount') { setOrdersSortDir(ordersSortDir === 'asc' ? 'desc' : 'asc'); } else { setOrdersSortBy('amount'); setOrdersSortDir('desc'); } }}>
-                      Amount {ordersSortBy === 'amount' && (ordersSortDir === 'asc' ? '↑' : '↓')}
-                    </th>
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedOrders.map((order, index) => (
-                    <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{order.id}</td>
-                      <td className="py-2 px-2 text-gray-700 dark:text-gray-300">{order.customer}</td>
-                      <td className="py-2 px-2 text-gray-900 dark:text-white font-semibold">{order.amount}</td>
-                      <td className="py-2 px-2">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {order.status}
+              <div className="space-y-3">
+                {jobApplicants.map((applicant, idx) => (
+                  <div key={idx} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {applicant.name.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-gray-900 dark:text-white">{applicant.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{applicant.position}</p>
+                        <span className={`inline-block mt-2 px-2 py-1 text-xs rounded font-medium ${applicant.color}`}>
+                          {applicant.status}
                         </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {/* Pagination */}
-              <div className="flex justify-between items-center mt-3 px-2">
-                <span className="text-xs text-gray-600 dark:text-gray-400">Page {ordersPage} of {ordersTotalPages}</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setOrdersPage(Math.max(1, ordersPage - 1))}
-                    disabled={ordersPage === 1}
-                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    ← Prev
-                  </button>
-                  <button
-                    onClick={() => setOrdersPage(Math.min(ordersTotalPages, ordersPage + 1))}
-                    disabled={ordersPage === ordersTotalPages}
-                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    Next →
-                  </button>
-                </div>
-              </div>
-            </div>
-            )}
-          </div>
-
-          {/* Top Products & System Health Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            {/* Top Products - Compact Table */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-green-500">
-              <div className="flex justify-between items-center mb-3">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">Top Products</p>
-                <button 
-                  onClick={() => setShowProductFilters(!showProductFilters)}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                  </svg>
-                  Filters
-                </button>
-              </div>
-
-              {/* Advanced Filters */}
-              {showProductFilters && (
-                <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Min Sales</label>
-                      <input 
-                        type="number" 
-                        placeholder="0" 
-                        value={productSalesMin}
-                        onChange={(e) => { setProductSalesMin(e.target.value); setProductsPage(1); }}
-                        className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Max Sales</label>
-                      <input 
-                        type="number" 
-                        placeholder="Unlimited" 
-                        value={productSalesMax}
-                        onChange={(e) => { setProductSalesMax(e.target.value); setProductsPage(1); }}
-                        className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      />
+                      </div>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => { setProductSalesMin(''); setProductSalesMax(''); setProductsPage(1); }}
-                    className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-                  >
-                    Clear Filters
-                  </button>
-                </div>
-              )}
+                ))}
+              </div>
+            </div>
 
+            {/* Employees Table */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-blue-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Employees</h3>
+                <a href="#" className="text-xs text-blue-600 dark:text-blue-400">View All</a>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Product</th>
-                      <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (productsSortBy === 'sales') { setProductsSortDir(productsSortDir === 'asc' ? 'desc' : 'asc'); } else { setProductsSortBy('sales'); setProductsSortDir('desc'); } }}>
-                        Sales {productsSortBy === 'sales' && (productsSortDir === 'asc' ? '↑' : '↓')}
-                      </th>
-                      <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (productsSortBy === 'revenue') { setProductsSortDir(productsSortDir === 'asc' ? 'desc' : 'asc'); } else { setProductsSortBy('revenue'); setProductsSortDir('desc'); } }}>
-                        Revenue {productsSortBy === 'revenue' && (productsSortDir === 'asc' ? '↑' : '↓')}
-                      </th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700 dark:text-gray-300">Name</th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700 dark:text-gray-300">Department</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedProducts.map((product, index) => (
-                      <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{product.name}</td>
-                        <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{product.sales}</td>
-                        <td className="py-2 px-2 text-right text-gray-900 dark:text-white font-semibold">{product.revenue}</td>
+                    {employees.map((emp, idx) => (
+                      <tr key={idx} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td className="py-3 px-2 text-gray-900 dark:text-white font-medium">{emp.name}</td>
+                        <td className="py-3 px-2 text-gray-600 dark:text-gray-400">{emp.dept}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              {/* Pagination */}
-              <div className="flex justify-between items-center mt-3 px-2">
-                <span className="text-xs text-gray-600 dark:text-gray-400">Page {productsPage} of {productsTotalPages}</span>
+            </div>
+          </div>
+
+          {/* Todo, Sales Overview & Invoices */}
+          <div className="grid grid-cols-3 gap-6 mb-6">
+            {/* Sales Overview */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-green-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Sales Overview</h3>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => setProductsPage(Math.max(1, productsPage - 1))}
-                    disabled={productsPage === 1}
-                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    ← Prev
-                  </button>
-                  <button
-                    onClick={() => setProductsPage(Math.min(productsTotalPages, productsPage + 1))}
-                    disabled={productsPage === productsTotalPages}
-                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    Next →
-                  </button>
+                  <select className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option>All Departments</option>
+                  </select>
+                  <select className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option>September</option>
+                  </select>
                 </div>
+              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={salesData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#6b7280" tick={{ fontSize: 11 }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.5rem' }} />
+                  <Bar dataKey="Income" fill="#f97316" />
+                  <Bar dataKey="Expenses" fill="#ef4444" />
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                <p>Last Updated at 11:30 PM</p>
               </div>
             </div>
 
-            {/* System Health Indicators */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-orange-500">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-3">System Health</p>
-              <div className="space-y-2">
-                {systemHealth.map((health, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded border-l-4" style={{ borderColor: health.status === 'healthy' ? '#10b981' : '#f59e0b' }}>
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{health.name}</span>
+            {/* Invoices */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-pink-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Invoices</h3>
+                <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">All Invoices</a>
+              </div>
+              <div className="space-y-3">
+                {invoices.map((invoice, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-gray-900 dark:text-white">{health.value}</span>
-                      <span className={`text-xs font-medium px-2 py-1 rounded ${health.status === 'healthy' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-400'}`}>
-                        {health.status === 'healthy' ? '✓ OK' : '⚠ Warning'}
-                      </span>
+                      <div className="w-8 h-8 bg-gradient-to-br from-yellow-300 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        🎯
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-gray-900 dark:text-white">{invoice.id}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{invoice.status}</p>
+                      </div>
                     </div>
+                    <p className={`text-xs font-semibold ${invoice.color}`}>{invoice.amount}</p>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Top Customers - Compact Table */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-indigo-500 mb-4">
-            <div className="flex justify-between items-center mb-3">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">Top Customers {filteredCustomersAdvanced.length < topCustomers.length && <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">({filteredCustomersAdvanced.length})</span>}</p>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setShowCustomerFilters(!showCustomerFilters)}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                  </svg>
-                  Filters
-                </button>
-                <button 
-                  onClick={exportCustomersToCSV}
-                  disabled={filteredCustomersAdvanced.length === 0}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium disabled:text-gray-400 flex items-center gap-1"
-                  title="Export to CSV"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Export
-                </button>
+          {/* Projects & Tasks Statistics */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Projects */}
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-cyan-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Projects</h3>
+                <select className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                  <option>September</option>
+                </select>
               </div>
-            </div>
-
-            {/* Advanced Filters */}
-            {showCustomerFilters && (
-              <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Status</label>
-                    <select 
-                      value={customerStatusFilter} 
-                      onChange={(e) => { setCustomerStatusFilter(e.target.value); setCustomersPage(1); }}
-                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="all">All Statuses</option>
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Min Revenue ($)</label>
-                    <input 
-                      type="number" 
-                      placeholder="0" 
-                      value={customerRevenueMin}
-                      onChange={(e) => { setCustomerRevenueMin(e.target.value); setCustomersPage(1); }}
-                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Max Revenue ($)</label>
-                    <input 
-                      type="number" 
-                      placeholder="Unlimited" 
-                      value={customerRevenueMax}
-                      onChange={(e) => { setCustomerRevenueMax(e.target.value); setCustomersPage(1); }}
-                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                </div>
-                <button 
-                  onClick={() => { setCustomerStatusFilter('all'); setCustomerRevenueMin(''); setCustomerRevenueMax(''); setCustomersPage(1); }}
-                  className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-                >
-                  Clear Filters
-                </button>
-              </div>
-            )}
-
-            {filteredCustomersAdvanced.length === 0 ? (
-              <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">No customers found for search</div>
-            ) : (
               <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Customer Name</th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (customersSortBy === 'revenue') { setCustomersSortDir(customersSortDir === 'asc' ? 'desc' : 'asc'); } else { setCustomersSortBy('revenue'); setCustomersSortDir('desc'); } }}>
-                      Revenue {customersSortBy === 'revenue' && (customersSortDir === 'asc' ? '↑' : '↓')}
-                    </th>
-                    <th className="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => { if (customersSortBy === 'orders') { setCustomersSortDir(customersSortDir === 'asc' ? 'desc' : 'asc'); } else { setCustomersSortBy('orders'); setCustomersSortDir('desc'); } }}>
-                      Orders {customersSortBy === 'orders' && (customersSortDir === 'asc' ? '↑' : '↓')}
-                    </th>
-                    <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Last Order</th>
-                    <th className="text-center py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedCustomers.map((customer, index) => (
-                    <tr key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{customer.name}</td>
-                      <td className="py-2 px-2 text-right text-gray-900 dark:text-white font-semibold">{customer.revenue}</td>
-                      <td className="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{customer.orders}</td>
-                      <td className="py-2 px-2 text-gray-700 dark:text-gray-300 text-xs">{customer.lastOrder}</td>
-                      <td className="py-2 px-2 text-center">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${customer.status === 'Active' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'}`}>
-                          {customer.status}
-                        </span>
-                      </td>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">ID</th>
+                      <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Name</th>
+                      <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Team</th>
+                      <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Hours</th>
+                      <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Deadline</th>
+                      <th className="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Priority</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {/* Pagination */}
-              <div className="flex justify-between items-center mt-3 px-2">
-                <span className="text-xs text-gray-600 dark:text-gray-400">Page {customersPage} of {customersTotalPages}</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setCustomersPage(Math.max(1, customersPage - 1))}
-                    disabled={customersPage === 1}
-                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    ← Prev
-                  </button>
-                  <button
-                    onClick={() => setCustomersPage(Math.min(customersTotalPages, customersPage + 1))}
-                    disabled={customersPage === customersTotalPages}
-                    className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    Next →
-                  </button>
-                </div>
+                  </thead>
+                  <tbody>
+                    {projects.map((project, idx) => (
+                      <tr key={idx} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="py-2 px-2 text-gray-900 dark:text-white font-medium">{project.id}</td>
+                        <td className="py-2 px-2 text-gray-600 dark:text-gray-400">{project.name}</td>
+                        <td className="py-2 px-2 text-gray-600 dark:text-gray-400">{project.team}</td>
+                        <td className="py-2 px-2 text-gray-600 dark:text-gray-400">{project.hours}</td>
+                        <td className="py-2 px-2 text-gray-600 dark:text-gray-400">{project.deadline}</td>
+                        <td className="py-2 px-2"><span className={`text-xs font-semibold ${project.color}`}>•</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-            )}
+
+            {/* Tasks Statistics */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-blue-500">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">Tasks Statistics</h3>
+              <div className="text-center mb-2">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">124/165</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Spent on Overall Tasks This Week</p>
+              </div>
+              <ResponsiveContainer width="100%" height={150}>
+                <PieChart>
+                  <Pie data={tasksStats} cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={2} dataKey="value">
+                    {tasksStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                {tasksStats.map((task, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: task.color }}></div>
+                    <span className="text-gray-600 dark:text-gray-400">{task.name} {task.value}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Footer Stats Summary */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            {footerStats.map((stat, index) => (
-              <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center border-t-4 border-blue-500">
-                <p className="text-2xl mb-1">{stat.icon}</p>
-                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">{stat.label}</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</p>
+          {/* Bottom Section - Schedules, Activities, Birthdays */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Schedules */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-teal-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Schedules</h3>
+                <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">View All</a>
               </div>
-            ))}
+              <div className="space-y-3">
+                {schedules.map((schedule, idx) => (
+                  <div key={idx} className="p-3 bg-teal-50 dark:bg-teal-900/20 rounded border-l-4 border-teal-500">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-xs font-bold bg-teal-600 text-white w-fit px-2 py-1 rounded mb-1">Slot Booking</p>
+                        <p className="text-xs font-medium text-gray-900 dark:text-white">{schedule.title}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{schedule.date}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{schedule.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Activities */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-purple-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Recent Activities</h3>
+                <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">View All</a>
+              </div>
+              <div className="space-y-3">
+                {recentActivities.map((activity, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                    <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      {activity.user.charAt(0)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-gray-900 dark:text-white">{activity.user}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{activity.action}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{activity.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Birthdays */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-pink-500">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Birthdays</h3>
+                <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">View All</a>
+              </div>
+              <div className="space-y-3">
+                {birthdays.map((birthday, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-pink-50 dark:bg-pink-900/20 rounded">
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-gray-900 dark:text-white">{birthday.name}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{birthday.date}</p>
+                    </div>
+                    <button className="px-2 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded text-xs font-medium">
+                      🎂 {birthday.status}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
     </div>
   );
 };

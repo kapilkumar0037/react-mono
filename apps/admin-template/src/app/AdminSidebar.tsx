@@ -313,36 +313,34 @@ const AdminSidebar: React.FC<{
         />
       )}
       <div
-        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-72 transform flex-col transition-transform duration-200 md:relative md:z-auto md:w-auto md:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} ${isDarkMode ? 'bg-gradient-to-b from-gray-800 via-gray-800 to-gray-800' : 'bg-gradient-to-b from-blue-900 via-blue-800 to-blue-700'} border-r ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${collapsed ? 'md:w-20' : 'md:w-64'}`}
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen w-72 transform flex-col border-r border-gray-200 bg-white transition-transform duration-200 md:relative md:z-auto md:w-auto md:translate-x-0 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} ${collapsed ? 'md:w-20' : 'md:w-60'}`}
       >
       {/* Header */}
-      <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${isCollapsedView ? 'flex justify-center' : ''}`}>
-        <Link to="/" className={`text-lg font-bold text-white whitespace-nowrap`}>
-          {isCollapsedView ? 'A' : 'Admin'}
+      <div className={`h-[50px] border-b border-gray-100 px-4 py-2.5 ${isCollapsedView ? 'flex justify-center' : ''}`}>
+        <Link to="/" className="flex items-center gap-2 whitespace-nowrap text-xl font-extrabold text-gray-900">
+          {isCollapsedView ? 'A' : <><span className="grid h-8 w-8 place-items-center rounded-full bg-orange-50 text-orange-600 ring-2 ring-orange-500">◉</span><span>SmartHR</span></>}
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+      <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-5">
         {visibleMenuGroups.map((group) => (
           <div key={group.name} className="space-y-2">
             {/* Group Header */}
             <button
               onClick={() => toggleGroup(group.name)}
-              className={`w-full flex items-center px-2 py-2 rounded-md transition-colors text-blue-100 hover:text-white ${
-                isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-600'
-              } ${isCollapsedView ? 'justify-center' : 'gap-3'}`}
+              className={`flex w-full items-center rounded-md px-2 py-2 text-gray-800 transition-colors hover:bg-gray-100 ${isCollapsedView ? 'justify-center' : 'gap-3'}`}
               title={isCollapsedView ? group.name : undefined}
               aria-expanded={expandedGroups.includes(group.name)}
             >
-              <span className="text-blue-100">
+              <span className="text-gray-500">
                 {group.icon}
               </span>
               {!isCollapsedView && (
                 <>
-                  <span className="flex-1 text-sm font-medium text-left">{group.name}</span>
+                  <span className="flex-1 text-left text-sm font-bold">{group.name}</span>
                   <svg
-                    className={`w-4 h-4 transition-transform ${expandedGroups.includes(group.name) ? 'rotate-180' : ''}`}
+                    className={`h-4 w-4 text-gray-400 transition-transform ${expandedGroups.includes(group.name) ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -361,14 +359,10 @@ const AdminSidebar: React.FC<{
                     key={item.to}
                     to={item.to}
                     onClick={onRequestClose}
-                    className={`block px-3 py-2 rounded-md text-sm transition-colors ${
+                    className={`block rounded-md px-3 py-2 text-sm transition-colors ${
                       isActive(item.to)
-                        ? isDarkMode
-                          ? 'bg-blue-600 text-white font-medium'
-                          : 'bg-white text-blue-900 font-medium'
-                        : isDarkMode
-                        ? 'text-blue-100 hover:text-white hover:bg-gray-700'
-                        : 'text-blue-100 hover:text-white hover:bg-blue-600'
+                        ? 'border-l-2 border-orange-500 bg-gray-100 font-bold text-gray-900'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     } ${isCollapsedView ? 'flex justify-center' : ''}`}
                     title={isCollapsedView ? item.label : undefined}
                   >
@@ -382,8 +376,8 @@ const AdminSidebar: React.FC<{
       </nav>
 
       {/* Footer */}
-      <div className={`p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-blue-600'} ${isCollapsedView ? 'text-center' : ''}`}>
-        <p className="text-xs text-blue-200">
+      <div className={`border-t border-gray-100 p-4 ${isCollapsedView ? 'text-center' : ''}`}>
+        <p className="text-xs text-gray-500">
           {isCollapsedView ? 'v1.0' : 'Admin Dashboard v1.0.0'}
         </p>
       </div>
