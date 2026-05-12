@@ -145,10 +145,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
 
   return (
     <div className={`${isDarkMode ? 'dark' : ''}`}>
-      <div className="min-h-screen bg-white dark:bg-gray-900 p-6">
+      <div className="min-h-screen bg-white dark:bg-gray-900 p-4">
         <div className="max-w-7xl mx-auto">
           {/* Welcome Section */}
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-5 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
                 A
@@ -165,51 +165,44 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           </div>
 
           {/* Primary Metrics Cards - 4 Column */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-4 gap-2.5 mb-4">
             {metrics.map((metric, idx) => (
-              <div key={idx} className={`rounded-lg border-l-4 p-4 bg-white dark:bg-gray-800 shadow ${metric.color}`}>
+              <div key={idx} className={`rounded-lg border-l-4 p-2.5 bg-white dark:bg-gray-800 shadow ${metric.color}`}>
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-3">{metric.label}</p>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{metric.value}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+ {metric.change}</p>
-                </div>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{metric.value}</p>
               </div>
             ))}
           </div>
 
           {/* Secondary Metrics - 4 Column */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="rounded-lg p-4 bg-purple-100 dark:bg-purple-900/30 border-l-4 border-purple-500 shadow">
+          <div className="grid grid-cols-4 gap-2.5 mb-4">
+            <div className="rounded-lg p-2.5 bg-purple-100 dark:bg-purple-900/30 border-l-4 border-purple-500 shadow">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">Pending</p>
               <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">$21,645</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+ 18.2%</p>
               <a href="#" className="text-xs text-orange-600 dark:text-orange-400 font-semibold mt-3 block">View Transactions →</a>
             </div>
-            <div className="rounded-lg p-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 shadow">
+            <div className="rounded-lg p-2.5 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 shadow">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">This Week</p>
               <p className="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">$5,644</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+ 7.1%</p>
               <a href="#" className="text-xs text-orange-600 dark:text-orange-400 font-semibold mt-3 block">View Earnings →</a>
             </div>
-            <div className="rounded-lg p-4 bg-green-100 dark:bg-green-900/30 border-l-4 border-green-500 shadow">
+            <div className="rounded-lg p-2.5 bg-green-100 dark:bg-green-900/30 border-l-4 border-green-500 shadow">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">New Applicants</p>
               <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">98</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">+ 4.3%</p>
               <a href="#" className="text-xs text-orange-600 dark:text-orange-400 font-semibold mt-3 block">View All →</a>
             </div>
-            <div className="rounded-lg p-4 bg-gray-800 dark:bg-gray-700 border-l-4 border-gray-600 shadow">
+            <div className="rounded-lg p-2.5 bg-gray-800 dark:bg-gray-700 border-l-4 border-gray-600 shadow">
               <p className="text-sm font-semibold text-white mt-2">New Tasks This month</p>
               <p className="text-3xl font-bold text-white mt-2">45/98</p>
-              <p className="text-xs text-gray-400 mt-2">- 11.2%</p>
               <a href="#" className="text-xs text-orange-400 font-semibold mt-3 block">View Candidates →</a>
             </div>
           </div>
 
           {/* Top Section - Charts */}
-          <div className="grid grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-3 gap-4 mb-4">
             {/* Employee Status */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-teal-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3.5 border-t-4 border-teal-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Employee Status</h3>
                 <span className="text-xs text-gray-500 dark:text-gray-400">This Week</span>
               </div>
@@ -252,8 +245,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
             </div>
 
             {/* Attendance Overview */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-teal-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3.5 border-t-4 border-teal-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Attendance Overview</h3>
                 <span className="text-xs text-gray-500 dark:text-gray-400">Today</span>
               </div>
@@ -277,8 +270,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
             </div>
 
             {/* Clock-In/Out */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-teal-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3.5 border-t-4 border-teal-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Clock-In/Out</h3>
                 <div className="flex gap-2">
                   <select className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -309,10 +302,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           </div>
 
           {/* Jobs Applicants & Employees */}
-          <div className="grid grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-3 gap-4 mb-4">
             {/* Jobs Applicants */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-blue-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3.5 border-t-4 border-blue-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Jobs Applicants</h3>
                 <a href="#" className="text-xs text-blue-600 dark:text-blue-400">View All</a>
               </div>
@@ -341,8 +334,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
             </div>
 
             {/* Employees Table */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-blue-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-3.5 border-t-4 border-blue-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Employees</h3>
                 <a href="#" className="text-xs text-blue-600 dark:text-blue-400">View All</a>
               </div>
@@ -368,10 +361,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           </div>
 
           {/* Todo, Sales Overview & Invoices */}
-          <div className="grid grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-3 gap-4 mb-4">
             {/* Sales Overview */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-green-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-t-4 border-green-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">Sales Overview</h3>
                 <div className="flex gap-2">
                   <select className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -398,8 +391,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
             </div>
 
             {/* Invoices */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-pink-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-t-4 border-pink-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">Invoices</h3>
                 <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">All Invoices</a>
               </div>
@@ -423,10 +416,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           </div>
 
           {/* Projects & Tasks Statistics */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
             {/* Projects */}
-            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-cyan-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-t-4 border-cyan-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">Projects</h3>
                 <select className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                   <option>September</option>
@@ -461,8 +454,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
             </div>
 
             {/* Tasks Statistics */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-blue-500">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">Tasks Statistics</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-t-4 border-blue-500">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">Tasks Statistics</h3>
               <div className="text-center mb-2">
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">124/165</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Spent on Overall Tasks This Week</p>
@@ -488,10 +481,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           </div>
 
           {/* Bottom Section - Schedules, Activities, Birthdays */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Schedules */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-teal-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-t-4 border-teal-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">Schedules</h3>
                 <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">View All</a>
               </div>
@@ -512,8 +505,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
             </div>
 
             {/* Recent Activities */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-purple-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-t-4 border-purple-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">Recent Activities</h3>
                 <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">View All</a>
               </div>
@@ -534,8 +527,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
             </div>
 
             {/* Birthdays */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-t-4 border-pink-500">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border-t-4 border-pink-500">
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">Birthdays</h3>
                 <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">View All</a>
               </div>
