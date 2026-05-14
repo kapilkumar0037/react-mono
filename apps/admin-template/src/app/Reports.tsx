@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Badge } from '@react-mono/ui-controls';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, ComposedChart, Scatter, ScatterChart, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { useSearchParams } from 'react-router-dom';
 import { usePageAction } from './usePageAction';
 import { createSavedView, persistSavedViews, readSavedViews, SavedView } from './savedViews';
