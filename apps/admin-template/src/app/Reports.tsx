@@ -68,6 +68,50 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
     { id: 5, name: 'Laptop Stand', sales: 1560, revenue: 46800, trend: 'up' },
   ];
 
+  // Data for AreaChart
+  const areaChartData = [
+    { month: 'Jan', online: 4000, offline: 2400, partners: 2400 },
+    { month: 'Feb', online: 3000, offline: 1398, partners: 2210 },
+    { month: 'Mar', online: 2000, offline: 9800, partners: 2290 },
+    { month: 'Apr', online: 2780, offline: 3908, partners: 2000 },
+    { month: 'May', online: 1890, offline: 4800, partners: 2181 },
+    { month: 'Jun', online: 2390, offline: 3800, partners: 2500 },
+  ];
+
+  // Data for ComposedChart
+  const composedData = [
+    { month: 'Jan', sales: 59, profit: 40, cost: 19 },
+    { month: 'Feb', sales: 70, profit: 48, cost: 22 },
+    { month: 'Mar', sales: 78, profit: 55, cost: 23 },
+    { month: 'Apr', sales: 85, profit: 62, cost: 23 },
+    { month: 'May', sales: 92, profit: 70, cost: 22 },
+    { month: 'Jun', sales: 98, profit: 78, cost: 20 },
+  ];
+
+  // Data for RadarChart
+  const radarData = [
+    { category: 'Pricing', value: 85 },
+    { category: 'Quality', value: 92 },
+    { category: 'Delivery', value: 78 },
+    { category: 'Support', value: 88 },
+    { category: 'Reliability', value: 81 },
+    { category: 'Satisfaction', value: 90 },
+  ];
+
+  // Data for ScatterChart
+  const scatterData = [
+    { x: 100, y: 200, z: 200 },
+    { x: 120, y: 250, z: 220 },
+    { x: 170, y: 300, z: 250 },
+    { x: 140, y: 280, z: 200 },
+    { x: 150, y: 250, z: 250 },
+    { x: 110, y: 200, z: 150 },
+    { x: 130, y: 230, z: 200 },
+    { x: 90, y: 240, z: 180 },
+    { x: 160, y: 290, z: 230 },
+    { x: 180, y: 320, z: 270 },
+  ];
+
   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
   const exportReport = (format: string) => {
@@ -245,16 +289,20 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
 
         {/* Tab Navigation */}
         <div className="mb-6 border-b border-gray-300 dark:border-gray-700">
-          <div className="flex gap-8">
+          <div className="flex gap-8 overflow-x-auto">
             {[
               { id: 'sales', label: 'Sales Report' },
               { id: 'users', label: 'User Analytics' },
               { id: 'products', label: 'Product Performance' },
+              { id: 'trends', label: 'Trend Analysis' },
+              { id: 'comparison', label: 'Comparison' },
+              { id: 'performance', label: 'Performance' },
+              { id: 'correlation', label: 'Correlation' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`px-4 py-3 font-medium border-b-2 transition-colors ${
+                className={`px-4 py-3 font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-blue-600 text-blue-600'
                     : isDarkMode
