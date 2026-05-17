@@ -563,6 +563,212 @@ const Reports: React.FC<ReportsProps> = ({ isDarkMode = false }) => {
             </Card>
           </div>
         )}
+
+        {/* Trend Analysis Tab - Area Chart */}
+        {activeTab === 'trends' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { label: 'Trend Direction', value: 'Upward', change: '+2.4%', trend: 'up' },
+                { label: 'Growth Rate', value: '14.2%', change: '+0.8%', trend: 'up' },
+                { label: 'Market Share', value: '18.5%', change: '+1.2%', trend: 'up' },
+              ].map((kpi, idx) => (
+                <Card
+                  key={idx}
+                  title={kpi.label}
+                  className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}
+                >
+                  <div>
+                    <p className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      {kpi.value}
+                    </p>
+                    <Badge variant={kpi.trend === 'up' ? 'success' : 'danger'}>
+                      {kpi.change}
+                    </Badge>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <Card title="Sales Channel Trends (Area Chart)" className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+              <ResponsiveContainer width="100%" height={350}>
+                <AreaChart data={areaChartData}>
+                  <defs>
+                    <linearGradient id="colorOnline" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorOffline" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorPartners" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                  <XAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                      color: isDarkMode ? '#ffffff' : '#000000',
+                    }}
+                  />
+                  <Legend />
+                  <Area type="monotone" dataKey="online" stroke="#3B82F6" fillOpacity={1} fill="url(#colorOnline)" name="Online Sales" />
+                  <Area type="monotone" dataKey="offline" stroke="#10B981" fillOpacity={1} fill="url(#colorOffline)" name="Offline Sales" />
+                  <Area type="monotone" dataKey="partners" stroke="#F59E0B" fillOpacity={1} fill="url(#colorPartners)" name="Partner Sales" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Card>
+          </div>
+        )}
+
+        {/* Comparison Tab - Composed Chart */}
+        {activeTab === 'comparison' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { label: 'Avg Sales', value: '85.2', change: '+5%', trend: 'up' },
+                { label: 'Avg Profit', value: '62.1', change: '+8%', trend: 'up' },
+                { label: 'Profit Margin', value: '72.9%', change: '+2.1%', trend: 'up' },
+              ].map((kpi, idx) => (
+                <Card
+                  key={idx}
+                  title={kpi.label}
+                  className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}
+                >
+                  <div>
+                    <p className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      {kpi.value}
+                    </p>
+                    <Badge variant={kpi.trend === 'up' ? 'success' : 'danger'}>
+                      {kpi.change}
+                    </Badge>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <Card title="Sales vs Profit vs Cost (Composed Chart)" className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+              <ResponsiveContainer width="100%" height={350}>
+                <ComposedChart data={composedData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                  <XAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                      color: isDarkMode ? '#ffffff' : '#000000',
+                    }}
+                  />
+                  <Legend />
+                  <Bar dataKey="sales" fill="#3B82F6" name="Sales" />
+                  <Bar dataKey="cost" fill="#EF4444" name="Cost" />
+                  <Line type="monotone" dataKey="profit" stroke="#10B981" strokeWidth={2} name="Profit" />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </Card>
+          </div>
+        )}
+
+        {/* Performance Tab - Radar Chart */}
+        {activeTab === 'performance' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { label: 'Overall Score', value: '85.8', change: '+3.2%', trend: 'up' },
+                { label: 'Quality Index', value: '92', change: '+1.5%', trend: 'up' },
+                { label: 'Support Rating', value: '88', change: '+2%', trend: 'up' },
+              ].map((kpi, idx) => (
+                <Card
+                  key={idx}
+                  title={kpi.label}
+                  className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}
+                >
+                  <div>
+                    <p className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      {kpi.value}
+                    </p>
+                    <Badge variant={kpi.trend === 'up' ? 'success' : 'danger'}>
+                      {kpi.change}
+                    </Badge>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <Card title="Business Performance Metrics (Radar Chart)" className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+              <ResponsiveContainer width="100%" height={400}>
+                <RadarChart data={radarData}>
+                  <PolarGrid stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                  <PolarAngleAxis dataKey="category" stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <PolarRadiusAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <Radar name="Score" dataKey="value" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.6} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                      color: isDarkMode ? '#ffffff' : '#000000',
+                    }}
+                  />
+                  <Legend />
+                </RadarChart>
+              </ResponsiveContainer>
+            </Card>
+          </div>
+        )}
+
+        {/* Correlation Tab - Scatter Chart */}
+        {activeTab === 'correlation' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { label: 'Data Points', value: '1,245', change: '+12.5%', trend: 'up' },
+                { label: 'Correlation Strength', value: '0.82', change: '+0.05', trend: 'up' },
+                { label: 'Confidence Level', value: '94.3%', change: '+2.1%', trend: 'up' },
+              ].map((kpi, idx) => (
+                <Card
+                  key={idx}
+                  title={kpi.label}
+                  className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}
+                >
+                  <div>
+                    <p className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                      {kpi.value}
+                    </p>
+                    <Badge variant={kpi.trend === 'up' ? 'success' : 'danger'}>
+                      {kpi.change}
+                    </Badge>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <Card title="Variable Correlation Analysis (Scatter Chart)" className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+              <ResponsiveContainer width="100%" height={400}>
+                <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                  <XAxis type="number" dataKey="x" name="Feature X" stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <YAxis type="number" dataKey="y" name="Feature Y" stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                      color: isDarkMode ? '#ffffff' : '#000000',
+                    }}
+                    cursor={{ strokeDasharray: '3 3' }}
+                  />
+                  <Scatter name="Data Correlation" data={scatterData} fill="#3B82F6" />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
