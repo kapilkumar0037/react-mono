@@ -136,6 +136,7 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
   const [stageFilter, setStageFilter] = useState<LifecycleStage | 'all'>('all');
   const [channelFilter, setChannelFilter] = useState<AcquisitionChannel | 'all'>('all');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomerIds, setSelectedCustomerIds] = useState<string[]>([]);
 
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) => {
@@ -261,6 +262,64 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
     );
   };
 
+  const selectedCustomers = customers.filter((customer) => selectedCustomerIds.includes(customer.id));
+  const allFilteredSelected = filteredCustomers.length > 0 && filteredCustomers.every((customer) => selectedCustomerIds.includes(customer.id));
+
+  const toggleCustomerSelection = (customerId: string) => {
+    setSelectedCustomerIds((ids) => 
+      ids.includes(customerId) ? ids.filter((id) => id !== customerId) : [...ids, customerId]
+    );
+  };
+
+  const toggleSelectAllFiltered = () => {
+    const filteredIds = filteredCustomers.map((customer) => customer.id);
+    setSelectedCustomerIds((ids) =>
+      filteredIds.every((id) => ids.includes(id)) 
+        ? ids.filter((id) => !filteredIds.includes(id))
+        : Array.from(new Set([...ids, ...filteredIds]))
+    );
+  };
+
+  const applyBulkStatus = (status: CustomerStatus) => {
+    if (selectedCustomerIds.length === 0) return;
+    setCustomers((currentCustomers) =>
+      currentCustomers.map((customer) =>
+        selectedCustomerIds.includes(customer.id)
+          ? { ...customer, status }
+          : customer
+      )
+    );
+    setSelectedCustomerIds([]);
+    addToast({
+      message: `${selectedCustomerIds.length} customer${selectedCustomerIds.length === 1 ? '' : 's'} status updated to ${status}.`,
+      type: 'success',
+    });
+  };
+
+  const applyBulkStage = (stage: LifecycleStage) => {
+    if (selectedCustomerIds.length === 0) return;
+    setCustomers((currentCustomers) =>
+      currentCustomers.map((customer) =>
+        selectedCustomerIds.includes(customer.id)
+          ? { ...customer, stage }
+          : customer
+      )
+    );
+    setSelectedCustomerIds([]);
+    addToast({
+      message: `${selectedCustomerIds.length} customer${selectedCustomerIds.length === 1 ? '' : 's'} moved to ${stage} stage.`,
+      type: 'success',
+    });
+  };
+
+  const exportSelectedCustomers = () => {
+    if (selectedCustomerIds.length === 0) return;
+    addToast({
+      message: `Export package prepared for ${selectedCustomerIds.length} selected customer${selectedCustomerIds.length === 1 ? '' : 's'}.`,
+      type: 'success',
+    });
+  };
+
   return (
     <div className={`flex-1 p-4 overflow-y-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto space-y-4">
@@ -364,10 +423,45 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
         </Card>
 
         <Card className={isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+          {selectedCustomerIds.length > 0 && (
+            <div className={`border-b px-4 py-3 ${isDarkMode ? 'border-gray-700 bg-gray-900/40' : 'border-gray-200 bg-gray-50'}`}>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                  {selectedCustomerIds.length} customer{selectedCustomerIds.length === 1 ? '' : 's'} selected
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={() => setSelectedCustomerIds([])} className="bg-gray-600 px-3 py-1.5 text-xs text-white">
+                    Clear
+                  </Button>
+                  <Button onClick={exportSelectedCustomers} className="bg-gray-700 px-3 py-1.5 text-xs text-white">
+                    Export
+                  </Button>
+                  <Button onClick={() => applyBulkStatus('VIP')} className="bg-purple-600 px-3 py-1.5 text-xs text-white">
+                    Mark VIP
+                  </Button>
+                  <Button onClick={() => applyBulkStatus('At Risk')} className="bg-amber-600 px-3 py-1.5 text-xs text-white">
+                    Flag At Risk
+                  </Button>
+                  <Button onClick={() => applyBulkStage('Loyal')} className="bg-green-600 px-3 py-1.5 text-xs text-white">
+                    Mark Loyal
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <th className="px-3 py-2 text-left">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleSelectAllFiltered}
+                      className="h-4 w-4 rounded"
+                      aria-label="Select all filtered customers"
+                    />
+                  </th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Customer</th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Status</th>
                   <th className={`px-3 py-2 text-left font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Lifecycle</th>
@@ -381,13 +475,26 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
                 {filteredCustomers.map((customer) => (
                   <tr
                     key={customer.id}
-                    onClick={() => setSelectedCustomer(customer)}
-                    className={`cursor-pointer border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
+                    className={`border-b transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-200 hover:bg-gray-50'}`}
                   >
                     <td className="px-3 py-2 align-top">
-                      <div className={`font-semibold whitespace-nowrap ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{customer.name}</div>
-                      <div className={`mt-0.5 truncate max-w-[220px] ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{customer.company}</div>
-                      <div className={`mt-0.5 whitespace-nowrap ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>{customer.id} • {customer.region}</div>
+                      <input
+                        type="checkbox"
+                        checked={selectedCustomerIds.includes(customer.id)}
+                        onChange={() => toggleCustomerSelection(customer.id)}
+                        className="h-4 w-4 rounded"
+                        aria-label={`Select ${customer.name}`}
+                      />
+                    </td>
+                    <td className="px-3 py-2 align-top">
+                      <button
+                        onClick={() => setSelectedCustomer(customer)}
+                        className="text-left hover:underline"
+                      >
+                        <div className={`font-semibold whitespace-nowrap ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{customer.name}</div>
+                        <div className={`mt-0.5 truncate max-w-[220px] ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{customer.company}</div>
+                        <div className={`mt-0.5 whitespace-nowrap ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>{customer.id} • {customer.region}</div>
+                      </button>
                     </td>
                     <td className="px-3 py-2 align-top">
                       <Badge variant={getStatusVariant(customer.status)}>{customer.status}</Badge>
