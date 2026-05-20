@@ -11,6 +11,10 @@ import { useGlobalToast } from './hooks/useGlobalToast';
 import { useUpdateAction, useCreateAction, useDeleteAction, useExportAction } from './hooks/useActionFeedback';
 import { useConfirmDialog, ConfirmDialog } from './components/ConfirmDialog';
 import { EmptyState } from './components/EmptyState';
+import { useFilterPresets } from './hooks/useFilterPresets';
+import { FilterPresets } from './components/FilterPresets';
+import { ActiveFilters } from './components/ActiveFilters';
+import { ExportDialog } from './components/ExportDialog';
 
 interface FormData {
   name: string;
@@ -40,6 +44,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const exportAction = useExportAction('User Directory');
   const deleteConfirm = useConfirmDialog();
   const bulkDeleteConfirm = useConfirmDialog();
+  const filterPresets = useFilterPresets('users');
   
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
@@ -53,6 +58,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const [users, setUsers] = useState<DirectoryUser[]>(() => readStoredUsers());
   const [savedViews, setSavedViews] = useState<SavedView<UserViewFilters>[]>(() => readSavedViews<UserViewFilters>('users'));
   const [viewName, setViewName] = useState('');
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', role: 'Support', status: 'Active' });
 
   const itemsPerPage = 8;
@@ -262,12 +268,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   
   const exportSelectedUsers = async () => {
     if (selectedUserIds.length === 0) return;
-    await exportAction.execute(
-      () => new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        successMessage: `Directory export prepared for ${selectedUserIds.length} selected user${selectedUserIds.length === 1 ? '' : 's'}`,
-      }
-    );
+    setIsExportDialogOpen(true);
   };
 
   const handleSaveView = () => {
@@ -295,6 +296,60 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
     setCurrentPage(1);
   };
 
+  const handleLoadFilterPreset = (presetId: string) => {
+    const filters = filterPresets.loadPreset(presetId);
+    if (filters) {
+      setSearchQuery(filters.q || '');
+      setFilterRole(filters.role || 'all');
+      setFilterStatus(filters.status || 'all');
+      setCurrentPage(1);
+      addToast({ type: 'success', message: 'Filter preset loaded' });
+    }
+  };
+
+  const handleSaveFilterPreset = (name: string, filters: Record<string, any>) => {
+    filterPresets.savePreset(name, filters);
+    addToast({ type: 'success', message: `Filter preset "${name}" saved` });
+  };
+
+  const handleDeleteFilterPreset = (presetId: string) => {
+    filterPresets.deletePreset(presetId);
+    addToast({ type: 'info', message: 'Filter preset deleted' });
+  };
+
+  const handleRenameFilterPreset = (presetId: string, newName: string) => {
+    filterPresets.renamePreset(presetId, newName);
+    addToast({ type: 'success', message: 'Filter preset renamed' });
+  };
+
+  const handleSetDefaultPreset = (presetId: string) => {
+    filterPresets.setAsDefault(presetId);
+    addToast({ type: 'success', message: 'Default filter preset set' });
+  };
+
+  const handleClearFilter = (key: string) => {
+    switch (key) {
+      case 'q':
+        setSearchQuery('');
+        break;
+      case 'role':
+        setFilterRole('all');
+        break;
+      case 'status':
+        setFilterStatus('all');
+        break;
+    }
+    setCurrentPage(1);
+  };
+
+  const handleClearAllFilters = () => {
+    setSearchQuery('');
+    setFilterRole('all');
+    setFilterStatus('all');
+    setCurrentPage(1);
+    addToast({ type: 'info', message: 'All filters cleared' });
+  };
+
   return (
     <div className="mx-auto w-full max-w-7xl p-6">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -304,6 +359,15 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
 
       <Card className="mb-6">
         <div className="p-6">
+          <FilterPresets
+            presets={filterPresets.presets}
+            onLoadPreset={handleLoadFilterPreset}
+            onDeletePreset={handleDeleteFilterPreset}
+            onRenamePreset={handleRenameFilterPreset}
+            onSetAsDefault={handleSetDefaultPreset}
+            onSaveNew={handleSaveFilterPreset}
+            currentFilters={{ q: searchQuery, role: filterRole, status: filterStatus }}
+          />
           <div className="mb-6 flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center md:justify-between">
             <div className="flex-1"><p className="text-sm font-semibold text-gray-900">Saved Views</p><p className="mt-1 text-sm text-gray-600">Save filters and reuse the current URL as a shareable view.</p></div>
             <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center md:justify-end"><input type="text" value={viewName} onChange={(event) => setViewName(event.target.value)} placeholder="Name this view" className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" /><Button onClick={handleSaveView} className="bg-gray-900 text-white">Save View</Button></div>
@@ -315,6 +379,12 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
             <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }} className="rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"><option value="all">All Status</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Suspended">Suspended</option></select>
             <Button onClick={() => { if (!canManageUsers) return; setIsEditMode(false); setEditingUserId(null); setFormData({ name: '', email: '', role: 'Support', status: 'Active' }); setIsModalOpen(true); }} disabled={!canManageUsers} className="bg-blue-600 text-white disabled:bg-gray-400">+ Add User</Button>
           </div>
+          <ActiveFilters
+            filters={{ q: searchQuery, role: filterRole, status: filterStatus }}
+            onClearFilter={handleClearFilter}
+            onClearAll={handleClearAllFilters}
+            filterLabels={{ q: 'Search', role: 'Role', status: 'Status' }}
+          />
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between"><div className="text-sm text-gray-600">Showing {paginatedUsers.length} of {filteredUsers.length} users</div>{!canManageUsers && <div className="text-sm text-amber-700 dark:text-amber-300">Your role can review users but cannot add, edit, or delete them.</div>}</div>
         </div>
       </Card>
@@ -378,6 +448,24 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
         isLoading={bulkDeleteConfirm.isLoading}
         onConfirm={bulkDeleteConfirm.options?.onConfirm || (() => {})}
         onCancel={bulkDeleteConfirm.close}
+      />
+
+      <ExportDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+        data={users}
+        selectedCount={selectedUserIds.length}
+        selectedData={selectedUserIds.length > 0 ? users.filter(u => selectedUserIds.includes(u.id)) : []}
+        pageTitle="Users"
+        columnLabels={{
+          id: 'ID',
+          name: 'Name',
+          email: 'Email',
+          role: 'Role',
+          status: 'Status',
+          joinDate: 'Join Date',
+        }}
+        isDarkMode={isDarkMode}
       />
     </div>
   );
