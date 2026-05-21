@@ -15,6 +15,8 @@ import { useFilterPresets } from './hooks/useFilterPresets';
 import { FilterPresets } from './components/FilterPresets';
 import { ActiveFilters } from './components/ActiveFilters';
 import { ExportDialog } from './components/ExportDialog';
+import { useAuditLog } from './hooks/useAuditLog';
+import { AuditActionType } from './types/auditLog';
 
 interface FormData {
   name: string;
@@ -45,6 +47,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const deleteConfirm = useConfirmDialog();
   const bulkDeleteConfirm = useConfirmDialog();
   const filterPresets = useFilterPresets('users');
+  const auditLog = useAuditLog();
   
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
@@ -130,6 +133,17 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
         type: 'warning', 
         message: 'Your role cannot change the user directory.' 
       });
+      auditLog.logAction(
+        AuditActionType.PERMISSION_DENIED,
+        currentUserEmail || 'unknown',
+        'Current User',
+        currentUserEmail || 'unknown@example.com',
+        'User',
+        {
+          description: `Permission denied: User ${currentUserEmail} attempted to create/edit user without sufficient permissions`,
+          status: 'failure'
+        }
+      );
       return;
     }
     if (!formData.name || !formData.email) {
@@ -143,6 +157,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
     if (isEditMode && editingUserId !== null) {
       const existingUser = users.find((user) => user.id === editingUserId);
       const roleChanged = existingUser && existingUser.role !== formData.role;
+      const statusChanged = existingUser && existingUser.status !== formData.status;
       
       setUsers(users.map((user) => 
         user.id === editingUserId 
@@ -150,6 +165,37 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
           : user
       ));
       
+      const changes: Record<string, any> = {};
+      if (existingUser?.name !== formData.name) {
+        changes['name'] = { before: existingUser?.name, after: formData.name };
+      }
+      if (existingUser?.email !== formData.email) {
+        changes['email'] = { before: existingUser?.email, after: formData.email };
+      }
+      if (statusChanged) {
+        changes['status'] = { before: existingUser?.status, after: formData.status };
+      }
+      if (roleChanged) {
+        changes['role'] = { before: existingUser?.role, after: formData.role };
+      }
+
+      auditLog.logAction(
+        roleChanged ? AuditActionType.USER_ROLE_CHANGED : AuditActionType.USER_UPDATED,
+        currentUserEmail || 'unknown',
+        'Current User',
+        currentUserEmail || 'unknown@example.com',
+        'User',
+        {
+          entityId: String(editingUserId),
+          entityName: formData.name,
+          description: roleChanged 
+            ? `${formData.name} was reassigned to the ${formData.role} role.`
+            : `User ${formData.name} details updated`,
+          changes: Object.keys(changes).length > 0 ? changes : undefined,
+          status: 'success'
+        }
+      );
+
       if (roleChanged && canManageRoles) {
         appendAuditEntry({ 
           user: currentUserEmail ?? 'Workspace admin', 
@@ -176,6 +222,26 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
       };
       
       setUsers([...users, newUser]);
+
+      auditLog.logAction(
+        AuditActionType.USER_CREATED,
+        currentUserEmail || 'unknown',
+        'Current User',
+        currentUserEmail || 'unknown@example.com',
+        'User',
+        {
+          entityId: String(newUser.id),
+          entityName: newUser.name,
+          description: `${newUser.name} joined as ${newUser.role}`,
+          status: 'success',
+          metadata: {
+            email: newUser.email,
+            role: newUser.role,
+            status: newUser.status
+          }
+        }
+      );
+
       appendAuditEntry({ 
         user: currentUserEmail ?? 'Workspace admin', 
         action: 'User Created', 
@@ -201,6 +267,25 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
       isDangerous: true,
       onConfirm: async () => {
         setUsers(users.filter((u) => u.id !== user.id));
+        
+        auditLog.logAction(
+          AuditActionType.USER_DELETED,
+          currentUserEmail || 'unknown',
+          'Current User',
+          currentUserEmail || 'unknown@example.com',
+          'User',
+          {
+            entityId: String(user.id),
+            entityName: user.name,
+            description: `${user.name} was removed from the user directory`,
+            status: 'success',
+            metadata: {
+              email: user.email,
+              role: user.role
+            }
+          }
+        );
+
         appendAuditEntry({ 
           user: currentUserEmail ?? 'Workspace admin', 
           action: 'User Deleted', 
@@ -219,11 +304,31 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
 
   const applyBulkStatus = (status: DirectoryUser['status']) => {
     if (!canManageUsers || selectedUserIds.length === 0) return;
+    
+    const selectedUsers = users.filter(u => selectedUserIds.includes(u.id));
+    
     setUsers((currentUsers) => 
       currentUsers.map((user) => 
         selectedUserIds.includes(user.id) ? { ...user, status } : user
       )
     );
+
+    auditLog.logAction(
+      AuditActionType.BULK_UPDATE,
+      currentUserEmail || 'unknown',
+      'Current User',
+      currentUserEmail || 'unknown@example.com',
+      'User',
+      {
+        description: `${selectedUserIds.length} user${selectedUserIds.length === 1 ? '' : 's'} marked ${status.toLowerCase()}`,
+        status: 'success',
+        metadata: {
+          affectedUsers: selectedUsers.length,
+          newStatus: status
+        }
+      }
+    );
+
     appendAuditEntry({ 
       user: currentUserEmail ?? 'Workspace admin', 
       action: 'Users Updated', 
@@ -246,9 +351,28 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
       confirmLabel: 'Delete',
       isDangerous: true,
       onConfirm: async () => {
+        const usersToDelete = users.filter(u => selectedUserIds.includes(u.id));
+        
         setUsers((currentUsers) => 
           currentUsers.filter((user) => !selectedUserIds.includes(user.id))
         );
+
+        auditLog.logAction(
+          AuditActionType.BULK_DELETE,
+          currentUserEmail || 'unknown',
+          'Current User',
+          currentUserEmail || 'unknown@example.com',
+          'User',
+          {
+            description: `${selectedUserIds.length} user${selectedUserIds.length === 1 ? '' : 's'} removed from the directory`,
+            status: 'success',
+            metadata: {
+              deletedCount: usersToDelete.length,
+              deletedUserNames: usersToDelete.map(u => u.name)
+            }
+          }
+        );
+
         appendAuditEntry({ 
           user: currentUserEmail ?? 'Workspace admin', 
           action: 'Users Deleted', 
