@@ -17,6 +17,9 @@ import { ActiveFilters } from './components/ActiveFilters';
 import { ExportDialog } from './components/ExportDialog';
 import { useAuditLog } from './hooks/useAuditLog';
 import { AuditActionType } from './types/auditLog';
+import { useRealtimeSync } from './hooks/useRealtimeSync';
+import { RealtimeStatusIndicator } from './components/RealtimeStatusIndicator';
+import { RealtimeDataFeed } from './components/RealtimeDataFeed';
 
 interface FormData {
   name: string;
@@ -48,6 +51,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const bulkDeleteConfirm = useConfirmDialog();
   const filterPresets = useFilterPresets('users');
   const auditLog = useAuditLog();
+  const { syncStatus, changes } = useRealtimeSync('User');
   
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
@@ -62,6 +66,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const [savedViews, setSavedViews] = useState<SavedView<UserViewFilters>[]>(() => readSavedViews<UserViewFilters>('users'));
   const [viewName, setViewName] = useState('');
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isRealtimeFeedOpen, setIsRealtimeFeedOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', role: 'Support', status: 'Active' });
 
   const itemsPerPage = 8;
@@ -91,6 +96,24 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
     filterStatus !== 'all' ? nextParams.set('status', filterStatus) : nextParams.delete('status');
     setSearchParams(nextParams, { replace: true });
   }, [filterRole, filterStatus, searchParams, setSearchParams]);
+
+  // Real-time sync handler
+  useEffect(() => {
+    if (changes.length === 0) return;
+    
+    const latestChange = changes[0];
+    
+    // Refresh users from storage to reflect real-time updates
+    setUsers(readStoredUsers());
+    
+    // Show toast notification for real-time updates
+    if (latestChange.changeType !== 'SYNC') {
+      addToast({
+        type: 'info',
+        message: `User data updated: ${latestChange.changeType.toLowerCase()}`
+      });
+    }
+  }, [changes, addToast]);
 
   const filteredUsers = useMemo(
     () =>
@@ -478,7 +501,10 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
     <div className="mx-auto w-full max-w-7xl p-6">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div><h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Users</h1><p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Assign roles, review statuses, and manage workspace membership.</p></div>
-        <div className={`rounded-lg border p-4 ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}><p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Your access</p><p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{canManageUsers ? 'Can manage users' : 'Read-only access'}{canManageRoles ? ' and role assignments.' : '.'}</p></div>
+        <div className="flex flex-col gap-4">
+          <RealtimeStatusIndicator syncStatus={syncStatus} isDarkMode={isDarkMode} size="md" />
+          <div className={`rounded-lg border p-4 ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}><p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Your access</p><p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{canManageUsers ? 'Can manage users' : 'Read-only access'}{canManageRoles ? ' and role assignments.' : '.'}</p></div>
+        </div>
       </div>
 
       <Card className="mb-6">
@@ -591,6 +617,40 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
         }}
         isDarkMode={isDarkMode}
       />
+
+      {isRealtimeFeedOpen && (
+        <div className="mt-6">
+          <Card>
+            <div className={`border-b p-4 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+              <div className="flex items-center justify-between">
+                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  Real-time Data Feed
+                </h3>
+                <Button 
+                  onClick={() => setIsRealtimeFeedOpen(false)} 
+                  className="bg-gray-600 px-3 py-1 text-xs text-white"
+                >
+                  Hide
+                </Button>
+              </div>
+            </div>
+            <div className="p-4">
+              <RealtimeDataFeed changes={changes} isDarkMode={isDarkMode} maxItems={20} />
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {!isRealtimeFeedOpen && changes.length > 0 && (
+        <div className="mt-4 text-center">
+          <Button 
+            onClick={() => setIsRealtimeFeedOpen(true)}
+            className="bg-blue-600 text-white"
+          >
+            Show Real-time Feed ({changes.length})
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
