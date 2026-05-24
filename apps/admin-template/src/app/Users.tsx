@@ -20,6 +20,11 @@ import { AuditActionType } from './types/auditLog';
 import { useRealtimeSync } from './hooks/useRealtimeSync';
 import { RealtimeStatusIndicator } from './components/RealtimeStatusIndicator';
 import { RealtimeDataFeed } from './components/RealtimeDataFeed';
+import { useDataImport } from './hooks/useDataImport';
+import { ImportDialog } from './components/ImportDialog';
+import { ImportHistory } from './components/ImportHistory';
+import { ImportDetailsModal } from './components/ImportDetailsModal';
+import { ImportMapping, ImportStrategy } from './types/dataImport';
 
 interface FormData {
   name: string;
@@ -52,6 +57,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const filterPresets = useFilterPresets('users');
   const auditLog = useAuditLog();
   const { syncStatus, changes } = useRealtimeSync('User');
+  const { isLoading: isImporting, lastResult: importResult, getHistory: getImportHistory, executeImport } = useDataImport();
   
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
@@ -67,6 +73,8 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const [viewName, setViewName] = useState('');
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isRealtimeFeedOpen, setIsRealtimeFeedOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [selectedImportResult, setSelectedImportResult] = useState<any>(null);
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', role: 'Support', status: 'Active' });
 
   const itemsPerPage = 8;
@@ -497,6 +505,77 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
     addToast({ type: 'info', message: 'All filters cleared' });
   };
 
+  // Define column mappings for import
+  const userColumnMappings: ImportMapping[] = [
+    { csvColumn: 'name', entityField: 'name', required: true, dataType: 'string' },
+    { csvColumn: 'email', entityField: 'email', required: true, dataType: 'email' },
+    { csvColumn: 'role', entityField: 'role', required: false, dataType: 'string', transformer: (v) => v || 'Support' },
+    { csvColumn: 'status', entityField: 'status', required: false, dataType: 'string', transformer: (v) => v || 'Active' },
+  ];
+
+  const handleImportUsers = async (file: File, mappings: ImportMapping[], strategy: ImportStrategy) => {
+    if (!canManageUsers) {
+      addToast({ 
+        type: 'warning', 
+        message: 'Your role cannot import users.' 
+      });
+      return;
+    }
+
+    try {
+      const result = await executeImport(
+        file,
+        'CSV',
+        { format: 'CSV', strategy, columnMappings: mappings, skipHeader: true, validateEmail: true },
+        undefined,
+        (record) => {
+          const newUser: DirectoryUser = {
+            id: Math.max(...users.map(u => u.id), 0) + 1,
+            name: record.name,
+            email: record.email,
+            role: record.role || 'Support',
+            status: record.status || 'Active',
+            joinDate: new Date().toISOString().split('T')[0],
+          };
+          setUsers(prev => [...prev, newUser]);
+
+          auditLog.logAction(
+            AuditActionType.USER_CREATED,
+            currentUserEmail || 'unknown',
+            'Current User',
+            currentUserEmail || 'unknown@example.com',
+            'User',
+            {
+              entityId: String(newUser.id),
+              entityName: newUser.name,
+              description: `${newUser.name} imported as ${newUser.role}`,
+              status: 'success',
+              metadata: {
+                email: newUser.email,
+                role: newUser.role,
+                status: newUser.status,
+                importedVia: 'CSV'
+              }
+            }
+          );
+        }
+      );
+
+      setSelectedImportResult(result);
+      addToast({
+        type: result.failureCount === 0 ? 'success' : 'warning',
+        message: `Import completed: ${result.successCount} created${result.failureCount > 0 ? `, ${result.failureCount} failed` : ''}`
+      });
+
+      setIsImportDialogOpen(false);
+    } catch (error) {
+      addToast({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Import failed'
+      });
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-7xl p-6">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -528,6 +607,7 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
             <select value={filterRole} onChange={(e) => { setFilterRole(e.target.value); setCurrentPage(1); }} className="rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"><option value="all">All Roles</option>{APP_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}</select>
             <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }} className="rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"><option value="all">All Status</option><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Suspended">Suspended</option></select>
             <Button onClick={() => { if (!canManageUsers) return; setIsEditMode(false); setEditingUserId(null); setFormData({ name: '', email: '', role: 'Support', status: 'Active' }); setIsModalOpen(true); }} disabled={!canManageUsers} className="bg-blue-600 text-white disabled:bg-gray-400">+ Add User</Button>
+            <Button onClick={() => setIsImportDialogOpen(true)} disabled={!canManageUsers} className="bg-green-600 text-white disabled:bg-gray-400">📥 Import Users</Button>
           </div>
           <ActiveFilters
             filters={{ q: searchQuery, role: filterRole, status: filterStatus }}
@@ -651,6 +731,36 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
           </Button>
         </div>
       )}
+
+      {/* Import Components */}
+      <ImportDialog
+        isOpen={isImportDialogOpen}
+        onClose={() => setIsImportDialogOpen(false)}
+        onImport={handleImportUsers}
+        columnMappings={userColumnMappings}
+        isDarkMode={isDarkMode}
+        title="Import Users"
+        description="Upload a CSV file with columns: name, email, role (optional), status (optional)"
+      />
+
+      {getImportHistory().imports.length > 0 && (
+        <div className="mt-8">
+          <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Import History
+          </h2>
+          <ImportHistory
+            imports={getImportHistory().imports}
+            isDarkMode={isDarkMode}
+            onViewDetails={setSelectedImportResult}
+          />
+        </div>
+      )}
+
+      <ImportDetailsModal
+        result={selectedImportResult}
+        isDarkMode={isDarkMode}
+        onClose={() => setSelectedImportResult(null)}
+      />
     </div>
   );
 };
