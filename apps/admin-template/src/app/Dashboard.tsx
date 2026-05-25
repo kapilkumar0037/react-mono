@@ -1,155 +1,280 @@
-import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { useGlobalToast } from './hooks/useGlobalToast';
+import React, { useEffect, useState } from 'react';
+import { Button, Card } from '@react-mono/ui-controls';
+import { useDashboard } from './hooks/useDashboard';
+import { WidgetCustomization } from './components/WidgetCustomization';
+import { LayoutManager } from './components/LayoutManager';
+import { MetricWidget, ChartWidget, StatusOverviewWidget, ActivityFeedWidget } from './components/WidgetComponents';
+import { WidgetInstance, WidgetType } from './types/dashboard';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 interface DashboardProps {
   isDarkMode?: boolean;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
-  const { addToast } = useGlobalToast();
-  const [showAddSchedule, setShowAddSchedule] = useState(false);
+  const {
+    layouts,
+    preferences,
+    getActiveLayout,
+    switchLayout,
+    createNewLayout,
+    updateCurrentLayout,
+    deleteCurrentLayout,
+    addWidget,
+    removeWidget,
+    updateWidget,
+    updatePreferences,
+    toggleEditMode,
+  } = useDashboard();
 
-  // User profile
-  const userProfile = {
-    name: 'Adrian',
-    role: 'Manager',
-    avatar: '👤',
-  };
+  const [isCustomizing, setIsCustomizing] = useState(false);
+  const [isManagingLayouts, setIsManagingLayouts] = useState(false);
+  const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
 
-  // Metric cards
-  const metrics = [
-    { label: 'Attendance Overview', value: '120/154', change: '+2.3%', color: 'border-orange-500', bgColor: 'bg-orange-50 dark:bg-orange-900/20' },
-    { label: 'Total H/O Project\'s', value: '90/125', change: '+2.3%', color: 'border-teal-500', bgColor: 'bg-teal-50 dark:bg-teal-900/20' },
-    { label: 'Total No of Clients', value: '89/86', change: '+12.3%', color: 'border-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-900/20' },
-    { label: 'Total No of Tasks', value: '252/28', change: '+41.2%', color: 'border-pink-500', bgColor: 'bg-pink-50 dark:bg-pink-900/20' },
-  ];
+  const activeLayout = getActiveLayout();
 
-  // Employees by department
-  const departmentData = [
-    { name: 'HR', value: 45 },
-    { name: 'Development', value: 120 },
-    { name: 'Management', value: 35 },
-    { name: 'Testing', value: 28 },
-    { name: 'Sales', value: 52 },
-  ];
-
-  // Employee status
-  const employeeStatus = [
-    { name: 'Present', value: 154, color: '#10b981' },
-    { name: 'Absent', value: 21, color: '#ef4444' },
-    { name: 'Permission', value: 12, color: '#f59e0b' },
-    { name: 'Leave', value: 4, color: '#6b7280' },
-  ];
-
-  // Clock in/out employees
-  const clockInOutData = [
-    { name: 'Daniel Estella', dept: 'UI/UX Designer', status: '✓ IN', time: '09:30 AM', badge: 'Present' },
-    { name: 'Douglas Marting', dept: 'Tech Developer', status: '✓ IN', time: '08:45 AM', badge: 'Present' },
-    { name: 'Brian Villaobs', dept: 'Tech Developer', status: '✓ IN', time: '08:15 AM', badge: 'Present' },
-    { name: 'Anthony Lewis', dept: 'Finance', status: '✗ OUT', time: '05:30 PM', badge: 'Out', danger: true },
-  ];
-
-  // Jobs applicants
-  const jobApplicants = [
-    { name: 'Brian Villaobs', position: 'Exp: 0+ Years • USA', status: 'Interviewed', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
-    { name: 'Anthony Lewis', position: 'Exp: 0+ Years • USA', status: 'Follow-Update', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' },
-    { name: 'Stephen Peorit', position: 'Exp: 0+ Years • USA', status: 'Rejected-Offer', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300' },
-    { name: 'Douglas Marting', position: 'Exp: 0+ Years • USA', status: 'Rejected-Offer', color: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300' },
-  ];
-
-  // Employees table
-  const employees = [
-    { name: 'Anthony Lewis', dept: 'Finance', status: 'Active' },
-    { name: 'Brian Villaobs', dept: 'Tech Developer', status: 'Active' },
-    { name: 'Stephen Peorit', dept: 'Marketing', status: 'Active' },
-    { name: 'Douglas Marting', dept: 'Manager', status: 'Active' },
-    { name: 'Coronie Walters', dept: 'UI/UX Design', status: 'Active' },
-  ];
-
-  // Todo items
-  const todoItems = [
-    { id: 1, title: 'Add Holidays', completed: false },
-    { id: 2, title: 'Add Meeting to Client', completed: false },
-    { id: 3, title: 'Chat with Adrian', completed: false },
-    { id: 4, title: 'Management Call', completed: false },
-    { id: 5, title: 'Add Payroll', completed: false },
-  ];
-
-  // Sales overview
+  // Sample data
   const salesData = [
-    { month: 'Jan', Income: 40000, Expenses: 24000 },
-    { month: 'Feb', Income: 30000, Expenses: 13980 },
-    { month: 'Mar', Income: 20000, Expenses: 9800 },
-    { month: 'Apr', Income: 27800, Expenses: 39080 },
-    { month: 'May', Income: 18900, Expenses: 48000 },
-    { month: 'Jun', Income: 23900, Expenses: 38000 },
-    { month: 'Jul', Income: 34900, Expenses: 43000 },
-    { month: 'Aug', Income: 42000, Expenses: 51000 },
-    { month: 'Sep', Income: 38000, Expenses: 45000 },
-    { month: 'Oct', Income: 41000, Expenses: 52000 },
-    { month: 'Nov', Income: 49000, Expenses: 61000 },
-    { month: 'Dec', Income: 52000, Expenses: 68000 },
+    { month: 'Jan', revenue: 40000, expenses: 24000 },
+    { month: 'Feb', revenue: 30000, expenses: 13980 },
+    { month: 'Mar', revenue: 20000, expenses: 9800 },
+    { month: 'Apr', revenue: 27800, expenses: 39080 },
+    { month: 'May', revenue: 18900, expenses: 48000 },
+    { month: 'Jun', revenue: 23900, expenses: 38000 },
   ];
 
-  // Invoices
-  const invoices = [
-    { id: 'Redesign Website', amount: '$4800', status: 'Unpaid', color: 'text-red-600' },
-    { id: 'Module Completion', amount: '$1875', status: 'Unpaid', color: 'text-red-600' },
-    { id: 'Change on Erp Module', amount: '$2000 + ... LLP', status: 'Unpaid', color: 'text-red-600' },
-    { id: 'Changes on the Board', amount: '$1345', status: 'Unpaid', color: 'text-red-600' },
-    { id: 'Hospital Management', amount: '$6858', status: 'Paid', color: 'text-green-600' },
+  const userMetric = { label: 'Total Users', value: '1,245', change: 12, icon: '👥', color: 'text-blue-600' };
+  const ordersMetric = { label: 'Total Orders', value: '8,920', change: 8, icon: '📦', color: 'text-green-600' };
+  const revenueMetric = { label: 'Revenue', value: '$89,230', change: 15, icon: '💰', color: 'text-orange-600' };
+  const sessionsMetric = { label: 'Active Sessions', value: '342', change: -3, icon: '🟢', color: 'text-green-600' };
+
+  const orderStatuses = [
+    { label: 'Completed', value: 320, color: 'bg-green-500', icon: '✓' },
+    { label: 'In Progress', value: 145, color: 'bg-blue-500', icon: '⟳' },
+    { label: 'Pending', value: 78, color: 'bg-yellow-500', icon: '⏳' },
+    { label: 'Failed', value: 12, color: 'bg-red-500', icon: '✕' },
   ];
 
-  // Projects
-  const projects = [
-    { id: 'PRO-001', name: 'Office Management App', team: 3, hours: '120/250 Hrs', deadline: '12/09/2025', status: 'High', color: 'text-red-600' },
-    { id: 'PRO-002', name: 'Clinic Management', team: 3, hours: '250/250 Hrs', deadline: '26/10/2025', status: 'Medium', color: 'text-yellow-600' },
-    { id: 'PRO-003', name: 'Educational Platform', team: 3, hours: '80/120 Hrs', deadline: '18/02/2025', status: 'High', color: 'text-red-600' },
-    { id: 'PRO-004', name: 'Chat & Call Mobile App', team: 3, hours: '40/150 Hrs', deadline: '17/10/2025', status: 'Medium', color: 'text-yellow-600' },
-    { id: 'PRO-005', name: 'Chat & Call Mobile App', team: 3, hours: '100/300 Hrs', deadline: '17/10/2025', status: 'Medium', color: 'text-yellow-600' },
-  ];
-
-  // Tasks statistics
-  const tasksStats = [
-    { name: 'Ongoing', value: 24, color: '#fbbf24' },
-    { name: 'On Hold', value: 10, color: '#3b82f6' },
-    { name: 'Overdue', value: 16, color: '#8b5cf6' },
-    { name: 'Completed', value: 40, color: '#10b981' },
-  ];
-
-  // Schedules
-  const schedules = [
-    { title: 'Slot Booking', date: 'Thu, 16 Feb 2025', time: '09:00 AM - 10:00 AM' },
-    { title: 'Interview Candidates - IOS Developer', date: 'Wed, 26 Feb 2025', time: '10:00 AM - 02:00 AM' },
-  ];
-
-  // Recent activities
   const recentActivities = [
-    { user: 'Douglas Marting', action: 'Posted New Project HEME Dashboard', time: '06:30 PM' },
-    { user: 'Brian Villaobs', action: 'Commented on Updated Document', time: '06:30 PM' },
-    { user: 'Harvey Smith', action: 'Approved Task for Module Tasks', time: '06:30 PM' },
-    { user: 'Eliot Murray', action: 'Requesting Access for Module Tasks', time: '06:30 PM' },
+    { id: '1', action: 'New user registration', timestamp: '2 mins ago', user: 'System', icon: '📝' },
+    { id: '2', action: 'Order #12345 completed', timestamp: '15 mins ago', user: 'Order Service', icon: '📦' },
+    { id: '3', action: 'Revenue report generated', timestamp: '1 hour ago', user: 'Reporting', icon: '📊' },
+    { id: '4', action: 'System backup completed', timestamp: '2 hours ago', user: 'System', icon: '💾' },
   ];
 
-  // Birthdays
-  const birthdays = [
-    { name: 'Andrew Jermia', date: '28 Jun 2025', status: 'Today' },
-    { name: 'Denis Walters', date: '28 Jun 2025', status: 'Tomorrow' },
-    { name: 'Stephen Peorit', date: '28 Jun 2025', status: 'Soon' },
-  ];
-
-  const handleTodoToggle = (id: number) => {
-    addToast({ type: 'success', message: 'Todo updated successfully' });
+  const handleWidgetDragStart = (e: React.DragEvent, widgetId: string) => {
+    setDraggedWidget(widgetId);
+    e.dataTransfer.effectAllowed = 'move';
   };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const renderWidget = (widget: WidgetInstance) => {
+    switch (widget.type) {
+      case WidgetType.METRIC_CARD:
+        let metric = userMetric;
+        if (widget.title.includes('Orders')) metric = ordersMetric;
+        else if (widget.title.includes('Revenue')) metric = revenueMetric;
+        else if (widget.title.includes('Active')) metric = sessionsMetric;
+
+        return (
+          <MetricWidget
+            key={widget.id}
+            widget={widget}
+            isDarkMode={isDarkMode}
+            isEditing={activeLayout?.isEditing}
+            onDelete={() => removeWidget(activeLayout?.id || '', widget.id)}
+            onUpdate={(updates) => updateWidget(activeLayout?.id || '', widget.id, updates)}
+            onDragStart={(e) => handleWidgetDragStart(e, widget.id)}
+            metric={metric}
+          />
+        );
+
+      case WidgetType.CHART:
+        return (
+          <ChartWidget
+            key={widget.id}
+            widget={widget}
+            isDarkMode={isDarkMode}
+            isEditing={activeLayout?.isEditing}
+            onDelete={() => removeWidget(activeLayout?.id || '', widget.id)}
+            onUpdate={(updates) => updateWidget(activeLayout?.id || '', widget.id, updates)}
+            onDragStart={(e) => handleWidgetDragStart(e, widget.id)}
+            chart={
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={salesData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                  <XAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+                      color: isDarkMode ? '#f3f4f6' : '#111827',
+                    }}
+                  />
+                  <Bar dataKey="revenue" fill="#3b82f6" />
+                  <Bar dataKey="expenses" fill="#ef4444" />
+                </BarChart>
+              </ResponsiveContainer>
+            }
+          />
+        );
+
+      case WidgetType.STATUS_OVERVIEW:
+        return (
+          <StatusOverviewWidget
+            key={widget.id}
+            widget={widget}
+            isDarkMode={isDarkMode}
+            isEditing={activeLayout?.isEditing}
+            onDelete={() => removeWidget(activeLayout?.id || '', widget.id)}
+            onUpdate={(updates) => updateWidget(activeLayout?.id || '', widget.id, updates)}
+            onDragStart={(e) => handleWidgetDragStart(e, widget.id)}
+            statuses={orderStatuses}
+          />
+        );
+
+      case WidgetType.ACTIVITY_FEED:
+        return (
+          <ActivityFeedWidget
+            key={widget.id}
+            widget={widget}
+            isDarkMode={isDarkMode}
+            isEditing={activeLayout?.isEditing}
+            onDelete={() => removeWidget(activeLayout?.id || '', widget.id)}
+            onUpdate={(updates) => updateWidget(activeLayout?.id || '', widget.id, updates)}
+            onDragStart={(e) => handleWidgetDragStart(e, widget.id)}
+            activities={recentActivities}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  if (!activeLayout) {
+    return <div className="p-8 text-center">No dashboard layout found</div>;
+  }
 
   return (
-    <div className={`${isDarkMode ? 'dark' : ''}`}>
-      <div className="min-h-screen bg-white dark:bg-gray-900 p-4">
-        <div className="max-w-7xl mx-auto">
-          {/* Welcome Section */}
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      {/* Header */}
+      <div className={`border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'} sticky top-0 z-40`}>
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                Dashboard
+              </h1>
+              <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                {activeLayout.name}
+                {activeLayout.isEditing && <span className="ml-2 text-blue-500">(Editing)</span>}
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsManagingLayouts(true)}
+                className={`${isDarkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'}`}
+              >
+                📑 Layouts
+              </Button>
+
+              <Button
+                onClick={() => setIsCustomizing(true)}
+                className={`${isDarkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'}`}
+              >
+                ⚙ Customize
+              </Button>
+
+              <Button
+                onClick={() => {
+                  toggleEditMode(activeLayout.id);
+                }}
+                className={`${
+                  activeLayout.isEditing
+                    ? 'bg-green-600 text-white'
+                    : isDarkMode
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                {activeLayout.isEditing ? '✓ Done Editing' : '✎ Edit Layout'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Dashboard Grid */}
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {activeLayout.widgets.length === 0 ? (
+          <div className={`rounded-lg p-12 text-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <p className={`text-lg font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              No widgets in this layout
+            </p>
+            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Click "Customize" to add widgets to your dashboard
+            </p>
+            <Button
+              onClick={() => setIsCustomizing(true)}
+              className="mt-4 bg-blue-600 text-white"
+            >
+              Add Widgets
+            </Button>
+          </div>
+        ) : (
+          <div
+            className={`grid gap-4`}
+            style={{
+              gridTemplateColumns: `repeat(auto-fit, minmax(${300}px, 1fr))`,
+              gridAutoRows: 'auto',
+            }}
+            onDragOver={handleDragOver}
+          >
+            {activeLayout.widgets
+              .sort((a, b) => a.position - b.position)
+              .map((widget) => (
+                <div key={widget.id} style={{ gridColumn: `span ${Math.min(widget.width, 3)}` }}>
+                  {renderWidget(widget)}
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      <WidgetCustomization
+        isOpen={isCustomizing}
+        onClose={() => setIsCustomizing(false)}
+        currentLayout={activeLayout}
+        onAddWidget={(widget) => addWidget(activeLayout.id, widget)}
+        onRemoveWidget={(widgetId) => removeWidget(activeLayout.id, widgetId)}
+        isDarkMode={isDarkMode}
+      />
+
+      <LayoutManager
+        isOpen={isManagingLayouts}
+        onClose={() => setIsManagingLayouts(false)}
+        layouts={layouts}
+        activeLayoutId={preferences.activeLayoutId}
+        onSwitchLayout={switchLayout}
+        onCreateLayout={createNewLayout}
+        onDeleteLayout={deleteCurrentLayout}
+        isDarkMode={isDarkMode}
+      />
+    </div>
+  );
+};
+
+
+
+export default Dashboard;
               <div className="w-20 h-20 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
                 A
               </div>
