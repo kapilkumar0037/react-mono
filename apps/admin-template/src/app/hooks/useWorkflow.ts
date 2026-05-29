@@ -1,240 +1,283 @@
 /**
  * useWorkflow Hook
- * Manages workflow CRUD, execution, and templating
+ * Manages workflow rules, executions, and automation
  */
 
 import { useState, useCallback, useEffect } from 'react';
 import {
-  Workflow,
+  WorkflowRule,
   WorkflowExecution,
+  WorkflowExecutionLog,
   WorkflowTemplate,
-  WorkflowSchedule,
+  WorkflowPreferences,
   WorkflowStats,
+  ExecutionStatus,
+  TriggerType,
 } from '../types/workflow';
 import {
-  readWorkflows,
-  saveWorkflow,
-  deleteWorkflow,
-  getWorkflow,
-  readExecutions,
-  saveExecution,
-  getExecutionsByWorkflow,
+  readWorkflowRules,
+  saveWorkflowRule,
+  getWorkflowRule,
+  deleteWorkflowRule,
+  readWorkflowExecutions,
+  recordWorkflowExecution,
+  getWorkflowExecution,
+  getExecutionsByRuleId,
+  getExecutionsByStatus,
+  readWorkflowLogs,
+  addExecutionLog,
+  getLogsByExecutionId,
   readTemplates,
-  readSchedules,
-  saveSchedule,
-  getActiveSchedules,
+  readPreferences,
+  persistPreferences,
   getWorkflowStats,
-  validateWorkflow,
-  simulateWorkflow,
+  evaluateCondition,
 } from '../utils/workflowStorage';
 
-export const useWorkflow = () => {
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+export const useWorkflow = (userId: string) => {
+  const [rules, setRules] = useState<WorkflowRule[]>([]);
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
+  const [logs, setLogs] = useState<WorkflowExecutionLog[]>([]);
   const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
-  const [schedules, setSchedules] = useState<WorkflowSchedule[]>([]);
+  const [preferences, setPreferences] = useState<WorkflowPreferences | null>(null);
   const [stats, setStats] = useState<WorkflowStats | null>(null);
 
   // Load data on mount
   useEffect(() => {
-    setWorkflows(readWorkflows());
-    setExecutions(readExecutions());
+    setRules(readWorkflowRules());
+    setExecutions(readWorkflowExecutions());
+    setLogs(readWorkflowLogs());
     setTemplates(readTemplates());
-    setSchedules(readSchedules());
+    setPreferences(readPreferences(userId));
     setStats(getWorkflowStats());
+  }, [userId]);
+
+  // Rule Management
+  const createRule = useCallback((rule: WorkflowRule) => {
+    saveWorkflowRule(rule);
+    setRules((prev) => [...prev, rule]);
   }, []);
 
-  // Workflow Management
-  const createWorkflow = useCallback((workflow: Workflow) => {
-    const errors = validateWorkflow(workflow);
-    if (errors.length > 0) {
-      console.error('Validation errors:', errors);
-      throw new Error(`Workflow validation failed: ${errors.join(', ')}`);
+  const updateRule = useCallback((id: string, updates: Partial<WorkflowRule>) => {
+    const rule = getWorkflowRule(id);
+    if (rule) {
+      const updated = { ...rule, ...updates, updatedAt: new Date() };
+      saveWorkflowRule(updated);
+      setRules((prev) => prev.map((r) => (r.id === id ? updated : r)));
     }
-
-    saveWorkflow(workflow);
-    setWorkflows((prev) => [...prev, workflow]);
   }, []);
 
-  const updateWorkflow = useCallback((id: string, updates: Partial<Workflow>) => {
-    const workflow = getWorkflow(id);
-    if (!workflow) return;
-
-    const updated: Workflow = {
-      ...workflow,
-      ...updates,
-      updatedAt: new Date(),
-    };
-
-    const errors = validateWorkflow(updated);
-    if (errors.length > 0) {
-      console.error('Validation errors:', errors);
-      throw new Error(`Workflow validation failed: ${errors.join(', ')}`);
-    }
-
-    saveWorkflow(updated);
-    setWorkflows((prev) => prev.map((w) => (w.id === id ? updated : w)));
+  const deleteRule = useCallback((id: string) => {
+    deleteWorkflowRule(id);
+    setRules((prev) => prev.filter((r) => r.id !== id));
   }, []);
 
-  const removeWorkflow = useCallback((id: string) => {
-    deleteWorkflow(id);
-    setWorkflows((prev) => prev.filter((w) => w.id !== id));
-  }, []);
+  // Rule Execution
+  const executeRule = useCallback(
+    (
+      ruleId: string,
+      entityId: string,
+      entityData: Record<string, any>,
+    ): WorkflowExecution | null => {
+      const rule = getWorkflowRule(ruleId);
+      if (!rule) return null;
 
-  // Execution
-  const executeWorkflow = useCallback(
-    (workflowId: string, mockData?: Record<string, any>): WorkflowExecution => {
-      const workflow = getWorkflow(workflowId);
-      if (!workflow) throw new Error('Workflow not found');
+      // Check if all conditions are met
+      let conditionsMet = true;
+      if (rule.conditions && rule.conditions.length > 0) {
+        conditionsMet = rule.conditions.every((condition) => {
+          const fieldValue = entityData[condition.field];
+          return evaluateCondition(
+            condition.field,
+            fieldValue,
+            condition.operator,
+            condition.value,
+          );
+        });
+      }
 
-      // Simulate execution
-      const execution = simulateWorkflow(workflow, mockData || {});
-      saveExecution(execution);
-      setExecutions((prev) => [...prev, execution]);
-      refreshStats();
+      if (!conditionsMet) {
+        // Log skipped execution
+        const skippedExecution: WorkflowExecution = {
+          id: `exec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          ruleId,
+          ruleName: rule.name,
+          triggerType: rule.trigger.type,
+          entityType: rule.entityType,
+          entityId,
+          status: 'skipped',
+          startedAt: new Date(),
+          executedActions: [],
+        };
 
-      return execution;
+        addExecutionLog({
+          id: `log-${Date.now()}`,
+          executionId: skippedExecution.id,
+          ruleId,
+          timestamp: new Date(),
+          action: 'condition_check',
+          result: 'failure',
+          details: 'Rule conditions not met',
+        });
+
+        recordWorkflowExecution(skippedExecution);
+        setExecutions((prev) => [...prev, skippedExecution]);
+
+        return skippedExecution;
+      }
+
+      // Execute workflow
+      const startTime = Date.now();
+      const execution: WorkflowExecution = {
+        id: `exec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        ruleId,
+        ruleName: rule.name,
+        triggerType: rule.trigger.type,
+        entityType: rule.entityType,
+        entityId,
+        status: 'running',
+        startedAt: new Date(),
+        executedActions: [],
+        failedActions: [],
+      };
+
+      // Execute actions in order
+      let hasErrors = false;
+      const executedActionIds: string[] = [];
+      const failedActionsList: { actionId: string; error: string }[] = [];
+
+      rule.actions.forEach((action) => {
+        try {
+          // Simulate action execution with delay
+          if (action.delay) {
+            // In real scenario, would schedule async execution
+          }
+
+          // Log action execution
+          addExecutionLog({
+            id: `log-${Date.now()}`,
+            executionId: execution.id,
+            ruleId,
+            timestamp: new Date(),
+            action: `execute_action_${action.type}`,
+            result: 'success',
+            details: `Executed ${action.type} action`,
+            metadata: action.config,
+          });
+
+          executedActionIds.push(action.id);
+        } catch (error) {
+          hasErrors = true;
+          failedActionsList.push({
+            actionId: action.id,
+            error: String(error),
+          });
+
+          addExecutionLog({
+            id: `log-${Date.now()}`,
+            executionId: execution.id,
+            ruleId,
+            timestamp: new Date(),
+            action: `execute_action_${action.type}`,
+            result: 'failure',
+            details: `Failed to execute ${action.type}: ${error}`,
+          });
+        }
+      });
+
+      const duration = Date.now() - startTime;
+
+      const finalExecution: WorkflowExecution = {
+        ...execution,
+        status: hasErrors ? 'failed' : 'success',
+        completedAt: new Date(),
+        executedActions: executedActionIds,
+        failedActions: failedActionsList.length > 0 ? failedActionsList : undefined,
+        duration,
+      };
+
+      recordWorkflowExecution(finalExecution);
+      setExecutions((prev) => [...prev, finalExecution]);
+
+      return finalExecution;
     },
     [],
   );
 
-  const simulateExecution = useCallback((workflowId: string): WorkflowExecution | null => {
-    const workflow = getWorkflow(workflowId);
-    if (!workflow) return null;
+  // Trigger-based execution
+  const triggerWorkflow = useCallback(
+    (triggerType: TriggerType, entityType: string, entityId: string, entityData: Record<string, any>) => {
+      const applicableRules = rules.filter(
+        (r) => r.trigger.type === triggerType && r.entityType === entityType && r.isActive,
+      );
 
-    return simulateWorkflow(workflow, {});
+      return applicableRules.map((rule) => executeRule(rule.id, entityId, entityData)).filter(Boolean);
+    },
+    [rules, executeRule],
+  );
+
+  // Get rule details
+  const getRule = useCallback((id: string) => {
+    return getWorkflowRule(id);
   }, []);
 
-  // Execution History
-  const getExecutionHistory = useCallback((workflowId: string): WorkflowExecution[] => {
-    return getExecutionsByWorkflow(workflowId);
+  // Get execution history
+  const getRuleExecutions = useCallback((ruleId: string) => {
+    return getExecutionsByRuleId(ruleId);
   }, []);
 
-  const getAllExecutions = useCallback((): WorkflowExecution[] => {
-    return executions;
+  // Get execution logs
+  const getExecutionLogs = useCallback((executionId: string) => {
+    return getLogsByExecutionId(executionId);
+  }, []);
+
+  // Get recent executions
+  const getRecentExecutions = useCallback((limit: number = 10) => {
+    return executions
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+      .slice(0, limit);
   }, [executions]);
 
-  // Templates
-  const getTemplates = useCallback((): WorkflowTemplate[] => {
-    return templates;
-  }, [templates]);
-
-  const createFromTemplate = useCallback((template: WorkflowTemplate, name: string): Workflow => {
-    const newWorkflow: Workflow = {
-      ...template.workflow,
-      id: `workflow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name,
-      version: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    createWorkflow(newWorkflow);
-    return newWorkflow;
-  }, [createWorkflow]);
-
-  // Scheduling
-  const createSchedule = useCallback((schedule: WorkflowSchedule) => {
-    saveSchedule(schedule);
-    setSchedules((prev) => [...prev, schedule]);
-  }, []);
-
-  const updateSchedule = useCallback((id: string, updates: Partial<WorkflowSchedule>) => {
-    const schedule = schedules.find((s) => s.id === id);
-    if (!schedule) return;
-
-    const updated = { ...schedule, ...updates };
-    saveSchedule(updated);
-    setSchedules((prev) => prev.map((s) => (s.id === id ? updated : s)));
-  }, [schedules]);
-
-  const removeSchedule = useCallback((id: string) => {
-    setSchedules((prev) => prev.filter((s) => s.id !== id));
-  }, []);
-
-  const getActiveSchedules = useCallback((): WorkflowSchedule[] => {
-    return schedules.filter((s) => s.isActive);
-  }, [schedules]);
-
-  // Stats
+  // Statistics
   const refreshStats = useCallback(() => {
     setStats(getWorkflowStats());
   }, []);
 
-  // Bulk operations
-  const duplicateWorkflow = useCallback((id: string, newName: string): Workflow | null => {
-    const workflow = getWorkflow(id);
-    if (!workflow) return null;
-
-    const duplicate: Workflow = {
-      ...workflow,
-      id: `workflow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: newName,
-      version: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    createWorkflow(duplicate);
-    return duplicate;
-  }, [createWorkflow]);
-
-  const exportWorkflow = useCallback((id: string): string => {
-    const workflow = getWorkflow(id);
-    if (!workflow) return '';
-    return JSON.stringify(workflow, null, 2);
-  }, []);
-
-  const importWorkflow = useCallback(
-    (json: string): Workflow | null => {
-      try {
-        const workflow = JSON.parse(json) as Workflow;
-        workflow.id = `workflow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        createWorkflow(workflow);
-        return workflow;
-      } catch (error) {
-        console.error('Error importing workflow:', error);
-        return null;
-      }
-    },
-    [createWorkflow],
-  );
+  // Preferences
+  const updatePreferences = useCallback((newPrefs: Partial<WorkflowPreferences>) => {
+    if (preferences) {
+      const updated = { ...preferences, ...newPrefs };
+      persistPreferences(updated);
+      setPreferences(updated);
+    }
+  }, [preferences]);
 
   return {
     // State
-    workflows,
+    rules,
     executions,
+    logs,
     templates,
-    schedules,
+    preferences,
     stats,
 
-    // Workflow management
-    createWorkflow,
-    updateWorkflow,
-    removeWorkflow,
+    // Rule management
+    createRule,
+    updateRule,
+    deleteRule,
+    getRule,
 
     // Execution
-    executeWorkflow,
-    simulateExecution,
-    getExecutionHistory,
-    getAllExecutions,
+    executeRule,
+    triggerWorkflow,
+    getRuleExecutions,
+    getExecutionLogs,
+    getRecentExecutions,
 
-    // Templates
-    getTemplates,
-    createFromTemplate,
-
-    // Scheduling
-    createSchedule,
-    updateSchedule,
-    removeSchedule,
-    getActiveSchedules,
+    // Preferences
+    updatePreferences,
 
     // Stats
     refreshStats,
-
-    // Bulk operations
-    duplicateWorkflow,
-    exportWorkflow,
-    importWorkflow,
   };
 };

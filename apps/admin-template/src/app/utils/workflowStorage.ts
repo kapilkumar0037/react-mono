@@ -1,68 +1,73 @@
 /**
  * Workflow Storage Utilities
- * Handles persistence of workflows, executions, and templates
+ * Handles persistence of workflow rules, executions, and logs
  */
 
 import {
-  Workflow,
+  WorkflowRule,
   WorkflowExecution,
+  WorkflowExecutionLog,
   WorkflowTemplate,
-  WorkflowSchedule,
+  WorkflowPreferences,
   WorkflowStats,
-  WorkflowStatus,
   ExecutionStatus,
 } from '../types/workflow';
 
-const WORKFLOWS_KEY = 'workflows:definitions';
-const EXECUTIONS_KEY = 'workflows:executions';
-const TEMPLATES_KEY = 'workflows:templates';
-const SCHEDULES_KEY = 'workflows:schedules';
+const RULES_KEY = 'workflow:rules';
+const EXECUTIONS_KEY = 'workflow:executions';
+const LOGS_KEY = 'workflow:logs';
+const TEMPLATES_KEY = 'workflow:templates';
+const PREFERENCES_KEY = 'workflow:preferences';
 
-// Workflows
-export const readWorkflows = (): Workflow[] => {
+// Workflow Rules
+export const readWorkflowRules = (): WorkflowRule[] => {
   try {
-    const data = localStorage.getItem(WORKFLOWS_KEY);
+    const data = localStorage.getItem(RULES_KEY);
     return data ? JSON.parse(data) : [];
   } catch {
     return [];
   }
 };
 
-export const persistWorkflows = (workflows: Workflow[]): void => {
+export const persistWorkflowRules = (rules: WorkflowRule[]): void => {
   try {
-    const limited = workflows.slice(-200);
-    localStorage.setItem(WORKFLOWS_KEY, JSON.stringify(limited));
+    const limitedRules = rules.slice(-200);
+    localStorage.setItem(RULES_KEY, JSON.stringify(limitedRules));
   } catch (error) {
-    console.error('Error persisting workflows:', error);
+    console.error('Error persisting workflow rules:', error);
   }
 };
 
-export const saveWorkflow = (workflow: Workflow): void => {
-  const workflows = readWorkflows();
-  const existing = workflows.findIndex((w) => w.id === workflow.id);
+export const saveWorkflowRule = (rule: WorkflowRule): void => {
+  const rules = readWorkflowRules();
+  const existing = rules.findIndex((r) => r.id === rule.id);
   if (existing >= 0) {
-    workflows[existing] = workflow;
+    rules[existing] = rule;
   } else {
-    workflows.push(workflow);
+    rules.push(rule);
   }
-  persistWorkflows(workflows);
+  persistWorkflowRules(rules);
 };
 
-export const getWorkflow = (id: string): Workflow | undefined => {
-  return readWorkflows().find((w) => w.id === id);
+export const getWorkflowRule = (id: string): WorkflowRule | undefined => {
+  return readWorkflowRules().find((r) => r.id === id);
 };
 
-export const deleteWorkflow = (id: string): void => {
-  const workflows = readWorkflows().filter((w) => w.id !== id);
-  persistWorkflows(workflows);
+export const deleteWorkflowRule = (id: string): void => {
+  const rules = readWorkflowRules().filter((r) => r.id !== id);
+  persistWorkflowRules(rules);
 };
 
-export const getActiveWorkflows = (): Workflow[] => {
-  return readWorkflows().filter((w) => w.status === WorkflowStatus.ACTIVE);
+export const getActiveRules = (): WorkflowRule[] => {
+  return readWorkflowRules().filter((r) => r.isActive);
 };
 
-// Executions
-export const readExecutions = (): WorkflowExecution[] => {
+export const getRulesByEntityType = (entityType: string): WorkflowRule[] => {
+  return readWorkflowRules().filter((r) => r.entityType === entityType && r.isActive);
+};
+
+// Workflow Executions
+export const readWorkflowExecutions = (): WorkflowExecution[] => {
   try {
     const data = localStorage.getItem(EXECUTIONS_KEY);
     return data ? JSON.parse(data) : [];
@@ -71,34 +76,80 @@ export const readExecutions = (): WorkflowExecution[] => {
   }
 };
 
-export const persistExecutions = (executions: WorkflowExecution[]): void => {
+export const persistWorkflowExecutions = (executions: WorkflowExecution[]): void => {
   try {
-    const limited = executions.slice(-1000);
-    localStorage.setItem(EXECUTIONS_KEY, JSON.stringify(limited));
+    const limitedExecutions = executions.slice(-500);
+    localStorage.setItem(EXECUTIONS_KEY, JSON.stringify(limitedExecutions));
   } catch (error) {
-    console.error('Error persisting executions:', error);
+    console.error('Error persisting workflow executions:', error);
   }
 };
 
-export const saveExecution = (execution: WorkflowExecution): void => {
-  const executions = readExecutions();
+export const recordWorkflowExecution = (execution: WorkflowExecution): void => {
+  const executions = readWorkflowExecutions();
   executions.push(execution);
-  persistExecutions(executions);
+  persistWorkflowExecutions(executions);
 };
 
-export const getExecution = (id: string): WorkflowExecution | undefined => {
-  return readExecutions().find((e) => e.id === id);
+export const getWorkflowExecution = (id: string): WorkflowExecution | undefined => {
+  return readWorkflowExecutions().find((e) => e.id === id);
 };
 
-export const getExecutionsByWorkflow = (workflowId: string): WorkflowExecution[] => {
-  return readExecutions().filter((e) => e.workflowId === workflowId);
+export const getExecutionsByRuleId = (ruleId: string): WorkflowExecution[] => {
+  return readWorkflowExecutions().filter((e) => e.ruleId === ruleId);
+};
+
+export const getExecutionsByStatus = (status: ExecutionStatus): WorkflowExecution[] => {
+  return readWorkflowExecutions().filter((e) => e.status === status);
 };
 
 export const clearOldExecutions = (daysOld: number = 30): void => {
-  const executions = readExecutions();
+  const executions = readWorkflowExecutions();
   const cutoffTime = Date.now() - daysOld * 24 * 60 * 60 * 1000;
-  const filtered = executions.filter((e) => new Date(e.startedAt).getTime() > cutoffTime);
-  persistExecutions(filtered);
+  const filtered = executions.filter(
+    (e) => new Date(e.startedAt).getTime() > cutoffTime,
+  );
+  persistWorkflowExecutions(filtered);
+};
+
+// Execution Logs
+export const readWorkflowLogs = (): WorkflowExecutionLog[] => {
+  try {
+    const data = localStorage.getItem(LOGS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const persistWorkflowLogs = (logs: WorkflowExecutionLog[]): void => {
+  try {
+    const limitedLogs = logs.slice(-1000);
+    localStorage.setItem(LOGS_KEY, JSON.stringify(limitedLogs));
+  } catch (error) {
+    console.error('Error persisting workflow logs:', error);
+  }
+};
+
+export const addExecutionLog = (log: WorkflowExecutionLog): void => {
+  const logs = readWorkflowLogs();
+  logs.push(log);
+  persistWorkflowLogs(logs);
+};
+
+export const getLogsByExecutionId = (executionId: string): WorkflowExecutionLog[] => {
+  return readWorkflowLogs().filter((l) => l.executionId === executionId);
+};
+
+export const getLogsByRuleId = (ruleId: string): WorkflowExecutionLog[] => {
+  return readWorkflowLogs().filter((l) => l.ruleId === ruleId);
+};
+
+export const clearOldLogs = (daysOld: number = 90): void => {
+  const logs = readWorkflowLogs();
+  const cutoffTime = Date.now() - daysOld * 24 * 60 * 60 * 1000;
+  const filtered = logs.filter((l) => new Date(l.timestamp).getTime() > cutoffTime);
+  persistWorkflowLogs(filtered);
 };
 
 // Templates
@@ -114,64 +165,48 @@ export const readTemplates = (): WorkflowTemplate[] => {
 export const getDefaultTemplates = (): WorkflowTemplate[] => {
   return [
     {
-      id: 'tpl-user-notification',
-      name: 'User Notification Workflow',
-      description: 'Send notifications when new users register',
-      category: 'User Management',
+      id: 'tpl-auto-assign',
+      name: 'Auto-assign New Orders',
+      description: 'Automatically assign orders to available team members',
+      category: 'Assignment',
+      rules: [],
       icon: '👤',
       isPublic: true,
       createdAt: new Date(),
-      createdBy: 'System',
       usageCount: 0,
-      workflow: {
-        id: 'workflow-template-1',
-        name: 'User Notification',
-        status: WorkflowStatus.DRAFT,
-        version: 1,
-        isPublic: true,
-        createdAt: new Date(),
-        createdBy: 'System',
-        updatedAt: new Date(),
-        updatedBy: 'System',
-        trigger: {
-          id: 'trig-1',
-          type: 'event' as any,
-          name: 'User Registered',
-          config: { event: 'user.created' },
-          enabled: true,
-        },
-        steps: [],
-      },
     },
     {
-      id: 'tpl-data-export',
-      name: 'Data Export Workflow',
-      description: 'Export data on schedule and send to recipients',
-      category: 'Data Management',
-      icon: '📊',
+      id: 'tpl-escalation',
+      name: 'Auto-escalate Overdue Tasks',
+      description: 'Escalate tasks that exceed SLA threshold',
+      category: 'Escalation',
+      rules: [],
+      icon: '📈',
       isPublic: true,
       createdAt: new Date(),
-      createdBy: 'System',
       usageCount: 0,
-      workflow: {
-        id: 'workflow-template-2',
-        name: 'Data Export',
-        status: WorkflowStatus.DRAFT,
-        version: 1,
-        isPublic: true,
-        createdAt: new Date(),
-        createdBy: 'System',
-        updatedAt: new Date(),
-        updatedBy: 'System',
-        trigger: {
-          id: 'trig-2',
-          type: 'scheduled' as any,
-          name: 'Daily Export',
-          config: { schedule: 'daily', time: '08:00' },
-          enabled: true,
-        },
-        steps: [],
-      },
+    },
+    {
+      id: 'tpl-notification',
+      name: 'Notification on Status Change',
+      description: 'Send notifications when order status changes',
+      category: 'Notification',
+      rules: [],
+      icon: '📬',
+      isPublic: true,
+      createdAt: new Date(),
+      usageCount: 0,
+    },
+    {
+      id: 'tpl-cleanup',
+      name: 'Auto-cleanup Draft Records',
+      description: 'Delete draft records older than 30 days',
+      category: 'Maintenance',
+      rules: [],
+      icon: '🧹',
+      isPublic: true,
+      createdAt: new Date(),
+      usageCount: 0,
     },
   ];
 };
@@ -195,134 +230,96 @@ export const saveTemplate = (template: WorkflowTemplate): void => {
   persistTemplates(templates);
 };
 
-// Schedules
-export const readSchedules = (): WorkflowSchedule[] => {
+// Preferences
+export const readPreferences = (userId: string): WorkflowPreferences => {
   try {
-    const data = localStorage.getItem(SCHEDULES_KEY);
-    return data ? JSON.parse(data) : [];
+    const data = localStorage.getItem(`${PREFERENCES_KEY}:${userId}`);
+    if (data) return JSON.parse(data);
   } catch {
-    return [];
+    // Continue with defaults
   }
+
+  return {
+    userId,
+    autoExecuteRules: true,
+    notifyOnExecution: false,
+    notifyOnError: true,
+    retentionDays: 90,
+    maxConcurrentExecutions: 5,
+  };
 };
 
-export const persistSchedules = (schedules: WorkflowSchedule[]): void => {
+export const persistPreferences = (preferences: WorkflowPreferences): void => {
   try {
-    localStorage.setItem(SCHEDULES_KEY, JSON.stringify(schedules));
+    localStorage.setItem(`${PREFERENCES_KEY}:${preferences.userId}`, JSON.stringify(preferences));
   } catch (error) {
-    console.error('Error persisting schedules:', error);
+    console.error('Error persisting preferences:', error);
   }
-};
-
-export const saveSchedule = (schedule: WorkflowSchedule): void => {
-  const schedules = readSchedules();
-  const existing = schedules.findIndex((s) => s.id === schedule.id);
-  if (existing >= 0) {
-    schedules[existing] = schedule;
-  } else {
-    schedules.push(schedule);
-  }
-  persistSchedules(schedules);
-};
-
-export const getActiveSchedules = (): WorkflowSchedule[] => {
-  return readSchedules().filter((s) => s.isActive);
 };
 
 // Statistics
 export const getWorkflowStats = (): WorkflowStats => {
-  const workflows = readWorkflows();
-  const executions = readExecutions();
+  const rules = readWorkflowRules();
+  const executions = readWorkflowExecutions();
 
-  const active = workflows.filter((w) => w.status === WorkflowStatus.ACTIVE).length;
-  const successful = executions.filter((e) => e.status === ExecutionStatus.SUCCESS).length;
-  const failed = executions.filter((e) => e.status === ExecutionStatus.FAILED).length;
+  const activeRules = rules.filter((r) => r.isActive).length;
+  const successful = executions.filter((e) => e.status === 'success').length;
+  const failed = executions.filter((e) => e.status === 'failed').length;
 
   const avgTime =
     executions.length > 0
-      ? executions.reduce((sum, e) => sum + (e.executionTime || 0), 0) / executions.length
+      ? executions.reduce((sum, e) => sum + (e.duration || 0), 0) / executions.length
       : 0;
 
-  const successRate = executions.length > 0 ? (successful / executions.length) * 100 : 0;
+  const recentExecution = executions.sort(
+    (a, b) => new Date(b.completedAt || b.startedAt).getTime() - new Date(a.completedAt || a.startedAt).getTime(),
+  )[0];
 
   return {
-    totalWorkflows: workflows.length,
-    activeWorkflows: active,
+    totalRules: rules.length,
+    activeRules,
     totalExecutions: executions.length,
     successfulExecutions: successful,
     failedExecutions: failed,
     averageExecutionTime: avgTime,
-    successRate,
+    lastExecutionTime: recentExecution ? new Date(recentExecution.completedAt || recentExecution.startedAt) : undefined,
   };
 };
 
-// Validation
-export const validateWorkflow = (workflow: Workflow): string[] => {
-  const errors: string[] = [];
-
-  if (!workflow.name?.trim()) {
-    errors.push('Workflow name is required');
+// Condition evaluation
+export const evaluateCondition = (
+  field: string,
+  value: any,
+  operator: any,
+  conditionValue: any,
+): boolean => {
+  switch (operator) {
+    case 'equals':
+      return value === conditionValue;
+    case 'not_equals':
+      return value !== conditionValue;
+    case 'contains':
+      return String(value).includes(String(conditionValue));
+    case 'not_contains':
+      return !String(value).includes(String(conditionValue));
+    case 'greater_than':
+      return Number(value) > Number(conditionValue);
+    case 'less_than':
+      return Number(value) < Number(conditionValue);
+    case 'between':
+      return (
+        Number(value) >= Number((conditionValue as any)[0]) &&
+        Number(value) <= Number((conditionValue as any)[1])
+      );
+    case 'in':
+      return (conditionValue as any[]).includes(value);
+    case 'not_in':
+      return !(conditionValue as any[]).includes(value);
+    case 'is_empty':
+      return !value || value === '';
+    case 'is_not_empty':
+      return !!value && value !== '';
+    default:
+      return true;
   }
-
-  if (!workflow.trigger) {
-    errors.push('Workflow trigger is required');
-  }
-
-  if (!workflow.steps || workflow.steps.length === 0) {
-    errors.push('Workflow must have at least one step');
-  }
-
-  workflow.steps.forEach((step, idx) => {
-    if (!step.actions || step.actions.length === 0) {
-      errors.push(`Step ${idx + 1} must have at least one action`);
-    }
-  });
-
-  return errors;
-};
-
-// Simulation/Testing
-export const simulateWorkflow = (
-  workflow: Workflow,
-  mockData: Record<string, any>,
-): WorkflowExecution => {
-  const execution: WorkflowExecution = {
-    id: `exec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    workflowId: workflow.id,
-    workflowName: workflow.name,
-    triggeredBy: 'system',
-    startedAt: new Date(),
-    status: ExecutionStatus.SUCCESS,
-    steps: [],
-  };
-
-  const startTime = Date.now();
-
-  workflow.steps.forEach((step, idx) => {
-    const stepExecution = {
-      id: `step-exec-${idx}`,
-      stepId: step.id,
-      stepName: step.name,
-      status: ExecutionStatus.SUCCESS,
-      actions: step.actions.map((action) => ({
-        id: `action-exec-${action.id}`,
-        actionId: action.id,
-        actionName: action.name,
-        status: ExecutionStatus.SUCCESS,
-        startedAt: new Date(),
-        completedAt: new Date(),
-        result: { simulated: true },
-        retryAttempts: 0,
-      })),
-      startedAt: new Date(),
-      completedAt: new Date(),
-      result: { stepCompleted: true },
-    };
-
-    execution.steps.push(stepExecution);
-  });
-
-  execution.completedAt = new Date();
-  execution.executionTime = Date.now() - startTime;
-
-  return execution;
 };

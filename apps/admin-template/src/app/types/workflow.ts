@@ -1,46 +1,52 @@
 /**
- * Automated Workflows Types
- * Feature 9: Workflow automation with triggers, conditions, and actions
+ * Workflow Automation Types
+ * Feature 9: Rule-based automation for tasks and actions
  */
 
-export enum WorkflowTriggerType {
-  MANUAL = 'manual',              // Manually triggered
-  DATA_CHANGE = 'data_change',    // Triggers when data changes
-  SCHEDULED = 'scheduled',        // Scheduled trigger (cron-like)
-  EVENT = 'event',                // Event-based trigger
-  THRESHOLD = 'threshold',        // Threshold-based trigger
+export enum TriggerType {
+  ENTITY_CREATED = 'entity_created',       // Trigger when new entity is created
+  ENTITY_UPDATED = 'entity_updated',       // Trigger when entity is updated
+  ENTITY_DELETED = 'entity_deleted',       // Trigger when entity is deleted
+  STATUS_CHANGED = 'status_changed',       // Trigger when status field changes
+  FIELD_CHANGED = 'field_changed',         // Trigger when specific field changes
+  TIME_BASED = 'time_based',               // Trigger at specific time/schedule
+  THRESHOLD_REACHED = 'threshold_reached', // Trigger when value exceeds threshold
+  MANUAL = 'manual',                       // Manual trigger
 }
 
-export enum WorkflowActionType {
-  SEND_EMAIL = 'send_email',
-  CREATE_RECORD = 'create_record',
-  UPDATE_RECORD = 'update_record',
-  DELETE_RECORD = 'delete_record',
-  EXPORT_DATA = 'export_data',
-  SEND_NOTIFICATION = 'send_notification',
-  EXECUTE_SCRIPT = 'execute_script',
-  WAIT = 'wait',
-  BRANCH = 'branch',
+export enum ActionType {
+  SEND_EMAIL = 'send_email',               // Send email notification
+  SEND_SMS = 'send_sms',                   // Send SMS notification
+  UPDATE_FIELD = 'update_field',           // Update field value
+  CREATE_RECORD = 'create_record',         // Create new record
+  DELETE_RECORD = 'delete_record',         // Delete record
+  ASSIGN_TO_USER = 'assign_to_user',       // Assign to user
+  CHANGE_STATUS = 'change_status',         // Change status field
+  RUN_WEBHOOK = 'run_webhook',             // Call webhook
+  LOG_ACTIVITY = 'log_activity',           // Log activity entry
+  SEND_NOTIFICATION = 'send_notification', // Send in-app notification
 }
 
 export enum ConditionOperator {
   EQUALS = 'equals',
   NOT_EQUALS = 'not_equals',
-  GREATER_THAN = 'gt',
-  LESS_THAN = 'lt',
   CONTAINS = 'contains',
   NOT_CONTAINS = 'not_contains',
-  STARTS_WITH = 'starts_with',
-  ENDS_WITH = 'ends_with',
+  GREATER_THAN = 'greater_than',
+  LESS_THAN = 'less_than',
+  BETWEEN = 'between',
   IN = 'in',
   NOT_IN = 'not_in',
+  IS_EMPTY = 'is_empty',
+  IS_NOT_EMPTY = 'is_not_empty',
 }
 
 export enum WorkflowStatus {
   DRAFT = 'draft',
   ACTIVE = 'active',
+  INACTIVE = 'inactive',
   PAUSED = 'paused',
-  ARCHIVED = 'archived',
+  ERROR = 'error',
 }
 
 export enum ExecutionStatus {
@@ -48,7 +54,18 @@ export enum ExecutionStatus {
   RUNNING = 'running',
   SUCCESS = 'success',
   FAILED = 'failed',
-  CANCELLED = 'cancelled',
+  SKIPPED = 'skipped',
+}
+
+/**
+ * Condition for evaluating rule applicability
+ */
+export interface WorkflowCondition {
+  id: string;
+  field: string;
+  operator: ConditionOperator;
+  value: string | number | boolean | (string | number)[];
+  logicalOperator?: 'AND' | 'OR'; // AND is default
 }
 
 /**
@@ -56,167 +73,130 @@ export enum ExecutionStatus {
  */
 export interface WorkflowTrigger {
   id: string;
-  type: WorkflowTriggerType;
-  name: string;
-  config: Record<string, any>;
-  enabled: boolean;
+  type: TriggerType;
+  entityType: string; // e.g., 'user', 'order', 'customer'
+  schedule?: string; // Cron expression for TIME_BASED triggers
+  field?: string; // For FIELD_CHANGED and STATUS_CHANGED triggers
+  conditions: WorkflowCondition[];
 }
 
 /**
- * Condition for decision making
- */
-export interface WorkflowCondition {
-  id: string;
-  field: string;
-  operator: ConditionOperator;
-  value: string | number | boolean | string[];
-  logicalOperator?: 'and' | 'or'; // For multiple conditions
-}
-
-/**
- * Action to execute
+ * Action to execute when rule matches
  */
 export interface WorkflowAction {
   id: string;
-  type: WorkflowActionType;
-  name: string;
-  description?: string;
-  config: Record<string, any>;
-  retryable: boolean;
-  retryCount?: number;
-  timeout?: number; // milliseconds
+  type: ActionType;
+  config: Record<string, any>; // e.g., { email: 'user@example.com', subject: '...' }
+  delay?: number; // Delay in seconds before executing action
+  retryCount?: number; // Number of retry attempts
+  retryDelay?: number; // Delay between retries in seconds
 }
 
 /**
- * Step in workflow
+ * Workflow rule definition
  */
-export interface WorkflowStep {
-  id: string;
-  name: string;
-  order: number;
-  actions: WorkflowAction[];
-  conditions?: WorkflowCondition[];
-  errorHandling?: 'continue' | 'stop' | 'fallback';
-  fallbackStepId?: string;
-}
-
-/**
- * Complete workflow definition
- */
-export interface Workflow {
+export interface WorkflowRule {
   id: string;
   name: string;
   description?: string;
-  status: WorkflowStatus;
+  entityType: string;
   trigger: WorkflowTrigger;
-  steps: WorkflowStep[];
+  actions: WorkflowAction[];
+  conditions: WorkflowCondition[];
+  status: WorkflowStatus;
+  priority: number; // 1-10, higher = executed first
+  isActive: boolean;
   createdAt: Date;
   createdBy: string;
   updatedAt: Date;
   updatedBy: string;
-  version: number;
-  isPublic: boolean;
-  tags?: string[];
+  errorMessage?: string;
+  metadata?: Record<string, any>;
 }
 
 /**
- * Workflow execution record
+ * Workflow execution instance
  */
 export interface WorkflowExecution {
   id: string;
-  workflowId: string;
-  workflowName: string;
-  triggeredBy: string;
-  startedAt: Date;
-  completedAt?: Date;
-  status: ExecutionStatus;
-  steps: WorkflowStepExecution[];
-  result?: Record<string, any>;
-  errorMessage?: string;
-  executionTime?: number; // milliseconds
-}
-
-/**
- * Execution of a single step
- */
-export interface WorkflowStepExecution {
-  id: string;
-  stepId: string;
-  stepName: string;
-  status: ExecutionStatus;
-  actions: WorkflowActionExecution[];
-  startedAt: Date;
-  completedAt?: Date;
-  result?: Record<string, any>;
-  errorMessage?: string;
-}
-
-/**
- * Execution of a single action
- */
-export interface WorkflowActionExecution {
-  id: string;
-  actionId: string;
-  actionName: string;
+  ruleId: string;
+  ruleName: string;
+  triggerType: TriggerType;
+  entityType: string;
+  entityId: string;
   status: ExecutionStatus;
   startedAt: Date;
   completedAt?: Date;
-  result?: Record<string, any>;
+  executedActions: string[]; // IDs of actions that ran
+  failedActions?: { actionId: string; error: string }[];
   errorMessage?: string;
-  retryAttempts: number;
+  metadata?: Record<string, any>;
+  duration?: number; // milliseconds
 }
 
 /**
- * Workflow template for reuse
+ * Workflow execution log entry
  */
-export interface WorkflowTemplate {
+export interface WorkflowExecutionLog {
   id: string;
-  name: string;
-  description?: string;
-  category: string;
-  workflow: Workflow;
-  icon?: string;
-  usageCount?: number;
-  isPublic: boolean;
-  createdAt: Date;
-  createdBy: string;
+  executionId: string;
+  ruleId: string;
+  timestamp: Date;
+  action: string;
+  result: 'success' | 'failure';
+  details: string;
+  metadata?: Record<string, any>;
 }
 
 /**
  * Workflow statistics
  */
 export interface WorkflowStats {
-  totalWorkflows: number;
-  activeWorkflows: number;
+  totalRules: number;
+  activeRules: number;
   totalExecutions: number;
   successfulExecutions: number;
   failedExecutions: number;
   averageExecutionTime: number;
-  successRate: number;
+  lastExecutionTime?: Date;
 }
 
 /**
- * Workflow schedule configuration
+ * Workflow template for reusable workflows
  */
-export interface WorkflowSchedule {
+export interface WorkflowTemplate {
   id: string;
-  workflowId: string;
-  frequency: 'hourly' | 'daily' | 'weekly' | 'monthly' | 'custom';
-  cronExpression?: string;
-  timezone?: string;
-  isActive: boolean;
-  nextRun?: Date;
-  lastRun?: Date;
+  name: string;
+  description?: string;
+  category: string;
+  rules: WorkflowRule[];
+  icon?: string;
+  isPublic: boolean;
+  createdAt: Date;
+  usageCount?: number;
 }
 
 /**
- * Builder state
+ * User workflow preferences
+ */
+export interface WorkflowPreferences {
+  userId: string;
+  autoExecuteRules: boolean;
+  notifyOnExecution: boolean;
+  notifyOnError: boolean;
+  retentionDays: number;
+  maxConcurrentExecutions: number;
+}
+
+/**
+ * Workflow builder state
  */
 export interface WorkflowBuilderState {
-  currentWorkflow: Workflow;
-  isDirty: boolean;
+  currentRule: WorkflowRule;
+  preview?: {
+    matchingRecords: number;
+    affectedFields: string[];
+  };
   validationErrors: string[];
-  selectedStepId?: string;
-  isExecuting: boolean;
-  lastExecution?: WorkflowExecution;
+  isDirty: boolean;
 }
