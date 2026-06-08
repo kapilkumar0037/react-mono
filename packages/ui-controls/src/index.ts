@@ -85,3 +85,21 @@ export type { ListGroupProps, ListGroupItemProps } from './lib/ListGroup/ListGro
 
 export { default as Sidebar } from './lib/Sidebar/Sidebar';
 export type { SidebarProps, SidebarItem, SidebarGroup, SidebarSubGroup } from './lib/Sidebar/Sidebar';
+
+export {
+  DataTable,
+  TablePagination,
+  TableBulkActions,
+  useTableState,
+} from './lib/DataTable';
+export type {
+  DataTableProps,
+  TablePaginationProps,
+  TableBulkActionsProps,
+  BulkAction,
+  UseTableStateOptions,
+  UseTableStateReturn,
+  TableColumn,
+  TableFilter,
+  SortOrder,
+} from './lib/DataTable';

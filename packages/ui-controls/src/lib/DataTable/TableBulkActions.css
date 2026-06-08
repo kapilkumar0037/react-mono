@@ -1,0 +1,76 @@
+/**
+ * Table Bulk Actions Styles
+ */
+
+.table-bulk-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  gap: 1rem;
+  background-color: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+.table-bulk-actions--dark {
+  background-color: #1a237e;
+  border-color: #3949ab;
+  color: #e0e0e0;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-bulk-actions__info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.table-bulk-actions__clear {
+  margin-left: 0.5rem;
+}
+
+.table-bulk-actions__buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.table-bulk-actions__icon {
+  margin-right: 0.25rem;
+  display: inline-block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-bulk-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .table-bulk-actions__info {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .table-bulk-actions__buttons {
+    justify-content: center;
+    width: 100%;
+  }
+}
