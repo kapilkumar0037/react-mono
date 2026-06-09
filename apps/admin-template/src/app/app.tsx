@@ -24,6 +24,7 @@ import AdminSidebar from './AdminSidebar';
 import AdminNavbar from './AdminNavbar';
 import ProtectedRoute from './ProtectedRoute';
 import PermissionGuard from './PermissionGuard';
+import { WorkflowsPage } from './WorkflowsPage';
 import {
   AuthSession,
   clearStoredSession,
@@ -297,6 +298,9 @@ export function App() {
                       currentUserEmail={session?.email}
                     />
                   )
+                } />
+                <Route path="/workflows" element={
+                  renderProtectedPage('workflows.view', <WorkflowsPage isDarkMode={isDarkMode} />)
                 } />
               </Route>
             </Route>

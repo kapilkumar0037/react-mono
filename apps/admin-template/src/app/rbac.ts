@@ -18,7 +18,9 @@ export type AppPermission =
   | 'system.view'
   | 'backup.manage'
   | 'apiKeys.manage'
-  | 'rbac.manage';
+  | 'rbac.manage'
+  | 'workflows.view'
+  | 'workflows.manage';
 
 export interface RoleDefinition {
   label: AppRole;
@@ -47,6 +49,8 @@ export const PERMISSION_LABELS: Record<AppPermission, string> = {
   'backup.manage': 'Backup and recovery',
   'apiKeys.manage': 'API keys',
   'rbac.manage': 'Access control',
+  'workflows.view': 'Workflows',
+  'workflows.manage': 'Manage workflows',
 };
 
 export const PERMISSION_GROUPS: Array<{ name: string; permissions: AppPermission[] }> = [
@@ -60,6 +64,7 @@ export const PERMISSION_GROUPS: Array<{ name: string; permissions: AppPermission
       'returns.view',
       'support.view',
       'integrations.view',
+      'workflows.view',
     ],
   },
   {
@@ -77,6 +82,7 @@ export const PERMISSION_GROUPS: Array<{ name: string; permissions: AppPermission
       'backup.manage',
       'apiKeys.manage',
       'rbac.manage',
+      'workflows.manage',
     ],
   },
 ];
@@ -104,6 +110,8 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<AppRole, RoleDefinition> = {
       'backup.manage',
       'apiKeys.manage',
       'rbac.manage',
+      'workflows.view',
+      'workflows.manage',
     ],
   },
   Admin: {
@@ -125,6 +133,8 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<AppRole, RoleDefinition> = {
       'activity.view',
       'notifications.view',
       'system.view',
+      'workflows.view',
+      'workflows.manage',
     ],
   },
   Support: {
@@ -139,6 +149,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<AppRole, RoleDefinition> = {
       'users.view',
       'activity.view',
       'notifications.view',
+      'workflows.view',
     ],
   },
   Analyst: {
@@ -151,6 +162,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<AppRole, RoleDefinition> = {
       'orders.view',
       'activity.view',
       'notifications.view',
+      'workflows.view',
     ],
   },
   'Billing Manager': {
