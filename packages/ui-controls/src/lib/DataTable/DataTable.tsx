@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Checkbox } from '../checkbox/Checkbox';
+import Checkbox from '../checkbox/Checkbox';
 import { Spinner } from '../Spinner/Spinner';
 import './DataTable.css';
 import { TableColumn, UseTableStateReturn } from './useTableState';
