@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Button } from '../Button/Button';
+import Button from '../Button/Button';
 import './TablePagination.css';
 
 export interface TablePaginationProps {
