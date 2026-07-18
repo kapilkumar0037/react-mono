@@ -42,21 +42,21 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <span className="relative inline-block">
-      {React.cloneElement(children, {
+      {React.cloneElement(children as React.ReactElement<any>, {
         onMouseEnter: (e: any) => {
-          children.props.onMouseEnter?.(e);
+          (children.props as any).onMouseEnter?.(e);
           show();
         },
         onFocus: (e: any) => {
-          children.props.onFocus?.(e);
+          (children.props as any).onFocus?.(e);
           show();
         },
         onMouseLeave: (e: any) => {
-          children.props.onMouseLeave?.(e);
+          (children.props as any).onMouseLeave?.(e);
           hide();
         },
         onBlur: (e: any) => {
-          children.props.onBlur?.(e);
+          (children.props as any).onBlur?.(e);
           hide();
         },
         'aria-describedby': visible ? id : undefined,

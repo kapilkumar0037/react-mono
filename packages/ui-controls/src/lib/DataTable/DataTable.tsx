@@ -3,7 +3,7 @@
  * Reusable table component with sorting, filtering, selection, and pagination
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import Checkbox from '../checkbox/Checkbox';
 import { Spinner } from '../Spinner/Spinner';
 import './DataTable.css';

@@ -4,13 +4,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useWorkflow } from '../hooks/useWorkflow';
-import { WorkflowRule, WorkflowStats, WorkflowExecution } from '../types/workflow';
-import { WorkflowBuilder } from '../components/WorkflowBuilder';
-import { WorkflowRulesList } from '../components/WorkflowRulesList';
-import { WorkflowExecutionDashboard } from '../components/WorkflowExecutionDashboard';
-import { WorkflowTemplateGallery } from '../components/WorkflowTemplateGallery';
-import { useGlobalToast } from '../hooks/useGlobalToast';
+import { useWorkflow } from './hooks/useWorkflow';
+import { WorkflowRule, WorkflowStats, WorkflowExecution } from './types/workflow';
+import { WorkflowBuilder } from './components/WorkflowBuilder';
+import { WorkflowRulesList } from './components/WorkflowRulesList';
+import { WorkflowExecutionDashboard } from './components/WorkflowExecutionDashboard';
+import { WorkflowTemplateGallery } from './components/WorkflowTemplateGallery';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 

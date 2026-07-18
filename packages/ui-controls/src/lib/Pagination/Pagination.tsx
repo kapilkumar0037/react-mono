@@ -61,7 +61,6 @@ export const Pagination: React.FC<PaginationProps> = ({
 
   // Generate page numbers array
   const getPageNumbers = () => {
-    const pageNumbers: (number | 'dots')[] = [];
     const totalNumbers = siblingCount * 2 + 3; // siblings + current + first + last
     const totalBlocks = totalNumbers + 2; // total numbers + two dots blocks
 
@@ -194,7 +193,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           return (
             <button
               key={pageNumber}
-              onClick={() => onPageChange(pageNumber)}
+              onClick={() => onPageChange(pageNumber as number)}
               className={`border ${baseButtonClasses} ${
                 pageNumber === currentPage ? activeButtonClasses : inactiveButtonClasses
               }`}

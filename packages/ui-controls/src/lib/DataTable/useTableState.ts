@@ -27,7 +27,7 @@ export interface TableFilter {
 export interface UseTableStateOptions<T> {
   data: T[];
   columns: TableColumn<T>[];
-  getRowId?: (row: T) => string | number;
+  getRowId?: (row: T, index?: number) => string | number;
   initialSortColumn?: keyof T | string;
   initialSortOrder?: SortOrder;
   pageSize?: number;
@@ -73,7 +73,7 @@ export interface UseTableStateReturn<T> {
   displayedRange: [number, number]; // [start, end] for "1-10 of 100"
 
   // Utilities
-  getRowId: (row: T) => string | number;
+  getRowId: (row: T, index?: number) => string | number;
   resetTable: () => void;
 }
 
@@ -83,7 +83,7 @@ export interface UseTableStateReturn<T> {
 export function useTableState<T extends Record<string, any>>({
   data,
   columns,
-  getRowId = (row, index) => (row.id || index),
+  getRowId = (row: T, index?: number): string | number => ((row as any).id !== undefined ? (row as any).id : index ?? 0),
   initialSortColumn,
   initialSortOrder = null,
   pageSize: initialPageSize = 10,
@@ -104,11 +104,11 @@ export function useTableState<T extends Record<string, any>>({
 
   // Row ID resolver
   const resolveRowId = useCallback(
-    (row: T, index: number): string | number => {
+    (row: T, index?: number): string | number => {
       if (typeof getRowId === 'function') {
-        return getRowId(row);
+        return getRowId(row, index);
       }
-      return row.id || index;
+      return (row as any).id !== undefined ? (row as any).id : (index ?? 0);
     },
     [getRowId]
   );

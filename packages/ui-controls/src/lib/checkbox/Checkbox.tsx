@@ -1,18 +1,29 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useRef } from 'react';
 
 export interface CheckboxProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   /** Text or elements to display next to checkbox */
   children?: React.ReactNode;
+  /** Indeterminate state for "select all" */
+  indeterminate?: boolean;
 }
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ className = '', children, ...props }, ref) => {
+  ({ className = '', children, indeterminate, ...props }, ref) => {
+    const innerRef = useRef<HTMLInputElement>(null);
+    const resolvedRef = (ref as React.RefObject<HTMLInputElement>) || innerRef;
+
+    useEffect(() => {
+      if (resolvedRef && 'current' in resolvedRef && resolvedRef.current) {
+        resolvedRef.current.indeterminate = indeterminate ?? false;
+      }
+    }, [indeterminate, resolvedRef]);
+
     return (
       <label className="inline-flex items-center gap-2 cursor-pointer">
         <input
           {...props}
-          ref={ref}
+          ref={resolvedRef}
           type="checkbox"
           className={`
             w-4 h-4 

@@ -1,6 +1,6 @@
 export function Input() {
   return (
-    <div className={styles['container']}>
+    <div className="input-container">
       <h1>Welcome to Input!</h1>
     </div>
   );

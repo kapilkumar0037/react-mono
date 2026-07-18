@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'default' | 'outline';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'default' | 'outline' | 'link' | 'success' | 'warning' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps
@@ -35,6 +35,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ghost: 'bg-transparent text-primary hover:bg-gray-50',
       default: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50',
       outline: 'bg-transparent text-gray-700 border border-gray-300 hover:bg-gray-50',
+      link: 'bg-transparent text-primary underline hover:text-primary-dark p-0',
+      success: 'bg-green-600 text-white hover:bg-green-700',
+      warning: 'bg-yellow-500 text-white hover:bg-yellow-600',
+      danger: 'bg-red-600 text-white hover:bg-red-700',
     };
 
     const sizes: Record<ButtonSize, string> = {
