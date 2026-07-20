@@ -1,11 +1,11 @@
-﻿import React, { useEffect, useState } from 'react';
-import { Button, Card } from '@react-mono/ui-controls';
+﻿import React, { useState } from 'react';
+import { Button } from '@react-mono/ui-controls';
 import { useDashboard } from './hooks/useDashboard';
 import { WidgetCustomization } from './components/WidgetCustomization';
 import { LayoutManager } from './components/LayoutManager';
 import { MetricWidget, ChartWidget, StatusOverviewWidget, ActivityFeedWidget } from './components/WidgetComponents';
 import { WidgetInstance, WidgetType } from './types/dashboard';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface DashboardProps {
   isDarkMode?: boolean;
@@ -18,12 +18,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
     getActiveLayout,
     switchLayout,
     createNewLayout,
-    updateCurrentLayout,
     deleteCurrentLayout,
     addWidget,
     removeWidget,
     updateWidget,
-    updatePreferences,
+    reorderLayoutWidgets,
     toggleEditMode,
   } = useDashboard();
 
