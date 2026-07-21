@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Modal, Button, Card } from '@react-mono/ui-controls';
-import { DashboardLayout, WidgetInstance } from '../types/dashboard';
+import { Modal, Button } from '@react-mono/ui-controls';
+import { DashboardLayout, WidgetInstance, WidgetMetadata } from '../types/dashboard';
 import { getAvailableWidgets } from '../utils/dashboardStorage';
 
 interface WidgetCustomizationProps {
@@ -22,25 +22,22 @@ export const WidgetCustomization: React.FC<WidgetCustomizationProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('metrics');
   const allWidgets = getAvailableWidgets();
-  const activeWidgetIds = currentLayout?.widgets.map((w) => w.id) || [];
+  const activeWidgetTitles = currentLayout?.widgets.map((w) => w.title) || [];
 
   const categorizedWidgets = useMemo(() => {
-    return allWidgets.reduce(
-      (acc, widget) => {
-        if (!acc[widget.category]) {
-          acc[widget.category] = [];
-        }
-        acc[widget.category].push(widget);
-        return acc;
-      },
-      {} as Record<string, typeof allWidgets>
-    );
-  }, []);
+    return allWidgets.reduce((acc, widget) => {
+      if (!acc[widget.category]) {
+        acc[widget.category] = [];
+      }
+      acc[widget.category].push(widget);
+      return acc;
+    }, {} as Record<string, WidgetMetadata[]>);
+  }, [allWidgets]);
 
   const categories = Object.keys(categorizedWidgets);
   const widgetsInCategory = categorizedWidgets[selectedCategory] || [];
 
-  const handleAddWidget = (widgetMetadata: any) => {
+  const handleAddWidget = (widgetMetadata: WidgetMetadata) => {
     const newWidget: WidgetInstance = {
       id: `widget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type: widgetMetadata.type,
@@ -84,34 +81,38 @@ export const WidgetCustomization: React.FC<WidgetCustomizationProps> = ({
             Available Widgets
           </h3>
           <div className="space-y-2 max-h-48 overflow-y-auto">
-            {widgetsInCategory.map((widget) => (
-              <div
-                key={widget.id}
-                className={`rounded-lg p-3 flex items-center justify-between ${
-                  isDarkMode ? 'bg-gray-800 hover:bg-gray-750' : 'bg-gray-50 hover:bg-gray-100'
-                } transition-colors`}
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{widget.icon}</span>
-                    <div>
-                      <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                        {widget.title}
-                      </p>
-                      <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {widget.description}
-                      </p>
+            {widgetsInCategory.map((widget) => {
+              const alreadyAdded = activeWidgetTitles.includes(widget.title);
+              return (
+                <div
+                  key={widget.id}
+                  className={`rounded-lg p-3 flex items-center justify-between ${
+                    isDarkMode ? 'bg-gray-800 hover:bg-gray-750' : 'bg-gray-50 hover:bg-gray-100'
+                  } transition-colors`}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{widget.icon}</span>
+                      <div>
+                        <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {widget.title}
+                        </p>
+                        <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {widget.description}
+                        </p>
+                      </div>
                     </div>
                   </div>
+                  <Button
+                    onClick={() => handleAddWidget(widget)}
+                    disabled={alreadyAdded}
+                    className={`px-3 py-1 text-xs ${alreadyAdded ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-blue-600 text-white'}`}
+                  >
+                    {alreadyAdded ? 'Added' : '+ Add'}
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => handleAddWidget(widget)}
-                  className="bg-blue-600 text-white px-3 py-1 text-xs"
-                >
-                  + Add
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
