@@ -40,6 +40,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     }
   };
 
+  const handleCancel = () => {
+    if (onCancel) onCancel();
+  };
+
   const confirmButtonClass = isDangerous
     ? 'bg-red-600 hover:bg-red-700 text-white'
     : 'bg-blue-600 hover:bg-blue-700 text-white';
@@ -48,9 +52,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <Modal
       isOpen={isOpen}
       title={title}
-      onClose={onCancel}
+      onClose={handleCancel}
       isDarkMode={isDarkMode}
-      size="small"
+      size="sm"
       className={`${isDarkMode ? 'dark' : ''}`}
     >
       <div className={`py-4 ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
@@ -60,7 +64,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <div className="flex gap-3 justify-end mt-6">
         <Button
           variant="outline"
-          onClick={onCancel}
+          onClick={handleCancel}
           disabled={isLoading}
           className={isDarkMode ? 'dark' : ''}
         >
