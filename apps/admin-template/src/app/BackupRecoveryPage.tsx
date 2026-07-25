@@ -148,7 +148,7 @@ export const BackupRecoveryPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkM
   const handleSaveTask = (task: BackupTask) => {
     setIsLoading(true);
     setTimeout(() => {
-      if (editingTask?.id === task.id && backup.tasks.find((t) => t.id === task.id)) {
+      if (editingTask?.id === task.id && backup.tasks.find((t: BackupTask) => t.id === task.id)) {
         backup.updateBackupTask(task.id, task);
         addToast('Backup task updated successfully', 'success');
       } else {
@@ -243,7 +243,7 @@ export const BackupRecoveryPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkM
             tasks={backup.tasks}
             stats={backup.stats}
             onExecuteBackup={handleExecuteBackup}
-            onEditTask={(task) => {
+            onEditTask={(task: BackupTask) => {
               setEditingTask(task);
               setActiveTab('schedule');
             }}
@@ -271,7 +271,7 @@ export const BackupRecoveryPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkM
           <BackupHistory
             backups={backup.backups}
             onVerifyBackup={handleVerifyBackup}
-            onRestoreBackup={(b) => {
+            onRestoreBackup={(b: BackupMetadata) => {
               setSelectedBackup(b);
               setActiveTab('restore');
             }}

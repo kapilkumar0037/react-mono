@@ -53,7 +53,6 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       isOpen={isOpen}
       title={title}
       onClose={handleCancel}
-      isDarkMode={isDarkMode}
       size="sm"
       className={`${isDarkMode ? 'dark' : ''}`}
     >
