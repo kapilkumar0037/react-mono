@@ -31,6 +31,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
 
   const activeLayout = getActiveLayout();
+  const visibleWidgets = activeLayout?.widgets.filter((widget) => widget.isVisible) || [];
+  const hiddenWidgetCount = activeLayout?.widgets.filter((widget) => !widget.isVisible).length || 0;
 
   // Sample data
   const salesData = [
@@ -244,6 +246,21 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
               Add Widgets
             </Button>
           </div>
+        ) : visibleWidgets.length === 0 ? (
+          <div className={`rounded-lg p-12 text-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <p className={`text-lg font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Widgets are hidden
+            </p>
+            <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              {hiddenWidgetCount} widget{hiddenWidgetCount !== 1 ? 's are' : ' is'} currently hidden.
+            </p>
+            <Button
+              onClick={() => setIsCustomizing(true)}
+              className="mt-4 bg-blue-600 text-white"
+            >
+              Manage Widgets
+            </Button>
+          </div>
         ) : (
           <div
             className={`grid gap-4`}
@@ -253,7 +270,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
             }}
             onDragOver={handleDragOver}
           >
-            {activeLayout.widgets
+            {visibleWidgets
               .sort((a, b) => a.position - b.position)
               .map((widget) => (
                 <div
@@ -277,6 +294,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
         currentLayout={activeLayout}
         onAddWidget={(widget) => addWidget(activeLayout.id, widget)}
         onRemoveWidget={(widgetId) => removeWidget(activeLayout.id, widgetId)}
+        onUpdateWidget={(widgetId, updates) => updateWidget(activeLayout.id, widgetId, updates)}
         isDarkMode={isDarkMode}
       />
 

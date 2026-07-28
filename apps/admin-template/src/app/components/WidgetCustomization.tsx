@@ -9,6 +9,7 @@ interface WidgetCustomizationProps {
   currentLayout: DashboardLayout | null;
   onAddWidget: (widget: WidgetInstance) => void;
   onRemoveWidget: (widgetId: string) => void;
+  onUpdateWidget: (widgetId: string, updates: Partial<WidgetInstance>) => void;
   isDarkMode?: boolean;
 }
 
@@ -18,6 +19,7 @@ export const WidgetCustomization: React.FC<WidgetCustomizationProps> = ({
   currentLayout,
   onAddWidget,
   onRemoveWidget,
+  onUpdateWidget,
   isDarkMode = false,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('metrics');
@@ -53,6 +55,10 @@ export const WidgetCustomization: React.FC<WidgetCustomizationProps> = ({
 
   const handleRemoveWidget = (id: string) => {
     onRemoveWidget(id);
+  };
+
+  const handleToggleVisibility = (widget: WidgetInstance) => {
+    onUpdateWidget(widget.id, { isVisible: !widget.isVisible });
   };
 
   return (
@@ -135,15 +141,23 @@ export const WidgetCustomization: React.FC<WidgetCustomizationProps> = ({
                       {widget.title}
                     </p>
                     <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {widget.width}x{widget.height} grid
+                      {widget.width}x{widget.height} grid • {widget.isVisible ? 'Visible' : 'Hidden'}
                     </p>
                   </div>
-                  <Button
-                    onClick={() => handleRemoveWidget(widget.id)}
-                    className="bg-red-600 text-white px-3 py-1 text-xs"
-                  >
-                    ✕ Remove
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleToggleVisibility(widget)}
+                      className={`px-3 py-1 text-xs ${widget.isVisible ? 'bg-yellow-500 text-white' : 'bg-blue-600 text-white'}`}
+                    >
+                      {widget.isVisible ? 'Hide' : 'Show'}
+                    </Button>
+                    <Button
+                      onClick={() => handleRemoveWidget(widget.id)}
+                      className="bg-red-600 text-white px-3 py-1 text-xs"
+                    >
+                      ✕ Remove
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
