@@ -81,14 +81,17 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
   }, [isOpen, onClose]);
 
   const commands = useMemo<RuntimeCommand[]>(() => {
-    const available = getAvailableCommands(currentRole, definitions).map((command) => ({
-      ...command,
-      action: command.to
-        ? () => {
-            navigate(command.to);
-          }
-        : undefined,
-    }));
+    const available = getAvailableCommands(currentRole, definitions).map((command) => {
+      const target = command.to;
+      return {
+        ...command,
+        action: target
+          ? () => {
+              navigate(target);
+            }
+          : undefined,
+      };
+    });
 
     return [
       ...available,

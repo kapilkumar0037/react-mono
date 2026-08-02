@@ -4,13 +4,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useBackup } from '../hooks/useBackup';
-import { BackupTask, BackupMetadata } from '../types/backup';
-import { BackupScheduler } from '../components/BackupScheduler';
-import { BackupHistory } from '../components/BackupHistory';
-import { RestoreWizard } from '../components/RestoreWizard';
-import { BackupOverview } from '../components/BackupOverview';
-import { useGlobalToast } from '../hooks/useGlobalToast';
+import { useBackup } from './hooks/useBackup';
+import { BackupTask, BackupMetadata } from './types/backup';
+import { BackupScheduler } from './components/BackupScheduler';
+import { BackupHistory } from './components/BackupHistory';
+import { RestoreWizard } from './components/RestoreWizard';
+import { BackupOverview } from './components/BackupOverview';
+import { useGlobalToast } from './hooks/useGlobalToast';
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
