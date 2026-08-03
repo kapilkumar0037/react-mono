@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useBackup } from './hooks/useBackup';
-import { BackupTask, BackupMetadata } from './types/backup';
+import { BackupTask, BackupMetadata, BackupType, BackupFrequency, BackupDestination, RetentionPolicy } from './types/backup';
 import { BackupScheduler } from './components/BackupScheduler';
 import { BackupHistory } from './components/BackupHistory';
 import { RestoreWizard } from './components/RestoreWizard';
@@ -33,13 +33,13 @@ export const BackupRecoveryPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkM
           name: 'Daily Database Full Backup',
           description: 'Complete database backup every day at 2 AM',
           schedule: {
-            frequency: 'daily',
+            frequency: BackupFrequency.DAILY,
             time: '02:00',
           },
-          backupType: 'full',
-          destination: 'cloud_s3',
+          backupType: BackupType.FULL,
+          destination: BackupDestination.CLOUD_S3,
           includeEntityTypes: ['users', 'orders', 'customers'],
-          retentionPolicy: '30days',
+          retentionPolicy: RetentionPolicy.THIRTY_DAYS,
           isActive: true,
           compressionEnabled: true,
           encryptionEnabled: true,
@@ -58,14 +58,14 @@ export const BackupRecoveryPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkM
           name: 'Weekly Incremental Backup',
           description: 'Incremental backup every Sunday at 3 AM',
           schedule: {
-            frequency: 'weekly',
+            frequency: BackupFrequency.WEEKLY,
             time: '03:00',
             daysOfWeek: [0],
           },
-          backupType: 'incremental',
-          destination: 'nas',
+          backupType: BackupType.INCREMENTAL,
+          destination: BackupDestination.NAS,
           includeEntityTypes: ['orders', 'invoices'],
-          retentionPolicy: '90days',
+          retentionPolicy: RetentionPolicy.NINETY_DAYS,
           isActive: true,
           compressionEnabled: true,
           encryptionEnabled: false,
@@ -84,14 +84,14 @@ export const BackupRecoveryPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkM
           name: 'Monthly Snapshot',
           description: 'Full snapshot backup on the 1st of each month',
           schedule: {
-            frequency: 'monthly',
+            frequency: BackupFrequency.MONTHLY,
             time: '01:00',
             dayOfMonth: 1,
           },
-          backupType: 'snapshot',
-          destination: 'cloud_azure',
+          backupType: BackupType.SNAPSHOT,
+          destination: BackupDestination.CLOUD_AZURE,
           includeEntityTypes: ['users', 'orders', 'customers', 'products', 'invoices'],
-          retentionPolicy: '1year',
+          retentionPolicy: RetentionPolicy.ONE_YEAR,
           isActive: true,
           compressionEnabled: true,
           encryptionEnabled: true,
@@ -123,13 +123,13 @@ export const BackupRecoveryPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkM
       id: `task-${generateId()}`,
       name: 'New Backup Task',
       schedule: {
-        frequency: 'daily',
+        frequency: BackupFrequency.DAILY,
         time: '02:00',
       },
-      backupType: 'full',
-      destination: 'local',
+      backupType: BackupType.FULL,
+      destination: BackupDestination.LOCAL,
       includeEntityTypes: [],
-      retentionPolicy: '30days',
+      retentionPolicy: RetentionPolicy.THIRTY_DAYS,
       isActive: false,
       compressionEnabled: true,
       encryptionEnabled: true,
@@ -150,10 +150,10 @@ export const BackupRecoveryPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkM
     setTimeout(() => {
       if (editingTask?.id === task.id && backup.tasks.find((t: BackupTask) => t.id === task.id)) {
         backup.updateBackupTask(task.id, task);
-        addToast('Backup task updated successfully', 'success');
+        addToast({ message: 'Backup task updated successfully', type: 'success' });
       } else {
         backup.createBackupTask(task);
-        addToast('Backup task created successfully', 'success');
+        addToast({ message: 'Backup task created successfully', type: 'success' });
       }
       setEditingTask(null);
       setActiveTab('overview');
@@ -165,26 +165,26 @@ export const BackupRecoveryPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkM
     setIsLoading(true);
     setTimeout(() => {
       backup.executeBackup(taskId);
-      addToast('Backup execution started', 'info');
+      addToast({ message: 'Backup execution started', type: 'info' });
       setIsLoading(false);
     }, 1000);
   };
 
   const handleDeleteTask = (taskId: string) => {
     backup.deleteBackupTask(taskId);
-    addToast('Backup task deleted', 'info');
+    addToast({ message: 'Backup task deleted', type: 'info' });
   };
 
   const handleVerifyBackup = (backupId: string) => {
     backup.verifyBackup(backupId);
-    addToast('Backup verification started', 'info');
+    addToast({ message: 'Backup verification started', type: 'info' });
   };
 
   const handleRestoreBackup = (backupId: string, env: 'dev' | 'staging' | 'production', entities: string[]) => {
     setIsLoading(true);
     setTimeout(() => {
       backup.initiateRestore(backupId, env, entities);
-      addToast('Restore operation initiated', 'info');
+      addToast({ message: 'Restore operation initiated', type: 'info' });
       setEditingTask(null);
       setSelectedBackup(null);
       setActiveTab('overview');
