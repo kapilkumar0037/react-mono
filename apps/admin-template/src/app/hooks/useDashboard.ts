@@ -6,8 +6,6 @@ import {
 } from '../types/dashboard';
 import {
   readDashboardLayouts,
-  persistDashboardLayouts,
-  getLayout,
   createLayout,
   updateLayout,
   deleteLayout,

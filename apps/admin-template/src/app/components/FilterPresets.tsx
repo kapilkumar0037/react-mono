@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Card } from '@react-mono/ui-controls';
-import { FilterPreset } from './hooks/useFilterPresets';
+import { FilterPreset } from '../hooks/useFilterPresets';
 
 interface FilterPresetsProps {
   presets: FilterPreset[];

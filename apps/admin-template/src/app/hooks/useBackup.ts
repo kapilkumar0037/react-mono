@@ -104,7 +104,7 @@ export const useBackup = (userId: string) => {
     setTimeout(() => {
       const completedBackup: BackupMetadata = {
         ...backup,
-        status: 'completed',
+        status: BackupStatus.COMPLETED,
         sizeBytes: Math.floor(Math.random() * 100000000) + 10000000,
         completedAt: new Date(),
         duration: Date.now() - startTime,

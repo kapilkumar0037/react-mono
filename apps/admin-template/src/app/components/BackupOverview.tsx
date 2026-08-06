@@ -29,8 +29,6 @@ export const BackupOverview: React.FC<BackupOverviewProps> = ({
 
   const bgClass = isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900';
   const cardClass = isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200';
-  const headerClass = isDarkMode ? 'bg-gray-800' : 'bg-gray-50';
-  const rowHoverClass = isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50';
 
   return (
     <div className={`${bgClass} rounded-lg border p-6`}>

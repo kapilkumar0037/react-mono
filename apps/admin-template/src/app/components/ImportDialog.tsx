@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Button, Card, Badge } from '@react-mono/ui-controls';
+import React, { useState } from 'react';
+import { Modal, Button } from '@react-mono/ui-controls';
 import {
   ImportFormat,
   ImportStrategy,
-  ImportStatus,
   ImportMapping,
   ImportPreview,
-  ImportResult,
 } from '../types/dataImport';
 
 interface ImportDialogProps {
@@ -35,9 +33,6 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({
   description = 'Upload a CSV or JSON file to import data in bulk.',
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedFormat, setSelectedFormat] = useState<ImportFormat>(
-    ImportFormat.CSV
-  );
   const [selectedStrategy, setSelectedStrategy] =
     useState<ImportStrategy>(ImportStrategy.SKIP_DUPLICATES);
   const [preview, setPreview] = useState<ImportPreview | null>(null);

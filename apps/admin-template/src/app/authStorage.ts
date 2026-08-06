@@ -24,10 +24,14 @@ function parseSession(value: string | null): AuthSession | null {
       return null;
     }
 
+    const resolvedRole: AppRole = isAppRole(parsed.role ?? '')
+      ? (parsed.role as AppRole)
+      : getDefaultRoleForEmail(parsed.email);
+
     return {
       email: parsed.email,
       loginAt: parsed.loginAt,
-      role: isAppRole(parsed.role ?? '') ? parsed.role : getDefaultRoleForEmail(parsed.email),
+      role: resolvedRole,
     };
   } catch {
     return null;

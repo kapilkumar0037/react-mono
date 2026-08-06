@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Card, Badge, Button, Pagination } from '@react-mono/ui-controls';
-import { AuditLog, AuditActionType, AuditSeverity, AuditFilter } from '../types/auditLog';
+import { Card, Badge, Pagination } from '@react-mono/ui-controls';
+import { AuditActionType, AuditSeverity, AuditFilter } from '../types/auditLog';
 import { filterAuditLogs, generateAuditSummary, readAuditLogs } from '../utils/auditLogStorage';
 import { EmptyState } from './EmptyState';
 
@@ -13,13 +13,6 @@ const severityColors = {
   [AuditSeverity.MEDIUM]: 'warning',
   [AuditSeverity.HIGH]: 'danger',
   [AuditSeverity.CRITICAL]: 'danger',
-} as const;
-
-const severityBgColors = {
-  [AuditSeverity.LOW]: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
-  [AuditSeverity.MEDIUM]: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
-  [AuditSeverity.HIGH]: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200',
-  [AuditSeverity.CRITICAL]: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
 } as const;
 
 const statusColors = {

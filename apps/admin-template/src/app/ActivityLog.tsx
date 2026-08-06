@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Card } from '@react-mono/ui-controls';
 import { useSyncedSearchQuery } from './useSyncedSearchQuery';
 import { readStoredAuditEntries } from './rbacStorage';
-import { useGlobalToast } from './hooks/useGlobalToast';
-import { useDeleteAction } from './hooks/useActionFeedback';
 import { EmptyState } from './components/EmptyState';
 
 interface ActivityLog {
@@ -21,8 +19,6 @@ interface ActivityLogProps {
 }
 
 const ActivityLog: React.FC<ActivityLogProps> = ({ isDarkMode = false }) => {
-  const { addToast } = useGlobalToast();
-  const deleteAction = useDeleteAction('Activity');
   const [filteredCategory, setFilteredCategory] = useState('all');
   const [filteredStatus, setFilteredStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
