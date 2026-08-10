@@ -3,7 +3,7 @@
  * Handles HTTP requests, error handling, retries, and integration with cache
  */
 
-import { ApiError, ApiResponse, QueryOptions, RequestConfig, HttpMethod } from '../types/api';
+import { ApiError, QueryOptions, RequestConfig, HttpMethod } from '../types/api';
 import { queryCache } from './queryCache';
 
 // Mock data store for development
@@ -63,7 +63,7 @@ class ApiClient {
   async request<T = any>(
     method: HttpMethod,
     path: string,
-    options: QueryOptions & RequestConfig = {}
+    options: QueryOptions & Partial<RequestConfig> = {}
   ): Promise<T> {
     const {
       cache = true,
@@ -128,35 +128,35 @@ class ApiClient {
   /**
    * GET request helper
    */
-  async get<T = any>(path: string, options?: QueryOptions): Promise<T> {
+  async get<T = any>(path: string, options?: QueryOptions & Partial<RequestConfig>): Promise<T> {
     return this.request('GET', path, options);
   }
 
   /**
    * POST request helper
    */
-  async post<T = any>(path: string, data?: any, options?: QueryOptions): Promise<T> {
+  async post<T = any>(path: string, data?: any, options?: QueryOptions & Partial<RequestConfig>): Promise<T> {
     return this.request('POST', path, { ...options, data });
   }
 
   /**
    * PUT request helper
    */
-  async put<T = any>(path: string, data?: any, options?: QueryOptions): Promise<T> {
+  async put<T = any>(path: string, data?: any, options?: QueryOptions & Partial<RequestConfig>): Promise<T> {
     return this.request('PUT', path, { ...options, data });
   }
 
   /**
    * PATCH request helper
    */
-  async patch<T = any>(path: string, data?: any, options?: QueryOptions): Promise<T> {
+  async patch<T = any>(path: string, data?: any, options?: QueryOptions & Partial<RequestConfig>): Promise<T> {
     return this.request('PATCH', path, { ...options, data });
   }
 
   /**
    * DELETE request helper
    */
-  async delete<T = any>(path: string, options?: QueryOptions): Promise<T> {
+  async delete<T = any>(path: string, options?: QueryOptions & Partial<RequestConfig>): Promise<T> {
     return this.request('DELETE', path, options);
   }
 

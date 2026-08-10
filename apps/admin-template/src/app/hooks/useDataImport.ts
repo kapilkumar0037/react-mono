@@ -63,6 +63,8 @@ export const useDataImport = () => {
           setPreview(preview);
           return preview;
         }
+
+        return null;
       } catch (err) {
         const errorMsg =
           err instanceof Error ? err.message : 'Failed to process file';

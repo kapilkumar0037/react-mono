@@ -262,7 +262,6 @@ const Customers: React.FC<CustomersProps> = ({ isDarkMode = false }) => {
     );
   };
 
-  const selectedCustomers = customers.filter((customer) => selectedCustomerIds.includes(customer.id));
   const allFilteredSelected = filteredCustomers.length > 0 && filteredCustomers.every((customer) => selectedCustomerIds.includes(customer.id));
 
   const toggleCustomerSelection = (customerId: string) => {

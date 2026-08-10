@@ -3,14 +3,14 @@
  * Comprehensive reporting interface with builder, viewer, scheduler, and history
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useReporting } from './hooks/useReporting';
 import { ReportBuilder } from './components/ReportBuilder';
 import { ReportViewer } from './components/ReportViewer';
 import { ScheduleReportModal } from './components/ScheduleReportModal';
 import { ReportTemplateGallery } from './components/ReportTemplateGallery';
 import { ReportHistory } from './components/ReportHistory';
-import { ReportConfig, GeneratedReport } from './types/reporting';
+import { ReportConfig, GeneratedReport, ReportType, ReportDataSource } from './types/reporting';
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -28,8 +28,8 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ isDarkMode = false }) 
   const [currentConfig, setCurrentConfig] = useState<ReportConfig>({
     id: generateId(),
     name: 'New Report',
-    type: 'summary',
-    dataSource: 'users',
+    type: ReportType.SUMMARY,
+    dataSource: ReportDataSource.USERS,
   });
   const [generatedReport, setGeneratedReport] = useState<GeneratedReport | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -102,7 +102,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ isDarkMode = false }) 
     alert('Report configuration saved!');
   };
 
-  const handleSelectTemplate = (template) => {
+  const handleSelectTemplate = (template: { config: ReportConfig }) => {
     const newConfig: ReportConfig = {
       ...template.config,
       id: generateId(),

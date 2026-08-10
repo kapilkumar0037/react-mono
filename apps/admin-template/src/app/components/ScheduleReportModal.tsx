@@ -22,9 +22,9 @@ export const ScheduleReportModal: React.FC<ScheduleReportModalProps> = ({
   configId,
   isDarkMode = false,
 }) => {
-  const [frequency, setFrequency] = useState<ReportFrequency>('weekly');
+  const [frequency, setFrequency] = useState<ReportFrequency>(ReportFrequency.WEEKLY);
   const [recipients, setRecipients] = useState<string[]>(['']);
-  const [formats, setFormats] = useState<ReportFormat[]>(['pdf']);
+  const [formats, setFormats] = useState<ReportFormat[]>([ReportFormat.PDF]);
   const [isActive, setIsActive] = useState(true);
 
   const handleAddRecipient = () => {

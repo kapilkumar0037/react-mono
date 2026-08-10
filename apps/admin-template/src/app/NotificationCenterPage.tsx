@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Button } from '@react-mono/ui-controls';
-import { useNotifications } from '../hooks/useNotifications';
+import { Card } from '@react-mono/ui-controls';
+import { useNotifications } from './hooks/useNotifications';
 import { NotificationCenter } from './NotificationCenter';
 
 interface NotificationCenterPageProps {

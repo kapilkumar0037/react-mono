@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Card, Badge, Button, Pagination } from '@react-mono/ui-controls';
-import { EmailNotification, NotificationType } from '../types/notification';
+import { EmailNotification } from '../types/notification';
 import { EmptyState } from './EmptyState';
 
 interface NotificationCenterProps {

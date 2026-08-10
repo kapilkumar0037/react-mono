@@ -105,7 +105,7 @@ export const useWorkflow = (userId: string) => {
           triggerType: rule.trigger.type,
           entityType: rule.entityType,
           entityId,
-          status: 'skipped',
+          status: ExecutionStatus.SKIPPED,
           startedAt: new Date(),
           executedActions: [],
         };
@@ -135,7 +135,7 @@ export const useWorkflow = (userId: string) => {
         triggerType: rule.trigger.type,
         entityType: rule.entityType,
         entityId,
-        status: 'running',
+        status: ExecutionStatus.RUNNING,
         startedAt: new Date(),
         executedActions: [],
         failedActions: [],
@@ -189,7 +189,7 @@ export const useWorkflow = (userId: string) => {
 
       const finalExecution: WorkflowExecution = {
         ...execution,
-        status: hasErrors ? 'failed' : 'success',
+        status: hasErrors ? ExecutionStatus.FAILED : ExecutionStatus.SUCCESS,
         completedAt: new Date(),
         executedActions: executedActionIds,
         failedActions: failedActionsList.length > 0 ? failedActionsList : undefined,

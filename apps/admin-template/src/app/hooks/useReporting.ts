@@ -165,7 +165,7 @@ export const useReporting = (userId: string) => {
       const report: GeneratedReport = {
         id: `rpt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         configId: config.id,
-        status: 'completed' as ReportStatus,
+        status: ReportStatus.COMPLETED,
         type: config.type,
         dataSource: config.dataSource,
         title: config.name,
@@ -194,7 +194,7 @@ export const useReporting = (userId: string) => {
         generatedBy: userId,
         recordCount: processedData.length,
         executionTime,
-        status: 'completed',
+        status: ReportStatus.COMPLETED,
       });
 
       return report;

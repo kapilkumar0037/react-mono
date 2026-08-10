@@ -5,7 +5,6 @@ import {
   persistNotifications,
   addNotification,
   updateNotificationStatus,
-  getNotificationPreferences,
   saveNotificationPreferences,
   getOrCreatePreferences,
   getNotificationStats,

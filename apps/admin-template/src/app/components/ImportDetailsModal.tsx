@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Badge, Button } from '@react-mono/ui-controls';
+import { Card, Badge } from '@react-mono/ui-controls';
 import { ImportResult, ImportStatus } from '../types/dataImport';
 
 interface ImportDetailsModalProps {

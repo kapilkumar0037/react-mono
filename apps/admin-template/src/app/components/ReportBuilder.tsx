@@ -91,7 +91,6 @@ export const ReportBuilder: React.FC<ReportBuilderProps> = ({
   const bgClass = isDarkMode ? 'bg-gray-900' : 'bg-white';
   const textClass = isDarkMode ? 'text-white' : 'text-gray-900';
   const inputBg = isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300';
-  const borderClass = isDarkMode ? 'border-gray-700' : 'border-gray-200';
 
   return (
     <div className={`${bgClass} rounded-lg shadow p-6 space-y-4`}>
@@ -163,11 +162,11 @@ export const ReportBuilder: React.FC<ReportBuilderProps> = ({
                 onChange={(e) => handleTypeChange(e.target.value as ReportType)}
                 className={`w-full px-3 py-2 rounded border ${inputBg}`}
               >
-                <option value="summary">Summary</option>
-                <option value="detailed">Detailed</option>
-                <option value="comparative">Comparative</option>
-                <option value="trend">Trend</option>
-                <option value="distribution">Distribution</option>
+                <option value={ReportType.SUMMARY}>Summary</option>
+                <option value={ReportType.DETAILED}>Detailed</option>
+                <option value={ReportType.COMPARATIVE}>Comparative</option>
+                <option value={ReportType.TREND}>Trend</option>
+                <option value={ReportType.DISTRIBUTION}>Distribution</option>
               </select>
             </div>
 
@@ -178,11 +177,11 @@ export const ReportBuilder: React.FC<ReportBuilderProps> = ({
                 onChange={(e) => handleDataSourceChange(e.target.value as ReportDataSource)}
                 className={`w-full px-3 py-2 rounded border ${inputBg}`}
               >
-                <option value="users">Users</option>
-                <option value="orders">Orders</option>
-                <option value="customers">Customers</option>
-                <option value="audit_log">Audit Log</option>
-                <option value="activity">Activity</option>
+                <option value={ReportDataSource.USERS}>Users</option>
+                <option value={ReportDataSource.ORDERS}>Orders</option>
+                <option value={ReportDataSource.CUSTOMERS}>Customers</option>
+                <option value={ReportDataSource.AUDIT_LOG}>Audit Log</option>
+                <option value={ReportDataSource.ACTIVITY}>Activity</option>
               </select>
             </div>
           </div>

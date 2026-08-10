@@ -153,7 +153,7 @@ export function usePaginatedQuery<T = any>(
   options: UsePaginatedQueryOptions = {}
 ): UsePaginatedQueryState<T> {
   const [page, setPage] = useState(options.page || 1);
-  const [pageSize, setPageSize] = useState(options.pageSize || 10);
+  const pageSize = options.pageSize || 10;
 
   const queryPath = `${path}?page=${page}&pageSize=${pageSize}${
     options.sortBy ? `&sortBy=${options.sortBy}&sortOrder=${options.sortOrder || 'asc'}` : ''

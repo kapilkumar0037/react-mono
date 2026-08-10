@@ -46,9 +46,6 @@ export const RestoreWizard: React.FC<RestoreWizardProps> = ({
 
   const bgClass = isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900';
   const cardClass = isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200';
-  const inputClass = isDarkMode
-    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500';
 
   return (
     <div className={`${bgClass} rounded-lg border p-6 max-w-2xl`}>

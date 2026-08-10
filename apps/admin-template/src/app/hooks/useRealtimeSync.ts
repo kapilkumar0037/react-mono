@@ -7,7 +7,6 @@ export const useRealtimeSync = (entityType: string, onDataChange?: (change: Data
     realtimeSyncManager.getStatus()
   );
   const [changes, setChanges] = useState<DataChange[]>([]);
-  const [subscriberId, setSubscriberId] = useState<string | null>(null);
 
   useEffect(() => {
     // Subscribe to changes
@@ -20,8 +19,6 @@ export const useRealtimeSync = (entityType: string, onDataChange?: (change: Data
         }
       }
     );
-
-    setSubscriberId(subId);
 
     // Start polling
     realtimeSyncManager.startPolling(2000);

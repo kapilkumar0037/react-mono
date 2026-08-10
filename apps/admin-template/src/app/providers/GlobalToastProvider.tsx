@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { GlobalToastContext, useGlobalToastProvider } from '../hooks/useGlobalToast';
 
 interface GlobalToastProviderProps {

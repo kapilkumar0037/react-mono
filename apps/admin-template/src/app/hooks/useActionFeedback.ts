@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useGlobalToast, ToastType } from './useGlobalToast';
+import { useGlobalToast } from './useGlobalToast';
 
 export type ActionType = 'create' | 'update' | 'delete' | 'export' | 'restore' | 'import' | 'custom';
 
@@ -28,7 +28,6 @@ export function useActionFeedback(options: ActionFeedbackOptions) {
   });
 
   const getMessages = (actionType: ActionType) => {
-    const item = itemName ? ` "${itemName}"` : '';
     const messages: Record<ActionType, { success: string; error: string }> = {
       create: {
         success: `${itemName} created successfully`,

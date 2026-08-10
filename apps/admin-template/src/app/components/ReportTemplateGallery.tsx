@@ -19,7 +19,6 @@ export const ReportTemplateGallery: React.FC<ReportTemplateGalleryProps> = ({
   isDarkMode = false,
 }) => {
   const bgClass = isDarkMode ? 'bg-gray-900' : 'bg-white';
-  const cardBg = isDarkMode ? 'bg-gray-800' : 'bg-white';
   const textClass = isDarkMode ? 'text-white' : 'text-gray-900';
   const borderClass = isDarkMode ? 'border-gray-700' : 'border-gray-200';
   const hoverClass = isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50';
