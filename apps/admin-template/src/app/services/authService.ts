@@ -56,7 +56,7 @@ export async function login(credentials: LoginRequest): Promise<AuthState> {
     const session: AuthSession = {
       email: credentials.email,
       loginAt: new Date().toISOString(),
-      role: credentials.role || 'Viewer',
+      role: credentials.role ?? 'Support',
     };
 
     // Persist session

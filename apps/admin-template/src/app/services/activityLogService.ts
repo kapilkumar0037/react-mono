@@ -106,7 +106,7 @@ export const useFilterActivityLog = (
  * Hook for exporting activity log
  */
 export const useExportActivityLog = () => {
-  const [mutate, state] = useQuery<{ url: string }>(
+  const state = useQuery<{ url: string }>(
     'GET',
     '/activity-log/export',
     { enabled: false }

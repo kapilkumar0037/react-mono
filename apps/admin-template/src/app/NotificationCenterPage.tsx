@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@react-mono/ui-controls';
 import { useNotifications } from './hooks/useNotifications';
-import { NotificationCenter } from './NotificationCenter';
+import { NotificationCenter } from './components/NotificationCenter';
 
 interface NotificationCenterPageProps {
   isDarkMode?: boolean;

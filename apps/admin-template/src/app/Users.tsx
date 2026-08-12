@@ -8,7 +8,6 @@ import { usePageAction } from './usePageAction';
 import { createSavedView, persistSavedViews, readSavedViews, SavedView } from './savedViews';
 import AdminActionConfirm from './AdminActionConfirm';
 import { useGlobalToast } from './hooks/useGlobalToast';
-import { useUpdateAction, useCreateAction, useDeleteAction, useExportAction } from './hooks/useActionFeedback';
 import { useConfirmDialog, ConfirmDialog } from './components/ConfirmDialog';
 import { EmptyState } from './components/EmptyState';
 import { useFilterPresets } from './hooks/useFilterPresets';
@@ -48,16 +47,12 @@ interface UserViewFilters {
 
 const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentUserEmail, definitions = DEFAULT_ROLE_DEFINITIONS }) => {
   const { addToast } = useGlobalToast();
-  const createUserAction = useCreateAction('User');
-  const updateUserAction = useUpdateAction('User');
-  const deleteUserAction = useDeleteAction('User');
-  const exportAction = useExportAction('User Directory');
   const deleteConfirm = useConfirmDialog();
   const bulkDeleteConfirm = useConfirmDialog();
   const filterPresets = useFilterPresets('users');
   const auditLog = useAuditLog();
   const { syncStatus, changes } = useRealtimeSync('User');
-  const { isLoading: isImporting, lastResult: importResult, getHistory: getImportHistory, executeImport } = useDataImport();
+  const { getHistory: getImportHistory, executeImport } = useDataImport();
   
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useSyncedSearchQuery();
@@ -135,7 +130,6 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = useMemo(() => filteredUsers.slice((currentPage - 1) * itemsPerPage, (currentPage - 1) * itemsPerPage + itemsPerPage), [filteredUsers, currentPage]);
   const allFilteredSelected = filteredUsers.length > 0 && filteredUsers.every((user) => selectedUserIds.includes(user.id));
-  const selectedUsers = users.filter((user) => selectedUserIds.includes(user.id));
 
   usePageAction('add-user', () => {
     if (!canManageUsers) return;

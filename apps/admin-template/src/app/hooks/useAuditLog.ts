@@ -3,7 +3,6 @@ import {
   AuditLog,
   AuditFilter,
   AuditActionType,
-  AuditSeverity,
 } from '../types/auditLog';
 import {
   readAuditLogs,

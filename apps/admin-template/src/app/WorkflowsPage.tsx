@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWorkflow } from './hooks/useWorkflow';
-import { WorkflowRule, WorkflowStats, WorkflowExecution } from './types/workflow';
+import { WorkflowRule, WorkflowExecution, WorkflowStatus, TriggerType, ActionType, ConditionOperator } from './types/workflow';
 import { WorkflowBuilder } from './components/WorkflowBuilder';
 import { WorkflowRulesList } from './components/WorkflowRulesList';
 import { WorkflowExecutionDashboard } from './components/WorkflowExecutionDashboard';
@@ -33,22 +33,22 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
           name: 'Auto-assign New Orders',
           description: 'Automatically assign orders to available team members when created',
           entityType: 'order',
-          status: 'active',
+          status: WorkflowStatus.ACTIVE,
           trigger: {
             id: `trigger-${generateId()}`,
-            type: 'entity_created',
+            type: TriggerType.ENTITY_CREATED,
             entityType: 'order',
             conditions: [],
           },
           actions: [
             {
               id: `action-${generateId()}`,
-              type: 'assign_to_user',
+              type: ActionType.ASSIGN_TO_USER,
               config: { assignToTeamLead: true },
             },
             {
               id: `action-${generateId()}`,
-              type: 'send_notification',
+              type: ActionType.SEND_NOTIFICATION,
               config: { message: 'New order assigned to you' },
             },
           ],
@@ -65,22 +65,22 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
           name: 'Auto-escalate Overdue Tasks',
           description: 'Escalate tasks that exceed SLA threshold to manager',
           entityType: 'task',
-          status: 'active',
+          status: WorkflowStatus.ACTIVE,
           trigger: {
             id: `trigger-${generateId()}`,
-            type: 'threshold_reached',
+            type: TriggerType.THRESHOLD_REACHED,
             entityType: 'task',
             conditions: [],
           },
           actions: [
             {
               id: `action-${generateId()}`,
-              type: 'change_status',
+              type: ActionType.CHANGE_STATUS,
               config: { newStatus: 'escalated' },
             },
             {
               id: `action-${generateId()}`,
-              type: 'send_email',
+              type: ActionType.SEND_EMAIL,
               config: { recipient: 'manager@example.com', subject: 'Task Escalation Alert' },
             },
           ],
@@ -88,7 +88,7 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
             {
               id: `cond-${generateId()}`,
               field: 'dueDate',
-              operator: 'less_than',
+              operator: ConditionOperator.LESS_THAN,
               value: new Date().toISOString(),
             },
           ],
@@ -104,10 +104,10 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
           name: 'Notification on Status Change',
           description: 'Send notifications when order status changes to completed',
           entityType: 'order',
-          status: 'active',
+          status: WorkflowStatus.ACTIVE,
           trigger: {
             id: `trigger-${generateId()}`,
-            type: 'status_changed',
+            type: TriggerType.STATUS_CHANGED,
             entityType: 'order',
             field: 'status',
             conditions: [],
@@ -115,12 +115,12 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
           actions: [
             {
               id: `action-${generateId()}`,
-              type: 'send_notification',
+              type: ActionType.SEND_NOTIFICATION,
               config: { message: 'Order completed successfully' },
             },
             {
               id: `action-${generateId()}`,
-              type: 'log_activity',
+              type: ActionType.LOG_ACTIVITY,
               config: { action: 'order_completed' },
             },
           ],
@@ -128,7 +128,7 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
             {
               id: `cond-${generateId()}`,
               field: 'status',
-              operator: 'equals',
+              operator: ConditionOperator.EQUALS,
               value: 'completed',
             },
           ],
@@ -160,10 +160,10 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
       id: `rule-${generateId()}`,
       name: 'New Workflow Rule',
       entityType: 'order',
-      status: 'draft',
+      status: WorkflowStatus.DRAFT,
       trigger: {
         id: `trigger-${generateId()}`,
-        type: 'entity_created',
+        type: TriggerType.ENTITY_CREATED,
         entityType: 'order',
         conditions: [],
       },
@@ -212,10 +212,10 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
       name: template.name,
       description: template.description,
       entityType: 'order',
-      status: 'draft',
+      status: WorkflowStatus.DRAFT,
       trigger: {
         id: `trigger-${generateId()}`,
-        type: 'entity_created',
+        type: TriggerType.ENTITY_CREATED,
         entityType: 'order',
         conditions: [],
       },

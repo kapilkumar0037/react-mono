@@ -39,6 +39,7 @@ export interface QueryOptions {
   timeout?: number;
   onError?: (error: ApiError) => void;
   onSuccess?: (data: any) => void;
+  params?: Record<string, any>;
 }
 
 export interface MutationOptions<T = any> {

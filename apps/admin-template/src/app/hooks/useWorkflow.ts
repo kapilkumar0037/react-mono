@@ -10,7 +10,6 @@ import {
   WorkflowExecutionLog,
   WorkflowTemplate,
   WorkflowPreferences,
-  WorkflowStats,
   ExecutionStatus,
   TriggerType,
 } from '../types/workflow';
@@ -21,9 +20,7 @@ import {
   deleteWorkflowRule,
   readWorkflowExecutions,
   recordWorkflowExecution,
-  getWorkflowExecution,
   getExecutionsByRuleId,
-  getExecutionsByStatus,
   readWorkflowLogs,
   addExecutionLog,
   getLogsByExecutionId,
