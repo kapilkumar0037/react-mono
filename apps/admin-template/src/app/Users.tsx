@@ -6,7 +6,6 @@ import { APP_ROLES, AppRole, DEFAULT_ROLE_DEFINITIONS, RoleDefinition, getRoleBa
 import { appendAuditEntry, DirectoryUser, persistUsers, readStoredUsers } from './rbacStorage';
 import { usePageAction } from './usePageAction';
 import { createSavedView, persistSavedViews, readSavedViews, SavedView } from './savedViews';
-import AdminActionConfirm from './AdminActionConfirm';
 import { useGlobalToast } from './hooks/useGlobalToast';
 import { useConfirmDialog, ConfirmDialog } from './components/ConfirmDialog';
 import { EmptyState } from './components/EmptyState';
@@ -23,7 +22,7 @@ import { useDataImport } from './hooks/useDataImport';
 import { ImportDialog } from './components/ImportDialog';
 import { ImportHistory } from './components/ImportHistory';
 import { ImportDetailsModal } from './components/ImportDetailsModal';
-import { ImportMapping, ImportStrategy } from './types/dataImport';
+import { ImportFormat, ImportMapping, ImportStrategy } from './types/dataImport';
 
 interface FormData {
   name: string;
@@ -519,8 +518,8 @@ const Users: React.FC<UsersProps> = ({ isDarkMode = false, currentRole, currentU
     try {
       const result = await executeImport(
         file,
-        'CSV',
-        { format: 'CSV', strategy, columnMappings: mappings, skipHeader: true, validateEmail: true },
+        ImportFormat.CSV,
+        { format: ImportFormat.CSV, strategy, columnMappings: mappings, skipHeader: true, validateEmail: true },
         undefined,
         (record) => {
           const newUser: DirectoryUser = {

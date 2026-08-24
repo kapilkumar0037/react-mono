@@ -10,6 +10,7 @@ import {
   WorkflowExecutionLog,
   WorkflowTemplate,
   WorkflowPreferences,
+  WorkflowStats,
   ExecutionStatus,
   TriggerType,
 } from '../types/workflow';

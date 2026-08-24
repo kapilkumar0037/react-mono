@@ -1,7 +1,6 @@
 import {
   DataChange,
   DataChangeType,
-  RealtimeDataEvent,
   DataSyncSubscriber,
   SyncStatus,
 } from '../types/realtimeSync';

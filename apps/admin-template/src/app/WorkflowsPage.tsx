@@ -21,7 +21,7 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
 
   const [activeTab, setActiveTab] = useState<'rules' | 'create' | 'executions' | 'templates'>('rules');
   const [editingRule, setEditingRule] = useState<WorkflowRule | null>(null);
-  const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
+  const [, setSelectedExecution] = useState<WorkflowExecution | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Initialize mock rules on first load
@@ -185,10 +185,10 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
     setTimeout(() => {
       if (editingRule) {
         workflow.updateRule(rule.id, rule);
-        addToast('Workflow rule updated successfully', 'success');
+        addToast({ type: 'success', message: 'Workflow rule updated successfully' });
       } else {
         workflow.createRule(rule);
-        addToast('Workflow rule created successfully', 'success');
+        addToast({ type: 'success', message: 'Workflow rule created successfully' });
       }
       setEditingRule(null);
       setActiveTab('rules');
@@ -198,12 +198,12 @@ export const WorkflowsPage: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode =
 
   const handleDeleteRule = (ruleId: string) => {
     workflow.deleteRule(ruleId);
-    addToast('Workflow rule deleted', 'info');
+    addToast({ type: 'info', message: 'Workflow rule deleted' });
   };
 
   const handleToggleRule = (ruleId: string, isActive: boolean) => {
     workflow.updateRule(ruleId, { isActive });
-    addToast(isActive ? 'Workflow activated' : 'Workflow deactivated', 'info');
+    addToast({ type: 'info', message: isActive ? 'Workflow activated' : 'Workflow deactivated' });
   };
 
   const handleSelectTemplate = (template: any) => {

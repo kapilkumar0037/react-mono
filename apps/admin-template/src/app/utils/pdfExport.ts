@@ -17,7 +17,6 @@ export const exportToPDF = <T extends Record<string, any>>(
 ) => {
   const {
     title = 'Export Report',
-    filename = `export-${new Date().toISOString().split('T')[0]}.pdf`,
     columns,
     columnLabels = {},
     includeTimestamp = true,

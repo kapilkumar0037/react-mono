@@ -4,7 +4,7 @@
  */
 
 import { AuthSession, clearStoredSession, persistSession, readStoredSession } from '../authStorage';
-import { readUserPreferences, clearUserPreferences } from './userPreferencesService';
+import { clearUserPreferences } from './userPreferencesService';
 import { AppRole } from '../rbac';
 
 export interface LoginRequest {

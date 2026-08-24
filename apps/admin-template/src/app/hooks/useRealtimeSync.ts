@@ -68,6 +68,13 @@ export const useRealtimeSyncGlobal = () => {
 
   return {
     syncStatus,
-    realtimeSyncManager,
+    subscribe: realtimeSyncManager.subscribe.bind(realtimeSyncManager),
+    unsubscribe: realtimeSyncManager.unsubscribe.bind(realtimeSyncManager),
+    startPolling: realtimeSyncManager.startPolling.bind(realtimeSyncManager),
+    stopPolling: realtimeSyncManager.stopPolling.bind(realtimeSyncManager),
+    recordChange: realtimeSyncManager.recordChange.bind(realtimeSyncManager),
+    getStatus: realtimeSyncManager.getStatus.bind(realtimeSyncManager),
+    getChangeHistory: realtimeSyncManager.getChangeHistory.bind(realtimeSyncManager),
+    clearHistory: realtimeSyncManager.clearHistory.bind(realtimeSyncManager),
   };
 };

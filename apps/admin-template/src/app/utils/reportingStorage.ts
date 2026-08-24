@@ -11,7 +11,6 @@ import {
   ReportTemplate,
   ReportHistoryEntry,
   ReportPreferences,
-  ReportStatus,
   ReportingStats,
 } from '../types/reporting';
 
